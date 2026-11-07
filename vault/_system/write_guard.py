@@ -141,6 +141,8 @@ def main() -> None:
     except Exception as error:  # the guard must never crash; Claude asks, the other clients deny (hook_io.FAIL)
         decide(hook_io.FAIL, localized(f"The write guard could not parse the input ({type(error).__name__}); the user should approve.",
                                 f"Yazma kapısı girdiyi çözümleyemedi ({type(error).__name__}); kullanıcı onaylasın."))
+    finally:
+        hook_io.finish(CLIENT)
 
 
 if __name__ == "__main__":

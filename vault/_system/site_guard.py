@@ -37,6 +37,7 @@ from urllib.parse import unquote, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
 import common  # noqa: E402
+import hook_io  # noqa: E402
 import session_mode as sm  # noqa: E402
 from common import VAULT, vault_path  # noqa: E402
 
@@ -329,9 +330,12 @@ def action_decisions(tool: str, data, domains: dict[str, str]) -> list[tuple[str
 
 
 def before_decision(data: dict) -> dict | None:
+    return actions_decision(split_actions(str(data.get("tool_name") or ""), data.get("tool_input")))
+
+
+def actions_decision(actions: list[tuple[str, object]]) -> dict | None:
     domains = blocklist()
-    results = [decision for tool, action_input in split_actions(str(data.get("tool_name") or ""), data.get("tool_input"))
-               for decision in action_decisions(tool, action_input, domains)]
+    results = [decision for tool, action_input in actions for decision in action_decisions(tool, action_input, domains)]
     if not results:
         return None
     tag = localized(TAG_EN, TAG_TR)
@@ -458,14 +462,40 @@ def run_after(data: dict) -> None:
     write("PostToolUse", {"additionalContext": warning_text(finding, host, written)})
 
 
+def run_before_for(client: str, raw: str) -> None:
+    """Codex, Gemini CLI, Antigravity: every web address of the call gets the same check as WebFetch (hook_io.py)."""
+    try:
+        call = hook_io.read_call(client, json.loads(raw or "{}"), hook_io.WEB)
+        decision = actions_decision([("WebFetch", {"url": url}) for url in call.urls]) if call else None
+    except Exception as error:  # an unknown tool, no address or bad input: denied outside Claude
+        decision = {"permissionDecision": hook_io.FAIL, "permissionDecisionReason": localized(
+            f"{TAG_EN} The web call could not be checked ({type(error).__name__}); it is not run.",
+            f"{TAG_TR} Web çağrısı denetlenemedi ({type(error).__name__}); çalıştırılmaz.")}
+    if decision:
+        hook_io.emit(client, decision["permissionDecision"], decision["permissionDecisionReason"])
+    hook_io.finish(client)
+
+
 def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stdin.reconfigure(encoding="utf-8")
+    args = sys.argv[1:]
     try:
-        data = json.loads(sys.stdin.read() or "{}")
+        client = hook_io.client_from_args(args)
+    except hook_io.UnknownCall:
+        client = "antigravity"   # a wrong --client in a template: answer in the strictest format, which denies
+        hook_io.emit(client, hook_io.FAIL, f"{TAG_EN} unknown --client")
+        return
+    raw = sys.stdin.read()
+    if client != "claude":
+        if "after" not in args:   # the after-scan (PostToolUse) is installed only for Claude
+            run_before_for(client, raw)
+        return
+    try:
+        data = json.loads(raw or "{}")
     except ValueError:
         data = {}
-    run = run_after if sys.argv[1:] == ["after"] else run_before
+    run = run_after if args == ["after"] else run_before
     run(data if isinstance(data, dict) else {})
 
 

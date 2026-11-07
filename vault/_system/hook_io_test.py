@@ -26,14 +26,16 @@ PATCH = "*** Begin Patch\n*** Update File: src/app.py\n@@\n-a\n+b\n*** Add File:
 
 def shell_payload(client: str, command: str, session: str = "s1", cwd: str = "C:/work/project") -> dict:
     if client == "antigravity":
-        return {"toolCall": {"name": "run_command", "args": {"CommandLine": command, "Cwd": cwd}}, "session_id": session}
+        return {"toolCall": {"name": "run_command", "args": {"CommandLine": command}}, "conversationId": session,
+                "workspacePaths": [cwd], "stepIdx": 0}
     tool = {"claude": "Bash", "codex": "Bash", "gemini": "run_shell_command"}[client]
     return {"tool_name": tool, "tool_input": {"command": command}, "cwd": cwd, "session_id": session}
 
 
 def write_payload(client: str, path: str, session: str = "s1") -> dict:
     if client == "antigravity":
-        return {"toolCall": {"name": "write_to_file", "args": {"TargetFile": path}}, "session_id": session}
+        return {"toolCall": {"name": "write_to_file", "args": {"TargetFile": path}}, "conversationId": session,
+                "workspacePaths": ["C:/work/project"]}
     if client == "codex":
         return {"tool_name": "apply_patch", "tool_input": {"command": f"*** Begin Patch\n*** Add File: {path}\n+x\n*** End Patch\n"},
                 "cwd": "C:/work/project", "session_id": session}
@@ -43,7 +45,7 @@ def write_payload(client: str, path: str, session: str = "s1") -> dict:
 
 def unknown_payload(client: str) -> dict:
     if client == "antigravity":
-        return {"toolCall": {"name": "brand_new_tool", "args": {}}, "session_id": "s1"}
+        return {"toolCall": {"name": "brand_new_tool", "args": {}}, "conversationId": "s1"}
     return {"tool_name": "BrandNewTool", "tool_input": {}, "cwd": "C:/work/project", "session_id": "s1"}
 
 
@@ -51,6 +53,9 @@ def run_guard(script: str, client: str, payload: dict) -> subprocess.CompletedPr
     env = {**os.environ, "SESSION_MODE_FILE": str(MODE_FILE)}
     return subprocess.run([sys.executable, "-I", str(HERE / script), "--client", client], input=json.dumps(payload),
                           capture_output=True, text=True, encoding="utf-8", env=env)
+
+
+SILENT = {"antigravity": "allow"}   # what each client receives when the guard has nothing to say
 
 
 def verdict(client: str, result: subprocess.CompletedProcess) -> str:
@@ -145,10 +150,24 @@ class Render(unittest.TestCase):
             self.assertEqual(json.loads(hook_io.render("gemini", decision, "why")), {"decision": "deny", "reason": "why"})
         self.assertEqual(hook_io.render("gemini", "allow", "why"), "")
 
-    def test_antigravity_writes_allow_and_deny(self):
-        self.assertEqual(json.loads(hook_io.render("antigravity", "allow", "ok")), {"decision": "allow", "reason": "ok"})
-        for decision in ("ask", "deny", hook_io.FAIL):
-            self.assertEqual(json.loads(hook_io.render("antigravity", decision, "why"))["decision"], "deny")
+    def test_antigravity_answers_every_decision_it_documents(self):
+        expected = {"allow": "allow", "ask": "ask", hook_io.ASK_OR_DENY: "force_ask", "deny": "deny", hook_io.FAIL: "deny"}
+        for decision, answer in expected.items():
+            with self.subTest(decision=decision):
+                self.assertEqual(json.loads(hook_io.render("antigravity", decision, "why")), {"decision": answer, "reason": "why"})
+
+    def test_antigravity_reads_its_documented_envelope(self):
+        call = hook_io.read_call("antigravity", shell_payload("antigravity", "ls", session="c-42", cwd="D:/repo"), "shell")
+        self.assertEqual((call.session_id, call.cwd), ("c-42", "D:/repo"))
+
+    def test_antigravity_command_folder_comes_before_the_workspace(self):
+        payload = shell_payload("antigravity", "ls", cwd="D:/repo")
+        payload["toolCall"]["args"]["Cwd"] = "D:/repo/sub"
+        self.assertEqual(hook_io.read_call("antigravity", payload, "shell").cwd, "D:/repo/sub")
+
+    def test_antigravity_multi_replace_is_a_write(self):
+        payload = {"toolCall": {"name": "multi_replace_file_content", "args": {"TargetFile": "a.md"}}, "conversationId": "c"}
+        self.assertEqual(hook_io.read_call("antigravity", payload, "write").paths, ("a.md",))
 
 
 class ProtectedRoots(unittest.TestCase):
@@ -165,7 +184,7 @@ class Guards(unittest.TestCase):
         MODE_FILE.write_text(json.dumps({"sessions": {}, "handoff": {}}), encoding="utf-8")
 
     def test_recursive_delete_under_home_is_denied_where_the_client_cannot_ask(self):
-        expected = {"claude": "ask", "codex": "deny", "gemini": "deny", "antigravity": "deny"}
+        expected = {"claude": "ask", "codex": "deny", "gemini": "deny", "antigravity": "force_ask"}
         for client in hook_io.CLIENTS:
             with self.subTest(client=client):
                 result = run_guard("command_guard.py", client, shell_payload(client, "rm -rf ~/x"))
@@ -174,6 +193,13 @@ class Guards(unittest.TestCase):
     def test_codex_leaves_a_single_file_delete_to_its_own_approval(self):
         result = run_guard("command_guard.py", "codex", shell_payload("codex", "rm notes.txt"))
         self.assertEqual(verdict("codex", result), "")
+
+    def test_antigravity_gets_one_decision_on_every_call(self):
+        for command in ("git status", "rm notes.txt", "rm -rf ~"):
+            with self.subTest(command=command):
+                result = run_guard("command_guard.py", "antigravity", shell_payload("antigravity", command))
+                self.assertEqual(len(result.stdout.strip().splitlines()), 1)
+                self.assertIn(verdict("antigravity", result), ("allow", "ask", "deny"))
 
     def test_deleting_another_clients_settings_is_denied(self):
         for client in hook_io.CLIENTS:
@@ -199,7 +225,7 @@ class Guards(unittest.TestCase):
         for client in hook_io.CLIENTS:
             with self.subTest(client=client):
                 result = run_guard("write_guard.py", client, write_payload(client, str(VAULT / "index.md")))
-                self.assertEqual(verdict(client, result), "")
+                self.assertEqual(verdict(client, result), SILENT.get(client, ""))
 
     def test_log_is_still_protected_for_every_client(self):
         for client in hook_io.CLIENTS:
@@ -214,6 +240,40 @@ class Guards(unittest.TestCase):
                 result = subprocess.run([sys.executable, "-I", str(HERE / "command_guard.py"), "--client", client],
                                         input="{not json", capture_output=True, text=True, encoding="utf-8", env=env)
                 self.assertEqual((verdict(client, result), result.returncode), ("deny", 0))
+
+
+class SiteGuard(unittest.TestCase):
+    """Web calls of Gemini CLI and Antigravity get the WebFetch address check (Codex web tools do not reach hooks)."""
+
+    FETCH = {
+        "gemini": {"tool_name": "web_fetch", "tool_input": {"prompt": "Summarize https://docs.python.org/3/"}, "session_id": "s1"},
+        "antigravity": {"toolCall": {"name": "read_url_content", "args": {"Url": "https://docs.python.org/3/"}},
+                        "conversationId": "s1"},
+    }
+
+    def test_an_unlisted_site_is_asked_where_possible_and_denied_elsewhere(self):
+        for client, expected in (("gemini", "deny"), ("antigravity", "ask")):
+            with self.subTest(client=client):
+                result = run_guard("site_guard.py", client, self.FETCH[client])
+                self.assertEqual((verdict(client, result), result.returncode), (expected, 0))
+
+    def test_every_address_in_the_call_is_checked(self):
+        call = hook_io.read_call("gemini", {"tool_name": "web_fetch", "session_id": "s1",
+                                            "tool_input": {"prompt": "Compare https://a.example/x and http://b.example"}}, "web")
+        self.assertEqual(call.urls, ("https://a.example/x", "http://b.example"))
+
+    def test_a_call_without_an_address_or_an_unknown_tool_is_denied(self):
+        empty = {"toolCall": {"name": "read_url_content", "args": {}}, "conversationId": "s1"}
+        for client, payload in (("antigravity", empty), ("gemini", unknown_payload("gemini"))):
+            with self.subTest(client=client):
+                self.assertEqual(verdict(client, run_guard("site_guard.py", client, payload)), "deny")
+
+    def test_a_dangerous_address_is_denied_for_every_client(self):
+        payloads = {"gemini": {"tool_name": "web_fetch", "tool_input": {"prompt": "get https://example.com/setup.exe"}},
+                    "antigravity": {"toolCall": {"name": "read_url_content", "args": {"Url": "https://example.com/setup.exe"}}}}
+        for client, payload in payloads.items():
+            with self.subTest(client=client):
+                self.assertEqual(verdict(client, run_guard("site_guard.py", client, payload)), "deny")
 
 
 if __name__ == "__main__":

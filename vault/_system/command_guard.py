@@ -557,6 +557,8 @@ def main() -> None:
         decide(hook_io.FAIL, localized((f"The command guard could not parse the command ({type(error).__name__}); the user "
                                  "should approve.",
                                  f"Koruma kapısı komutu çözümleyemedi ({type(error).__name__}); kullanıcı onaylasın.")))
+    finally:
+        hook_io.finish(CLIENT)
 
 
 if __name__ == "__main__":
