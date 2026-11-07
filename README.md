@@ -100,7 +100,7 @@ Step 8 of the installer can set up Google Antigravity, Google Gemini CLI and Ope
 | Command guard | yes | yes | yes | yes | no |
 | Write guard | yes | yes | yes | yes (`apply_patch`) | no |
 | Site guard | before and after reading | before reading | before reading | no: web tools do not reach hooks | no |
-| What Claude would ask | asked | asked | refused | single delete: Codex's own approval; recursive delete: refused | no guards |
+| What Claude would ask | asked | asked | refused | single delete: Codex's own approval; everything else: refused | no guards |
 | Instructions | `~/.claude/CLAUDE.md` | `~/.gemini/AGENTS.md` | `~/.gemini/GEMINI.md` | `~/.codex/AGENTS.md` | pasted text |
 | Skills | `~/.claude/skills` | `~/.gemini/config/skills` | `~/.agents/skills` | `~/.agents/skills` | uploaded files |
 | Agents | `~/.claude/agents` | `~/.gemini/config/agents` | `~/.gemini/agents` | `~/.codex/agents` (TOML) | no |
@@ -113,6 +113,8 @@ Step 8 of the installer can set up Google Antigravity, Google Gemini CLI and Ope
 - Codex runs a new or changed hook only after you review it with `/hooks`. A Codex agent file cannot limit tools, so the read-only agents rely on their instructions there.
 - Gemini CLI's documents show no way to ask the user from a hook, so what Claude would ask (an unlisted site, a delete) is refused there.
 - In no assistant do the read tools pass a guard; `.env` files are protected only in the shell.
+- The unrecorded (temporary) chat of rule #43 works only in Claude Code, which asks the record question at session start. In the other assistants a chat counts as recorded unless the session id is missing.
+- Writing another assistant's hook file (`~/.codex/hooks.json`, `~/.gemini/settings.json`, `~/.gemini/config/hooks.json`) is asked in Claude and Antigravity and refused in Gemini CLI and Codex.
 
 ### What a vault looks like
 
@@ -397,7 +399,7 @@ Kurucunun 8. adımı Google Antigravity, Google Gemini CLI ve OpenAI Codex CLI'y
 | Komut kapısı | var | var | var | var | yok |
 | Yazma kapısı | var | var | var | var (`apply_patch`) | yok |
 | Site kapısı | okumadan önce ve sonra | okumadan önce | okumadan önce | yok: web araçları hook'a gelmez | yok |
-| Claude'un soracağı şey | sorulur | sorulur | reddedilir | tek dosya silme: Codex'in kendi onayı; özyinelemeli silme: reddedilir | kapı yok |
+| Claude'un soracağı şey | sorulur | sorulur | reddedilir | tek dosya silme: Codex'in kendi onayı; gerisi: reddedilir | kapı yok |
 | Talimat | `~/.claude/CLAUDE.md` | `~/.gemini/AGENTS.md` | `~/.gemini/GEMINI.md` | `~/.codex/AGENTS.md` | yapıştırılan metin |
 | Beceriler | `~/.claude/skills` | `~/.gemini/config/skills` | `~/.agents/skills` | `~/.agents/skills` | yüklenen dosyalar |
 | Ajanlar | `~/.claude/agents` | `~/.gemini/config/agents` | `~/.gemini/agents` | `~/.codex/agents` (TOML) | yok |
@@ -410,6 +412,8 @@ Kurucunun 8. adımı Google Antigravity, Google Gemini CLI ve OpenAI Codex CLI'y
 - Codex yeni ya da değişmiş bir hook'u ancak siz `/hooks` ile inceledikten sonra çalıştırır. Codex ajan dosyası araçları sınırlayamaz; salt okur ajanlar orada yalnızca talimatlarına dayanır.
 - Gemini CLI belgelerinde hook'un kullanıcıya soru sormasının bir yolu yok; bu yüzden Claude'un soracağı şey (listede olmayan site, silme) orada reddedilir.
 - Hiçbir asistanda okuma araçları kapıdan geçmez; `.env` dosyaları yalnızca kabukta korunur.
+- #43 numaralı kuralın kayıtsız (geçici) sohbeti yalnızca Claude Code'da çalışır; kayıt sorusunu oturum başında o sorar. Öteki asistanlarda oturum kimliği eksik değilse sohbet kayıtlı sayılır.
+- Başka bir asistanın hook dosyasına (`~/.codex/hooks.json`, `~/.gemini/settings.json`, `~/.gemini/config/hooks.json`) yazmak Claude'da ve Antigravity'de sorulur, Gemini CLI'da ve Codex'te reddedilir.
 
 ### Bir vault nasıl görünür
 

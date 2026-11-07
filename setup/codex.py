@@ -8,7 +8,7 @@ Places (Codex docs on learn.chatgpt.com, read 7 November 2026):
 - agents:       ~/.codex/agents/<name>.toml (name, description, developer_instructions)
 
 Codex runs a new or changed hook only after the user reviews it with /hooks. Codex has no "ask": a single delete is
-left to Codex's own approval, a recursive or protected delete is denied. Hosted web tools do not reach hooks, so the
+left to Codex's own approval; everything else Claude would ask is denied. Hosted web tools do not reach hooks, so the
 site guard is not installed. An agent file cannot limit tools, so read-only agents rely on their instructions.
 """
 from __future__ import annotations

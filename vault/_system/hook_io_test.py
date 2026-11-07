@@ -95,7 +95,7 @@ class ReadCall(unittest.TestCase):
 
     def test_codex_command_given_as_a_list_is_joined(self):
         payload = {"tool_name": "Bash", "tool_input": {"command": ["rm", "-rf", "~/x"]}, "session_id": "s1"}
-        self.assertEqual(hook_io.read_call("codex", payload, "shell").command, "rm -rf ~/x")
+        self.assertEqual(hook_io.read_call("codex", payload, "shell").command, "rm -rf '~/x'")   # shlex.join
 
     def test_codex_patch_paths_come_from_the_patch_text(self):
         payload = {"tool_name": "apply_patch", "tool_input": {"command": PATCH}, "session_id": "s1"}
@@ -139,11 +139,13 @@ class Render(unittest.TestCase):
         out = json.loads(hook_io.render("claude", hook_io.FAIL, "why"))["hookSpecificOutput"]
         self.assertEqual(out["permissionDecision"], "ask")
 
-    def test_codex_has_no_ask_so_ask_and_allow_stay_silent(self):
-        self.assertEqual(hook_io.render("codex", "ask", "why"), "")
+    def test_codex_has_no_ask_so_only_a_single_delete_and_allow_stay_silent(self):
+        self.assertEqual(hook_io.render("codex", hook_io.ASK_OR_CLIENT, "why"), "")
         self.assertEqual(hook_io.render("codex", "allow", "why"), "")
-        out = json.loads(hook_io.render("codex", hook_io.FAIL, "why"))["hookSpecificOutput"]
-        self.assertEqual(out["permissionDecision"], "deny")
+        for decision in ("ask", hook_io.ASK_OR_DENY, hook_io.FAIL, "deny"):
+            with self.subTest(decision=decision):
+                out = json.loads(hook_io.render("codex", decision, "why"))["hookSpecificOutput"]
+                self.assertEqual(out["permissionDecision"], "deny")
 
     def test_gemini_turns_ask_and_failure_into_deny(self):
         for decision in ("ask", "deny", hook_io.FAIL):
@@ -274,6 +276,133 @@ class SiteGuard(unittest.TestCase):
         for client, payload in payloads.items():
             with self.subTest(client=client):
                 self.assertEqual(verdict(client, run_guard("site_guard.py", client, payload)), "deny")
+
+
+
+class AuditRegressions(unittest.TestCase):
+    """Bypasses found by the pre-release audit (7 November 2026); each must stay closed."""
+
+    @classmethod
+    def setUpClass(cls):
+        MODE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        MODE_FILE.write_text(json.dumps({"sessions": {}, "handoff": {}}), encoding="utf-8")
+
+    def shell(self, client: str, command, **extra) -> str:
+        payload = shell_payload(client, "x")
+        if client == "antigravity":
+            payload["toolCall"]["args"]["CommandLine"] = command
+        else:
+            payload["tool_input"] = {"command": command, **extra}
+        return verdict(client, run_guard("command_guard.py", client, payload))
+
+    def write(self, client: str, path: str, session: str = "s1") -> str:
+        return verdict(client, run_guard("write_guard.py", client, write_payload(client, path, session=session)))
+
+    def test_deletion_wrapped_in_another_shell_is_caught(self):
+        vault = VAULT.as_posix()
+        for command in ('bash -c "rm -rf ~/"', f'cmd /c "rd /s /q {vault}"',
+                        f'powershell -Command "Remove-Item -Recurse -Force {vault}"', "sh -c 'rm -rf ~/'"):
+            for client in hook_io.CLIENTS:
+                with self.subTest(client=client, command=command):
+                    self.assertEqual(self.shell(client, command), "deny")
+
+    def test_a_quoted_rm_before_a_real_one_does_not_hide_it(self):
+        for client in NOT_CLAUDE:
+            with self.subTest(client=client):
+                self.assertEqual(self.shell(client, f"echo 'rm x' ; rm -rf {VAULT.as_posix()}"), "deny")
+
+    def test_a_single_quote_inside_double_quotes_is_not_an_open_quote(self):
+        self.assertEqual(self.shell("codex", "echo \"'\" ; rm -rf ~/"), "deny")
+
+    def test_argv_list_is_quoted_before_it_is_checked(self):
+        self.assertEqual(self.shell("codex", ["env", "X='", "bash", "-c", "rm -rf ~/"]), "deny")
+
+    def test_codex_denies_what_claude_would_ask_except_a_single_delete(self):
+        self.assertEqual(self.shell("codex", "cat ~/.ssh/id_rsa"), "deny")
+        self.assertEqual(self.shell("codex", f"echo x >> {VAULT.as_posix()}/log.md"), "deny")
+        self.assertEqual(self.shell("codex", "rm notes.txt"), "")
+
+    def test_web_address_is_not_cut_before_an_at_sign(self):
+        call = hook_io.read_call("antigravity", {"toolCall": {"name": "read_url_content",
+                                                              "args": {"Url": "https://ok.com)@evil.com"}}}, "web")
+        self.assertEqual(call.urls, ("https://ok.com)@evil.com",))
+
+    def test_patch_header_with_leading_space_or_carriage_return_is_read(self):
+        log = f"{VAULT.as_posix()}/log.md"
+        for header in (f"  *** Update File: {log}", f"\t*** Update File: {log}", f"*** Add File:  {log}"):
+            for newline in ("\n", "\r"):
+                patch = newline.join(["*** Begin Patch", "*** Add File: notes/a.md", "+x", header, "+y", "*** End Patch"])
+                payload = {"tool_name": "apply_patch", "tool_input": {"command": patch}, "session_id": "s1"}
+                with self.subTest(header=header, newline=repr(newline)):
+                    self.assertEqual(verdict("codex", run_guard("write_guard.py", "codex", payload)), "deny")
+
+    def test_unknown_patch_instruction_is_refused(self):
+        with self.assertRaises(hook_io.UnknownCall):
+            hook_io.patch_paths("*** Begin Patch\n*** Teleport File: x\n*** End Patch\n")
+
+    def test_blank_session_id_counts_as_unrecorded(self):
+        for client in NOT_CLAUDE:
+            for session in (" ", "\t"):
+                with self.subTest(client=client, session=repr(session)):
+                    self.assertEqual(self.write(client, str(VAULT / "notes" / "new.md"), session=session), "deny")
+
+    def test_wrong_client_flag_is_denied_in_every_format(self):
+        for flags in (["--client", "Codex"], ["--client=codex"], ["--client", "codx"], ["--client"]):
+            with self.subTest(flags=flags):
+                env = {**os.environ, "SESSION_MODE_FILE": str(MODE_FILE)}
+                result = subprocess.run([sys.executable, "-I", str(HERE / "command_guard.py"), *flags],
+                                        input=json.dumps(shell_payload("codex", "rm -rf ~/")), capture_output=True,
+                                        text=True, encoding="utf-8", env=env)
+                data = json.loads(result.stdout)
+                if flags == ["--client=codex"]:
+                    self.assertEqual(data["hookSpecificOutput"]["permissionDecision"], "deny")
+                else:
+                    self.assertEqual((data["decision"], data["hookSpecificOutput"]["permissionDecision"]), ("deny", "deny"))
+
+    def test_client_homes_are_protected_by_their_short_names_and_relative_names(self):
+        home = Path.home().as_posix()
+        for command in (f"rm -rf {home}/CODEX~1", f"rm -rf {home}/GEMINI~1/config", "rm -rf .codex", "rm -rf .agents"):
+            with self.subTest(command=command):
+                self.assertEqual(self.shell("antigravity", command), "deny")
+
+    def test_long_command_is_judged_quickly(self):
+        import time
+        start = time.monotonic()
+        self.assertEqual(self.shell("codex", "echo 'rm a' ; " * 8000 + "rm -rf ~/"), "deny")
+        self.assertLess(time.monotonic() - start, 10)
+
+    def test_alternate_data_stream_and_device_prefix_do_not_hide_the_log(self):
+        log = str(VAULT / "log.md")
+        for path in (log + "::$DATA", "\\\\?\\" + log, "//?/" + VAULT.as_posix() + "/log.md"):
+            for client in ("claude", "gemini", "antigravity"):
+                with self.subTest(client=client, path=path):
+                    self.assertEqual(self.write(client, path), "deny")
+
+    def test_writing_another_assistants_hook_file_is_not_silent(self):
+        home = Path.home()
+        for path in (home / ".codex" / "hooks.json", home / ".gemini" / "settings.json",
+                     home / ".gemini" / "config" / "hooks.json"):
+            for client, expected in (("claude", "ask"), ("gemini", "deny"), ("antigravity", "force_ask")):
+                with self.subTest(client=client, path=path.name):
+                    self.assertEqual(self.write(client, str(path)), expected)
+
+    def test_blocklist_sees_a_bare_domain_given_to_a_download_tool(self):
+        import command_guard
+        listed = MODE_FILE.parent / "blocked-sites.md"
+        listed.write_text("| Domain | Date | Reason |\n|---|---|---|\n| `blocked.example` | 2026-11-07 | test |\n",
+                          encoding="utf-8")
+        original, command_guard.BLOCKLIST = command_guard.BLOCKLIST, listed
+        try:
+            for command in ("curl blocked.example/x", "curl //blocked.example", "iwr sub.blocked.example -OutFile a"):
+                with self.subTest(command=command):
+                    self.assertEqual(command_guard.blocked_address(command), "blocked.example")
+            self.assertEqual(command_guard.blocked_address("echo blocked.example"), "")   # not a download
+        finally:
+            command_guard.BLOCKLIST = original
+
+    def test_gemini_command_folder_is_read(self):
+        self.assertEqual(self.shell("gemini", "echo x >> log.md", dir_path=str(VAULT)), "deny")
+        self.assertEqual(self.shell("gemini", "echo x >> log.md"), "")   # the session folder is a project
 
 
 if __name__ == "__main__":

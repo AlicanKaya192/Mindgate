@@ -18,6 +18,7 @@ Codex patch, and the homes of every client (~/.codex, ~/.gemini, ~/.agents) are 
 """
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -30,6 +31,11 @@ from common import VAULT, name, vault_path  # noqa: E402
 CLIENT = "claude"   # set from --client in main(); decides the answer format (hook_io.py)
 # Every assistant's home: memory, instructions, skills, hooks and scheduled tasks (~/.claude, ~/.codex, ~/.gemini, ~/.agents)
 CLIENT_ROOTS = tuple(Path.home() / home for home in hook_io.CLIENT_HOMES)
+# The hook files of the other assistants: writing one can switch the guards off (audit 7 November 2026)
+CLIENT_HOOK_FILES = (Path.home() / ".codex" / "hooks.json", Path.home() / ".codex" / "config.toml",
+                     Path.home() / ".gemini" / "settings.json", Path.home() / ".gemini" / "config" / "hooks.json")
+DEVICE_PREFIX = re.compile(r"^(?:[\\/]{2}[?.][\\/])")   # \\?\C:\…, //?/C:/…, \\.\C:\…
+DRIVE = re.compile(r"^[a-zA-Z]:")
 SOURCES = vault_path("sources")
 LOG = vault_path("log.md")
 ARCHIVES = (vault_path("archive", "log"), vault_path("archive", "pending"))   # monthly rotation archives
@@ -121,11 +127,34 @@ def check(path: Path) -> bool:
     return False
 
 
+def check_stream(raw: str) -> bool:
+    """Denies a path that names an alternate data stream (`log.md::$DATA` writes log.md itself); True if it denied."""
+    if ":" not in DRIVE.sub("", raw, count=1):   # a colon after the drive letter: file.md::$DATA
+        return False
+    decide("deny", localized(f"A path with a data stream name is not written: {raw}. Use the plain file name.",
+                             f"Veri akışı adı taşıyan yola yazılmaz: {raw}. Dosyanın düz adını kullan."))
+    return True
+
+
+def check_hook_file(path: Path) -> bool:
+    """Asks (or denies where the client cannot ask) before an assistant's hook file is changed; True if it decided."""
+    target = real(path)
+    if not any(target == real(hook_file) for hook_file in CLIENT_HOOK_FILES):
+        return False
+    decide(hook_io.ASK_OR_DENY, localized(
+        f"This is an assistant's hook file ({path.name}); changing it can switch the guards off. The user decides.",
+        f"Bu bir asistanın hook dosyası ({path.name}); değiştirmek kapıları kapatabilir. Kararı kullanıcı verir."))
+    return True
+
+
 def check_call(call: hook_io.Call) -> None:
     """Every target path of the call (a Codex patch can hold several); stops at the first denial."""
     for raw in call.paths:
+        raw = DEVICE_PREFIX.sub("", raw.strip())
+        if check_stream(raw):
+            return
         path = resolve(raw, call.cwd)
-        if check_recording_mode(path, call.session_id) or check(path):
+        if check_recording_mode(path, call.session_id) or check_hook_file(path) or check(path):
             return
 
 

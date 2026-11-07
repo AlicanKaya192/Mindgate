@@ -28,6 +28,7 @@ import json
 import os
 import re
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
@@ -37,7 +38,6 @@ import session_mode as sm  # noqa: E402
 from common import VAULT, name, vault_path  # noqa: E402
 
 CLIENT = "claude"   # set from --client in main(); decides the answer format (hook_io.py)
-CLIENT_HOMES = "|".join(re.escape(home) for home in hook_io.CLIENT_HOMES)   # ~/.claude, ~/.codex, ~/.gemini, ~/.agents
 
 
 def localized(pair: tuple[str, str]) -> str:
@@ -76,6 +76,7 @@ def path_pattern(path: Path, home: Path | None = None) -> str:
 
 
 VAULT_AT = path_pattern(VAULT) + END
+CLIENT_HOMES = "|".join(segment_pattern(home) for home in hook_io.CLIENT_HOMES)   # ~/.claude … ~/.agents, 8.3 names too
 VAULT_NORMAL = os.path.normcase(os.path.abspath(VAULT))
 
 # --- Path patterns ----------------------------------------------------------
@@ -106,20 +107,20 @@ HOME_SUB = re.compile(
     [\\/]* \*? (?= [\s"'`;&|)>] | $ )
     """
 )
-PROTECTED = re.compile(rf"(?i){VAULT_AT}|[\\/](?:{CLIENT_HOMES})(?:[\\/]|\b)|\.obsidian|\.git(?:[\\/]|\b)|\.ssh|appdata|program files"
+PROTECTED = re.compile(rf"(?i){VAULT_AT}|(?:[\\/]|(?<![\w.~-]))(?:{CLIENT_HOMES})(?:[\\/]|\b)|\.obsidian|\.git(?:[\\/]|\b)|\.ssh|appdata|program files"
                        r"|windows[\\/]system32")
 
 # --- Command patterns -------------------------------------------------------
 DELETE = [  # (pattern, has a target capture group)
-    re.compile(r"(?i)(?<![\w-])rm\s+(?:-[a-z]*r[a-z]*\s+|-[a-z]*\s+)*(?:-[a-z]*r[a-z]*)?\s*(.*)"),  # rm -r* ...
-    re.compile(r"(?i)(?<![\w-])(?:rmdir|rd)\s+/s\b(.*)"),
-    re.compile(r"(?i)(?<![\w-])(?:del|erase)\s+(?:/\w\s+)*/s\b(.*)"),
-    re.compile(r"(?i)(?<![\w-])(?:remove-item|ri|rm|del|erase|rd|rmdir)\b[^|\n]*-recurse\b(.*)"),
-    re.compile(r"(?i)(?<![\w-])(?:remove-item|ri)\s+[^|\n]*-force\b(.*)"),
-    re.compile(r"(?i)(?<![\w-])rimraf\s+(.*)"),
+    re.compile(r"(?i)(?<![\w-])rm\s+(?:-[a-z]*r[a-z]*\s+|-[a-z]*\s+)*(?:-[a-z]*r[a-z]*)?\s*([^;&|\n]*)"),  # rm -r* ...
+    re.compile(r"(?i)(?<![\w-])(?:rmdir|rd)\s+/s\b([^;&|\n]*)"),
+    re.compile(r"(?i)(?<![\w-])(?:del|erase)\s+(?:/\w\s+)*/s\b([^;&|\n]*)"),
+    re.compile(r"(?i)(?<![\w-])(?:remove-item|ri|rm|del|erase|rd|rmdir)\b[^|\n]*-recurse\b([^;&|\n]*)"),
+    re.compile(r"(?i)(?<![\w-])(?:remove-item|ri)\s+[^|\n]*-force\b([^;&|\n]*)"),
+    re.compile(r"(?i)(?<![\w-])rimraf\s+([^;&|\n]*)"),
     re.compile(r"(?i)shutil\.rmtree\s*\(\s*(.*)"),
-    re.compile(r"(?i)(?<![\w-])git\s+clean\b(.*)"),
-    re.compile(r"(?i)(?<![\w-])(?:robocopy)\b[^|\n]*\s/mir\b(.*)"),
+    re.compile(r"(?i)(?<![\w-])git\s+clean\b([^;&|\n]*)"),
+    re.compile(r"(?i)(?<![\w-])(?:robocopy)\b[^|\n]*\s/mir\b([^;&|\n]*)"),
 ]
 RM_R = re.compile(r"(?i)(?<![\w-])rm\s+(?:-\w*\s+)*-\w*r")  # whether rm is recursive
 
@@ -373,11 +374,48 @@ def unrecorded_denied_part(text: str, cwd: str, sid: str) -> str:
     return next((p.strip() for p in PART_SEPARATOR.split(clean) if not part_reads(p)), "")
 
 
+@lru_cache(maxsize=8)
+def quote_map(text: str) -> bytes:
+    """For every position: 1 if it is inside quotes. One pass; a ' inside "…" is a plain character, and a backslash
+    escapes the next character outside single quotes (audit 7 November 2026: the old count was O(n²) and treated
+    "'" as an open quote)."""
+    flags, state, escaped = bytearray(len(text) + 1), "", False
+    for i, char in enumerate(text):
+        flags[i] = 1 if state else 0
+        if escaped:
+            escaped = False
+        elif char == "\\" and state != "'":
+            escaped = True
+        elif state == "" and char in "'\"":
+            state = char
+        elif char == state:
+            state = ""
+    flags[len(text)] = 1 if state else 0
+    return bytes(flags)
+
+
 def inside_quotes(text: str, position: int) -> bool:
     """Is `position` inside an open quote? (text searches such as grep 'rm -rf' are not commands)"""
-    single = text.count("'", 0, position) - text.count(chr(92) + "'", 0, position)
-    double = text.count('"', 0, position) - text.count(chr(92) + '"', 0, position)
-    return single % 2 == 1 or double % 2 == 1
+    return quote_map(text)[position] == 1
+
+
+WRAPPER = re.compile(
+    r"""(?ix) (?<![\w-]) (?: bash | sh | zsh | dash | ksh | cmd (?:\.exe)? | powershell (?:\.exe)? | pwsh (?:\.exe)? ) \b
+    [^\n;&|"']*? \s (?: -c | /c | /k | -command | -cmd ) \s+ (?: "((?:[^"\\]|\\.)*)" | '([^']*)' )""")
+WRAPPER_DEPTH = 3
+
+
+def with_inner_commands(text: str) -> str:
+    """The command plus, on lines of their own, the commands wrapped in `bash -c "…"`, `cmd /c "…"`,
+    `powershell -Command "…"` (audit 7 November 2026: a wrapped deletion was read as quoted text)."""
+    found, layer = [], text
+    for _ in range(WRAPPER_DEPTH):
+        inner = [m.group(1) if m.group(1) is not None else m.group(2) for m in WRAPPER.finditer(layer)]
+        if not inner:
+            break
+        found += inner
+        layer = "\n".join(inner)
+    return "\n".join([text, *found])
 
 
 def find_unquoted(pattern, text: str):
@@ -442,12 +480,19 @@ def blocklist_label() -> str:
     return BLOCKLIST.relative_to(VAULT).as_posix()
 
 
+DOWNLOAD_TOOL = re.compile(r"(?i)(?<![\w-])(?:curl|wget|iwr|irm|invoke-webrequest|invoke-restmethod|start-bitstransfer|certutil)\b")
+
+
 def blocked_address(text: str) -> str:
     """Does a URL in the command go to a site on the blocklist? (rule #27; the list is shared with site_guard.py)"""
-    if not BLOCKLIST.is_file() or not re.search(r"(?i)https?://", text):
+    fetches = DOWNLOAD_TOOL.search(text)
+    if not BLOCKLIST.is_file() or not (fetches or re.search(r"(?i)https?://", text)):
         return ""
     domains = re.findall(r"(?m)^\|\s*`?([a-z0-9.-]+\.[a-z]{2,})`?\s*\|", BLOCKLIST.read_text(encoding="utf-8").lower())
-    for host in re.findall(r"(?i)https?://(?:[^/\s'\"@]*@)?([a-z0-9.-]+)", text):
+    hosts = re.findall(r"(?i)https?://(?:[^/\s'\"@]*@)?([a-z0-9.-]+)", text)
+    if fetches:   # curl example.com/x, curl //example.com: no scheme
+        hosts += re.findall(r"(?i)(?<![\w.@-])(?://)?((?:[a-z0-9-]+\.)+[a-z]{2,})(?=[/:\s'\"]|$)", text)
+    for host in hosts:
         host = host.lower()
         for domain in domains:
             if host == domain or host.endswith("." + domain):
@@ -456,7 +501,7 @@ def blocked_address(text: str) -> str:
 
 
 def check(command: str, cwd: str, sid: str = "") -> None:
-    text = command.strip()
+    text = with_inner_commands(command.strip())
     if not text:
         return
 
@@ -506,7 +551,7 @@ def check(command: str, cwd: str, sid: str = "") -> None:
 
     deletion_part = simple_deletion_part(text)
     if deletion_part:
-        decide("ask", localized(DELETE_REASON).format(part=deletion_part))
+        decide(hook_io.ASK_OR_CLIENT, localized(DELETE_REASON).format(part=deletion_part))
         return
 
     # Writing/moving to the home or root folder (not deletion) — full path check
@@ -549,7 +594,12 @@ def main() -> None:
     try:
         sys.stdout.reconfigure(encoding="utf-8")
         sys.stdin.reconfigure(encoding="utf-8")
-        CLIENT = hook_io.client_from_args(sys.argv[1:])
+        try:
+            CLIENT = hook_io.client_from_args(sys.argv[1:])
+        except hook_io.UnknownCall as error:   # a wrong --client in a hook file: deny in every client's format
+            print(hook_io.deny_for_every_client(f"[Command guard] {error}"))
+            CLIENT = ""
+            return
         call = hook_io.read_call(CLIENT, json.loads(sys.stdin.read() or "{}"), hook_io.SHELL)
         if call is not None:
             check(call.command, call.cwd, call.session_id)
@@ -558,7 +608,8 @@ def main() -> None:
                                  "should approve.",
                                  f"Koruma kapısı komutu çözümleyemedi ({type(error).__name__}); kullanıcı onaylasın.")))
     finally:
-        hook_io.finish(CLIENT)
+        if CLIENT:
+            hook_io.finish(CLIENT)
 
 
 if __name__ == "__main__":

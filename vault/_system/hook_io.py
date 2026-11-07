@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 from dataclasses import dataclass
 
 import session_mode as sm
@@ -23,6 +24,7 @@ CLIENTS = ("claude", "codex", "gemini", "antigravity")
 CLIENT_HOMES = (".claude", ".codex", ".gemini", ".agents")   # settings, hooks, instructions and skills of each client
 FAIL = "fail"   # the guard could not read the call
 ASK_OR_DENY = "ask-or-deny"   # a recursive delete: always ask where the client can ask, deny where it cannot
+ASK_OR_CLIENT = "ask-or-client"   # a single delete: ask, or leave it to the client's own approval (Codex)
 
 SHELL, WRITE, WEB = "shell", "write", "web"
 TOOLS = {
@@ -37,8 +39,12 @@ ARGUMENTS = {   # client → (command key, file path key); Codex carries its pat
     "gemini": ("command", "file_path"),
     "antigravity": ("CommandLine", "TargetFile"),
 }
-WEB_ADDRESS = re.compile(r"(?i)https?://[^\s'\"`<>)\]]+")   # web tools: addresses are taken from every text argument
-PATCH_PATH = re.compile(r"(?m)^\*\*\* (?:Add|Update|Delete) File: (.+?)\s*$|^\*\*\* Move to: (.+?)\s*$")
+# web tools: an address runs to the next space, so "https://ok.com)@evil.com" is checked whole (as evil.com)
+WEB_ADDRESS = re.compile(r"(?i)https?://\S+")
+ADDRESS_TAIL = ".,;:!?'\")]}>"   # closing punctuation of the sentence around an address
+PATCH_LINE = re.compile(r"^\s*\*\*\*\s*(Begin Patch|End Patch|End of File|(?:Add|Update|Delete) File:|Move to:)\s*(.*?)\s*$")
+PATCH_MARK = re.compile(r"^\s*\*\*\*")
+CWD_FIELDS = {"gemini": "dir_path"}   # a tool argument that sets the command's own folder (Gemini CLI docs)
 _emitted = []   # decisions printed by this process; Antigravity needs one decision on every call
 
 
@@ -59,10 +65,15 @@ class Call:
 
 
 def client_from_args(args: list) -> str:
-    if "--client" not in args:
+    """`--client name` or `--client=name`; no flag means Claude. A wrong or empty name raises UnknownCall."""
+    client = None
+    for i, arg in enumerate(args):
+        if arg == "--client":
+            client = args[i + 1] if i + 1 < len(args) else ""
+        elif arg.startswith("--client="):
+            client = arg.split("=", 1)[1]
+    if client is None:
         return "claude"
-    position = args.index("--client") + 1
-    client = args[position] if position < len(args) else ""
     if client not in CLIENTS:
         raise UnknownCall(f"unknown client: {client or '(none)'}")
     return client
@@ -70,25 +81,37 @@ def client_from_args(args: list) -> str:
 
 def required(fields: dict, key: str) -> str:
     value = fields.get(key)
-    if isinstance(value, list):
-        value = " ".join(str(part) for part in value)
+    if isinstance(value, list):   # an argv list: quoted, so a part holding a quote cannot hide the rest
+        value = shlex.join(str(part) for part in value)
     if not isinstance(value, str) or not value.strip():
         raise UnknownCall(f"missing field: {key}")
     return value
 
 
 def patch_paths(patch: str) -> tuple:
-    paths = tuple(m.group(1) or m.group(2) for m in PATCH_PATH.finditer(patch))
+    """Every file a Codex patch touches. Headers may carry spaces around them; a `***` line that is not a known
+    instruction, or a patch without a path, is not understood."""
+    paths = []
+    for line in patch.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
+        if not PATCH_MARK.match(line):
+            continue
+        m = PATCH_LINE.match(line)
+        if not m:
+            raise UnknownCall(f"unknown patch instruction: {line.strip()[:60]}")
+        if m.group(1).endswith(":"):
+            if not m.group(2):
+                raise UnknownCall("patch header without a path")
+            paths.append(m.group(2))
     if not paths:
         raise UnknownCall("no file path in the patch")
-    return paths
+    return tuple(paths)
 
 
 def web_addresses(fields: dict) -> tuple:
     """Every web address in the text arguments, whatever their names; none found means the call is not understood."""
     texts = [value for value in fields.values() if isinstance(value, str)]
     texts += [item for value in fields.values() if isinstance(value, list) for item in value if isinstance(item, str)]
-    urls = tuple(m.group(0) for text in texts for m in WEB_ADDRESS.finditer(text))
+    urls = tuple(m.group(0).rstrip(ADDRESS_TAIL) for text in texts for m in WEB_ADDRESS.finditer(text))
     if not urls:
         raise UnknownCall("no web address in the tool input")
     return urls
@@ -103,7 +126,9 @@ def envelope(client: str, data: dict) -> tuple:
         workspace = workspaces[0] if isinstance(workspaces, list) and workspaces else ""
         cwd = (args.get("Cwd") if isinstance(args, dict) else None) or workspace   # run_command carries its own folder
         return str(tool_call.get("name") or ""), args, str(cwd), str(data.get("conversationId") or "")
-    return (str(data.get("tool_name") or ""), data.get("tool_input"), str(data.get("cwd") or ""),
+    fields = data.get("tool_input")
+    own_folder = fields.get(CWD_FIELDS[client]) if client in CWD_FIELDS and isinstance(fields, dict) else None
+    return (str(data.get("tool_name") or ""), fields, str(own_folder or data.get("cwd") or ""),
             str(data.get("session_id") or ""))
 
 
@@ -115,7 +140,7 @@ def claude_call(tool: str, fields: dict, cwd: str, session: str, kind: str) -> C
 
 
 def other_call(client: str, tool: str, fields: dict, cwd: str, session: str, kind: str) -> Call:
-    session = session or sm.UNKNOWN_SESSION
+    session = session.strip() or sm.UNKNOWN_SESSION
     if kind == WEB:
         return Call(client, kind, tool, urls=web_addresses(fields), cwd=cwd, session_id=session)
     command_key, path_key = ARGUMENTS[client]
@@ -148,23 +173,31 @@ def render(client: str, decision: str, reason: str) -> str:
     """The text to print for `decision` (allow, ask, deny, ASK_OR_DENY or FAIL); "" means stay silent. Every client
     exits with 0."""
     if client == "claude":
-        claude_decision = "ask" if decision in (FAIL, ASK_OR_DENY) else decision
+        claude_decision = "ask" if decision in (FAIL, ASK_OR_DENY, ASK_OR_CLIENT) else decision
         return json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": claude_decision,
                                                   "permissionDecisionReason": reason}}, ensure_ascii=False)
     if client == "codex":
-        # Codex has no "ask": a single delete is left to Codex's own approval; only a clear danger is denied.
-        if decision not in ("deny", FAIL, ASK_OR_DENY):
+        # Codex has no "ask": a single delete is left to Codex's own approval (the user's decision); everything else
+        # Claude would ask is denied.
+        if decision in ("allow", ASK_OR_CLIENT):
             return ""
         return json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
                                                   "permissionDecisionReason": reason}}, ensure_ascii=False)
     if client == "antigravity":
         # "allow" defers to the next hook or the default policy; "force_ask" asks even when a permission was cached.
-        answer = {"allow": "allow", "ask": "ask", ASK_OR_DENY: "force_ask"}.get(decision, "deny")
+        answer = {"allow": "allow", "ask": "ask", ASK_OR_CLIENT: "ask", ASK_OR_DENY: "force_ask"}.get(decision, "deny")
         return json.dumps({"decision": answer, "reason": reason}, ensure_ascii=False)
     if decision == "allow":
         return ""
     # Gemini CLI: no "ask" was confirmed in its documents, so ask is denied with its reason.
     return json.dumps({"decision": "deny", "reason": reason}, ensure_ascii=False)
+
+
+def deny_for_every_client(reason: str) -> str:
+    """For a hook started with a wrong --client: one answer every client reads as a denial."""
+    return json.dumps({"decision": "deny", "reason": reason,
+                       "hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
+                                              "permissionDecisionReason": reason}}, ensure_ascii=False)
 
 
 def emit(client: str, decision: str, reason: str) -> None:

@@ -134,7 +134,7 @@ MESSAGES = {
         "assist_codex": "Codex gets: the command and write guards in {hooks} (your own hooks stay), the instructions "
                         "between marked lines in {instructions}, the skills in ~/.agents/skills and the agents as TOML "
                         "files in ~/.codex/agents. Codex runs a new hook only after you review it with /hooks. Codex "
-                        "cannot ask: a single delete is left to Codex's own approval, a recursive delete is refused. "
+                        "cannot ask: a single delete is left to Codex's own approval, everything else Claude would ask is refused. "
                         "Web pages are not checked (Codex web tools do not reach hooks), and an agent file cannot limit "
                         "tools.",
         "assist_gemini": "Gemini CLI gets: the command, write and site guards in the \"hooks\" part of {hooks} (your "
@@ -342,7 +342,7 @@ MESSAGES = {
                         "kalır), {instructions} içinde işaretli satırlar arasında talimatlar, ~/.agents/skills içinde "
                         "beceriler ve ~/.codex/agents içinde TOML dosyası olarak ajanlar. Codex yeni bir hook'u ancak "
                         "siz /hooks ile inceledikten sonra çalıştırır. Codex soru soramaz: tek dosya silme Codex'in "
-                        "kendi onayına kalır, özyinelemeli silme reddedilir. Web sayfaları denetlenmez (Codex'in web "
+                        "kendi onayına kalır, Claude'un soracağı öteki her şey reddedilir. Web sayfaları denetlenmez (Codex'in web "
                         "araçları hook'a gelmez) ve ajan dosyası araçları sınırlayamaz.",
         "assist_gemini": "Gemini CLI'ya kurulacaklar: {hooks} dosyasının \"hooks\" bölümünde komut, yazma ve site "
                          "kapıları (öteki ayarlarınız yerinde kalır), {instructions} içinde işaretli satırlar arasında "
