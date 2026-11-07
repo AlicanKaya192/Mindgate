@@ -18,10 +18,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
+import antigravity as ag  # noqa: E402
 import installer_lib as lib  # noqa: E402
 import installer_messages as msg  # noqa: E402
 
-HANDLED_KINDS = ("settings", "instructions")   # "core" moves with ~/.claude/mindgate; "config" is in the vault
+HANDLED_KINDS = ("settings", "instructions", "antigravity-hooks")   # "core" moves with ~/.claude/mindgate; "config" is in the vault
 
 
 @dataclass
@@ -46,6 +47,7 @@ class Uninstaller:
     def __init__(self, home: Path, asker, dry_run: bool = False, output=print):
         self.home = home
         self.claude = lib.claude_dir(home)
+        self.roots = (self.claude, ag.gemini_dir(home))   # only files under these are touched
         self.asker = asker
         self.dry_run = dry_run
         self.out = output
@@ -104,13 +106,13 @@ class Uninstaller:
         return plan
 
     def plan_move(self, plan: Plan, path: Path) -> None:
-        if not lib.inside(path, self.claude) or path in plan.moves or path in plan.missing:
+        if not self.owned(path) or path in plan.moves or path in plan.missing:
             return
         (plan.moves if path.exists() else plan.missing).append(path)
 
     def plan_file(self, plan: Plan, state: dict, entry: dict) -> None:
         path = Path(entry["path"])
-        if not lib.inside(path, self.claude):
+        if not self.owned(path):
             return
         if path not in state:
             current = path.read_bytes() if path.is_file() else None
@@ -122,6 +124,13 @@ class Uninstaller:
             self.undo_unchanged(item, entry)
         else:
             self.undo_changed(plan, item, entry)
+
+    def owned(self, path: Path) -> bool:
+        return any(lib.inside(path, root) for root in self.roots)
+
+    def relative(self, path: Path) -> Path:
+        """Where a moved file goes inside the removed folder: ~/.claude files as before, others under their home path."""
+        return path.relative_to(self.claude) if lib.inside(path, self.claude) else path.relative_to(self.home)
 
     def undo_unchanged(self, item: FilePlan, entry: dict) -> None:
         backup = Path(entry["backup"]) if entry.get("backup") else None
@@ -144,6 +153,12 @@ class Uninstaller:
             for hook in entry.get("hooks", []):
                 commands.setdefault(hook["event"], set()).add(hook["command"])
             item.final, item.action = lib.settings_bytes(lib.remove_hooks(settings, commands)), "clean"
+        elif entry["kind"] == "antigravity-hooks":
+            try:
+                item.final, item.action = ag.remove_hook_set(item.final), "clean"
+            except (ValueError, TypeError, UnicodeDecodeError, lib.InstallerError):
+                item.action = "keep"
+                plan.notes.append(msg.text(self.language, "un_settings_broken", path=item.path))
         elif entry.get("created"):
             item.action = "keep"
         else:
@@ -176,7 +191,7 @@ class Uninstaller:
 
     def move(self, path: Path, target_root: Path, sub: str = "") -> None:
         """os.rename only: on the same disk a move never copies and deletes."""
-        destination = lib.free_path(target_root / sub / path.relative_to(self.claude))
+        destination = lib.free_path(target_root / sub / self.relative(path))
         destination.parent.mkdir(parents=True, exist_ok=True)
         os.rename(path, destination)
 

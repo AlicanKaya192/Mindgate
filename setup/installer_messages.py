@@ -123,6 +123,16 @@ MESSAGES = {
         "agents_list": "Agents ({count}): {names}",
         "skills_question": "Install the skills?",
         "agents_question": "Install the agents?",
+        "assist_title": "Other assistants (experimental)",
+        "assist_what": "Mindgate can also guard another coding assistant: its shell commands, file writes and web pages "
+                       "go through the same guards, and it gets the Mindgate instructions, skills and agents. This was "
+                       "tried only with sample hook data from the assistant's documents, not with the real program.",
+        "assist_no": "nothing is written for that assistant; Claude Code is set up as before.",
+        "assist_question": "Set up {name} too?",
+        "assist_antigravity": "Antigravity gets: the command, write and site guards in {hooks} (a hook set named "
+                              "\"mindgate\"; your other hook sets stay), the instructions between marked lines in "
+                              "{instructions}, and the skills and agents you chose above. Session records, the context "
+                              "check and the scheduled tasks do not run in Antigravity.",
         "conflict_question": "You already have a {kind} named `{name}`. It is not overwritten. skip / rename "
                              "(install as `{new_name}`)",
         "same_present": "Already installed with the same content, skipped: {names}",
@@ -308,6 +318,16 @@ MESSAGES = {
         "agents_list": "Ajanlar ({count}): {names}",
         "skills_question": "Beceriler kurulsun mu?",
         "agents_question": "Ajanlar kurulsun mu?",
+        "assist_title": "Başka asistanlar (deneysel)",
+        "assist_what": "Mindgate başka bir kod asistanını da koruyabilir: kabuk komutları, dosya yazmaları ve web sayfaları "
+                       "aynı kapılardan geçer; asistan Mindgate talimatlarını, becerilerini ve ajanlarını da alır. Bu, "
+                       "yalnızca asistanın belgelerindeki örnek hook verisiyle denendi, gerçek programla denenmedi.",
+        "assist_no": "o asistan için hiçbir şey yazılmaz; Claude Code önceki gibi kurulur.",
+        "assist_question": "{name} da kurulsun mu?",
+        "assist_antigravity": "Antigravity'ye kurulacaklar: {hooks} içinde komut, yazma ve site kapıları (\"mindgate\" "
+                              "adlı bir hook takımı; öteki takımlarınız yerinde kalır), {instructions} içinde işaretli "
+                              "satırlar arasında talimatlar ve yukarıda seçtiğiniz beceriler ve ajanlar. Oturum kayıtları, "
+                              "bağlam ölçümü ve zamanlanmış görevler Antigravity'de çalışmaz.",
         "conflict_question": "`{name}` adlı bir {kind} zaten var. Üzerine yazılmaz. skip (atla) / rename (`{new_name}` "
                              "adıyla kur)",
         "same_present": "Aynı içerikle zaten kurulu, atlandı: {names}",
@@ -575,6 +595,7 @@ LOG_PAGE = {
 }
 
 USER_WORD = {"en": "the user", "tr": "kullanıcı"}
+ASSISTANT_NAMES = {"antigravity": "Google Antigravity"}
 
 
 def text(language: str, key: str, /, **values) -> str:

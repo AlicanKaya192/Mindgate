@@ -47,25 +47,28 @@
   "_name_conflict": "Step 7. When a skill or agent with the same name exists (and differs): skip | rename (installed as mindgate-<name>). Never overwritten.",
   "name_conflict": "skip",
 
-  "_daily_task": "Step 8. Write the daily task to ~/.claude/scheduled-tasks/.",
+  "_assistants": "Step 8. Other assistants to set up too (experimental, tried only with sample hook data): [] | [\"antigravity\"]. Antigravity gets the guards in ~/.gemini/config/hooks.json, the instructions in ~/.gemini/AGENTS.md and the skills and agents chosen in step 7.",
+  "assistants": [],
+
+  "_daily_task": "Step 9. Write the daily task to ~/.claude/scheduled-tasks/.",
   "daily_task": true,
-  "_weekly_task": "Step 8. Write the weekly task.",
+  "_weekly_task": "Step 9. Write the weekly task.",
   "weekly_task": true,
-  "_scan_all_projects": "Step 8. Asked when a task is installed. false = only sessions that ran in the vault (config.json daily.scan_all_projects).",
+  "_scan_all_projects": "Step 9. Asked when a task is installed. false = only sessions that ran in the vault (config.json daily.scan_all_projects).",
   "scan_all_projects": false,
-  "_git_push": "Step 8. Asked when a task is installed. false = commit only, no push (config.json daily.git_push).",
+  "_git_push": "Step 9. Asked when a task is installed. false = commit only, no push (config.json daily.git_push).",
   "git_push": false,
 
-  "_weekly_trending": "Step 8. Asked only when the weekly task is installed. true = the last step of the weekly task reads one web page (https://github.com/trending?since=weekly), still only after the site guard asks you; false = the step is skipped (config.json weekly.trending).",
+  "_weekly_trending": "Step 9. Asked only when the weekly task is installed. true = the last step of the weekly task reads one web page (https://github.com/trending?since=weekly), still only after the site guard asks you; false = the step is skipped (config.json weekly.trending).",
   "weekly_trending": false,
 
-  "_optional_rules": "Step 9. Numbers of the optional rules to turn on (rules/general-rules.md, 'Optional rules'): 9 usage limit, 17 only this computer (saves a fingerprint of the computer name). Rule 29 needs the dashboard, which is not part of v1.",
+  "_optional_rules": "Step 10. Numbers of the optional rules to turn on (rules/general-rules.md, 'Optional rules'): 9 usage limit, 17 only this computer (saves a fingerprint of the computer name). Rule 29 needs the dashboard, which is not part of v1.",
   "optional_rules": [],
-  "_usage_limit_5h": "Step 9. Asked only with rule 9: percent of the 5-hour allowance.",
+  "_usage_limit_5h": "Step 10. Asked only with rule 9: percent of the 5-hour allowance.",
   "usage_limit_5h": 93,
-  "_usage_limit_week": "Step 9. Asked only with rule 9: percent of the weekly allowance.",
+  "_usage_limit_week": "Step 10. Asked only with rule 9: percent of the weekly allowance.",
   "usage_limit_week": 98,
 
-  "_confirm": "Step 10. Write everything in the summary. false writes nothing. The uninstaller uses this key too.",
+  "_confirm": "Step 11. Write everything in the summary. false writes nothing. The uninstaller uses this key too.",
   "confirm": true
 }

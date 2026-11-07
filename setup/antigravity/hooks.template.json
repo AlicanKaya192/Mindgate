@@ -1,0 +1,33 @@
+{
+  "mindgate": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/command_guard.py\" --client antigravity"
+          }
+        ]
+      },
+      {
+        "matcher": "write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/write_guard.py\" --client antigravity"
+          }
+        ]
+      },
+      {
+        "matcher": "read_url_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/site_guard.py\" --client antigravity"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -19,10 +19,12 @@ from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
+import antigravity as ag  # noqa: E402
 import installer_lib as lib  # noqa: E402
 import installer_messages as msg  # noqa: E402
 
-TOTAL_STEPS = 11
+TOTAL_STEPS = 12
+ASSISTANTS = ("antigravity",)   # other assistants the installer can set up (experimental)
 
 
 @dataclass
@@ -36,6 +38,11 @@ class Choices:
     hooks_present: list = field(default_factory=list)
     skills: list = field(default_factory=list)      # Bundles to copy (names already final)
     agents: list = field(default_factory=list)
+    want_skills: bool = False
+    want_agents: bool = False
+    assistants: list = field(default_factory=list)  # ids from ASSISTANTS
+    antigravity_skills: list = field(default_factory=list)
+    antigravity_agents: list = field(default_factory=list)
     tasks: list = field(default_factory=list)       # English task keys
     config: lib.ConfigChoices | None = None
 
@@ -100,6 +107,7 @@ class Installer:
             self.choose_instructions()
             self.choose_hooks()
             self.choose_skills_and_agents()
+            self.choose_assistants()
             self.choose_tasks()
             self.choose_optional_rules()
         return self.summarize_and_write()
@@ -265,9 +273,28 @@ class Installer:
         self.say("skills_list", count=len(skills), names=", ".join(b.name for b in skills))
         self.say("agents_list", count=len(agents), names=", ".join(b.name for b in agents))
         if self.asker.yes_no("install_skills", self.t("skills_question"), True):
+            self.choices.want_skills = True
             self.choices.skills = self.resolve_names(skills, self.claude() / "skills", "skill")
         if self.asker.yes_no("install_agents", self.t("agents_question"), True):
+            self.choices.want_agents = True
             self.choices.agents = self.resolve_names(agents, self.claude() / "agents", "agent")
+
+    def choose_assistants(self) -> None:
+        self.step(8, "assist_title")
+        self.say("assist_what")
+        self.say("if_no", result=self.t("assist_no"))
+        self.choices.assistants = self.asker.pick("assistants", list(ASSISTANTS),
+                                                  lambda a: self.t("assist_question", name=msg.ASSISTANT_NAMES[a]),
+                                                  default=False)
+        if "antigravity" not in self.choices.assistants:
+            return
+        self.say("assist_antigravity", hooks=ag.hooks_path(self.home), instructions=ag.instructions_path(self.home))
+        if self.choices.want_skills:
+            self.choices.antigravity_skills = self.resolve_names(lib.skill_bundles(self.vault_files()),
+                                                                 ag.skills_dir(self.home), "skill")
+        if self.choices.want_agents:
+            agents = [ag.convert_agent(b) for b in lib.agent_bundles(self.vault_files())]
+            self.choices.antigravity_agents = self.resolve_names(agents, ag.agents_dir(self.home), "agent")
 
     def bundle_target(self, folder: Path, bundle: lib.Bundle, kind: str) -> Path:
         return folder / bundle.name if kind == "skill" else folder / f"{bundle.name}.md"
@@ -303,7 +330,7 @@ class Installer:
         return candidate
 
     def choose_tasks(self) -> None:
-        self.step(8, "tasks_title")
+        self.step(9, "tasks_title")
         self.say("tasks_what")
         self.say("task_daily")
         self.say("task_weekly")
@@ -333,7 +360,7 @@ class Installer:
         return self.claude() / "scheduled-tasks" / lib.mapped(self.names(), "tasks", task)
 
     def choose_optional_rules(self) -> None:
-        self.step(9, "rules_title")
+        self.step(10, "rules_title")
         self.say("rules_what")
         self.say("if_no", result=self.t("rules_no"))
         rules_file = next(f for f in self.vault_files() if f.source == ("rules", "general-rules.md"))
@@ -367,7 +394,8 @@ class Installer:
     def build_plan(self) -> Plan:
         plan = Plan(record={"time": datetime.now().isoformat(timespec="seconds"), "language": self.choices.language,
                             "python": self.choices.python, "vault": None, "vault_created": False, "vault_files": 0,
-                            "skills": [], "agents": [], "tasks": [], "changed": [], "created": []})
+                            "skills": [], "agents": [], "tasks": [], "changed": [], "created": [],
+                            "assistants": list(self.choices.assistants)})
         if self.choices.vault is None:
             return plan
         plan.record["vault"] = str(self.choices.vault)
@@ -375,6 +403,7 @@ class Installer:
         self.plan_instructions(plan)
         self.plan_settings(plan)
         self.plan_bundles(plan)
+        self.plan_antigravity(plan)
         self.plan_tasks(plan)
         return plan
 
@@ -446,6 +475,24 @@ class Installer:
                 plan.actions += [lib.Write(root.joinpath(*parts), data) for parts, data in sorted(bundle.files.items())]
                 plan.record[f"{kind}s"].append(str(self.bundle_target(folder, bundle, kind)))
 
+    def plan_antigravity(self, plan: Plan) -> None:
+        if "antigravity" not in self.choices.assistants:
+            return
+        hooks = ag.hooks_path(self.home)
+        mindgate = ag.hook_set(self.values(), lib.local_name("_system", self.names()))
+        current = hooks.read_bytes() if hooks.is_file() else None
+        self.add_change(plan, hooks, ag.add_hook_set(current, mindgate), "antigravity-hooks")
+        instructions = ag.instructions_path(self.home)
+        text = lib.decode(instructions.read_bytes()) if instructions.is_file() else None
+        new = ag.instructions_text(text, self.core_text(), self.choices.language)
+        self.add_change(plan, instructions, lib.encode(new), "instructions", mode="merge")
+        for kind, bundles, folder in (("skill", self.choices.antigravity_skills, ag.skills_dir(self.home)),
+                                      ("agent", self.choices.antigravity_agents, ag.agents_dir(self.home))):
+            for bundle in bundles:
+                root = folder / bundle.name if kind == "skill" else folder
+                plan.actions += [lib.Write(root.joinpath(*parts), data) for parts, data in sorted(bundle.files.items())]
+                plan.record[f"{kind}s"].append(str(self.bundle_target(folder, bundle, kind)))
+
     def plan_tasks(self, plan: Plan) -> None:
         for task in self.choices.tasks:
             folder = self.task_folder(task)
@@ -464,7 +511,7 @@ class Installer:
     # ---------- summary and writing ----------
     def show_summary(self, plan: Plan) -> None:
         """Every file that will be written. Vault files and skill folders are grouped; --dry-run lists each file."""
-        self.step(10, "summary_title")
+        self.step(11, "summary_title")
         self.say("summary_what")
         vault = self.choices.vault
         vault_writes = [a for a in plan.actions if isinstance(a, lib.Write) and vault and lib.inside(a.path, vault)
@@ -507,7 +554,7 @@ class Installer:
     def summarize_and_write(self) -> int:
         plan = self.build_plan()
         if not plan.actions:
-            self.step(10, "summary_title")
+            self.step(11, "summary_title")
             self.say("summary_nothing")
             return 0
         plan.actions.append(self.manifest_action(plan))
@@ -521,7 +568,7 @@ class Installer:
         return self.write(plan)
 
     def write(self, plan: Plan) -> int:
-        self.step(11, "summary_title")
+        self.step(12, "summary_title")
         self.say("writing")
         manifest = plan.actions.pop()
         try:

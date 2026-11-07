@@ -20,6 +20,7 @@ from unittest import mock
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import antigravity as ag  # noqa: E402
 import install  # noqa: E402
 import installer_lib as lib  # noqa: E402
 import installer_messages as msg  # noqa: E402
@@ -29,7 +30,7 @@ REPO = HERE.parent
 RUNS = Path(os.environ.get("MINDGATE_TEST_RUNS") or REPO / ".yerel" / "k6" / "runs")
 BLOCKLIST = REPO / ".yerel" / "yasak-liste.txt"
 NEW_FILES = ["install.py", "uninstall.py", "installer_lib.py", "installer_messages.py", "installer_test.py",
-             "answers.example.json"]
+             "answers.example.json", "antigravity.py", "antigravity/hooks.template.json"]
 PLACEHOLDER = re.compile(r"\{\{(VAULT|PY|HOME|LANG|USER)\}\}")
 ANY_PLACEHOLDER = re.compile(r"\{\{[^{}\n]*\}\}")
 USER_HOOKS = {"hooks": {
@@ -46,7 +47,7 @@ def base_answers(**overrides) -> dict:
                "global_instructions": "import", "hooks": "all", "hooks_pick": [], "install_skills": True,
                "install_agents": True, "name_conflict": "skip", "daily_task": True, "weekly_task": True,
                "scan_all_projects": False, "git_push": False, "weekly_trending": False, "optional_rules": [],
-               "usage_limit_5h": 93, "usage_limit_week": 98, "confirm": True}
+               "usage_limit_5h": 93, "usage_limit_week": 98, "assistants": [], "confirm": True}
     answers.update(overrides)
     return answers
 
@@ -559,10 +560,113 @@ class ConsoleTest(unittest.TestCase):
         self.assertEqual(len(run.commands()), 12)
 
 
+USER_AGY_HOOKS = {"my-linter": {"PostToolUse": [{"matcher": "run_command", "hooks": [{"command": "./lint.sh"}]}]}}
+USER_AGENTS_MD = "# My Antigravity rules\n\n- Keep diffs small.\n".encode("utf-8")
+
+
+class AntigravityTest(unittest.TestCase):
+    """Antigravity (experimental): what is written under ~/.gemini and that the uninstaller gives it all back."""
+
+    def install(self, run: Run, **answers) -> str:
+        code, out = run.install(base_answers(assistants=["antigravity"], **answers))
+        self.assertEqual(code, 0, out)
+        return out
+
+    def hook_set(self, run: Run) -> dict:
+        return json.loads(ag.hooks_path(run.home).read_text(encoding="utf-8"))[ag.HOOK_SET]
+
+    def test_fresh_home_gets_guards_instructions_skills_and_agents(self):
+        run = Run()
+        self.install(run)
+        commands = [h["command"] for g in self.hook_set(run)["PreToolUse"] for h in g["hooks"]]
+        self.assertEqual(len(commands), 3)
+        for script in ("command_guard.py", "write_guard.py", "site_guard.py"):
+            self.assertTrue(any(script in c and c.endswith("--client antigravity") and run.vault.as_posix() in c
+                                for c in commands), script)
+        instructions = ag.instructions_path(run.home).read_bytes()
+        self.assertLessEqual(len(instructions), ag.INSTRUCTIONS_LIMIT)
+        self.assertIn(lib.BLOCK_START, lib.decode(instructions))
+        self.assertTrue((ag.skills_dir(run.home) / "idea" / "SKILL.md").is_file())
+        scout = (ag.agents_dir(run.home) / "scout.md").read_text(encoding="utf-8")
+        self.assertIn("tools: [view_file, grep_search, find_by_name, list_dir, run_command", scout)
+        self.assertNotIn("\neffort:", scout)
+        self.assertRegex(scout, r"(?m)^model: (inherit|flash|pro)$")
+
+    def test_users_own_files_come_back_byte_for_byte(self):
+        run = Run()
+        ag.hooks_path(run.home).parent.mkdir(parents=True)
+        ag.hooks_path(run.home).write_bytes(json.dumps(USER_AGY_HOOKS, indent=4).encode("utf-8"))
+        ag.instructions_path(run.home).write_bytes(USER_AGENTS_MD)
+        hooks_before = ag.hooks_path(run.home).read_bytes()
+        self.install(run)
+        installed = json.loads(ag.hooks_path(run.home).read_text(encoding="utf-8"))
+        self.assertEqual(installed["my-linter"], USER_AGY_HOOKS["my-linter"])
+        self.assertTrue(ag.instructions_path(run.home).read_bytes().startswith(USER_AGENTS_MD))
+
+        code, out = run.uninstall()
+        self.assertEqual(code, 0, out)
+        self.assertEqual(ag.hooks_path(run.home).read_bytes(), hooks_before)
+        self.assertEqual(ag.instructions_path(run.home).read_bytes(), USER_AGENTS_MD)
+        self.assertFalse((ag.skills_dir(run.home) / "idea").exists())
+        self.assertFalse((ag.agents_dir(run.home) / "scout.md").exists())
+        removed = list(run.claude.glob(lib.REMOVED_PREFIX + "*"))
+        self.assertTrue((removed[0] / ".gemini" / "config" / "skills" / "idea" / "SKILL.md").is_file(), out)
+
+    def test_files_mindgate_created_are_moved_away_on_uninstall(self):
+        run = Run()
+        self.install(run)
+        code, out = run.uninstall()
+        self.assertEqual(code, 0, out)
+        self.assertFalse(ag.hooks_path(run.home).exists())
+        self.assertFalse(ag.instructions_path(run.home).exists())
+
+    def test_turkish_install_uses_the_turkish_script_folder_and_header(self):
+        run = Run()
+        self.install(run, language="tr")
+        commands = [h["command"] for g in self.hook_set(run)["PreToolUse"] for h in g["hooks"]]
+        self.assertTrue(all("/_sistem/" in c for c in commands), commands)
+        self.assertIn(ag.HEADER["tr"], ag.instructions_path(run.home).read_text(encoding="utf-8"))
+
+    def test_installed_command_guard_denies_deleting_the_home_folder(self):
+        run = Run()
+        self.install(run)
+        command = next(h["command"] for g in self.hook_set(run)["PreToolUse"] for h in g["hooks"]
+                       if "command_guard.py" in h["command"])
+        payload = {"toolCall": {"name": "run_command", "args": {"CommandLine": "rm -rf ~", "Cwd": str(run.root)}},
+                   "conversationId": "c1", "workspacePaths": [str(run.root)]}
+        result = subprocess.run(command, shell=True, input=json.dumps(payload), capture_output=True, text=True,
+                                encoding="utf-8")
+        self.assertEqual(json.loads(result.stdout)["decision"], "deny", result.stderr)
+
+    def test_not_chosen_writes_nothing_under_gemini(self):
+        run = Run()
+        code, out = run.install(base_answers())
+        self.assertEqual(code, 0, out)
+        self.assertFalse(ag.gemini_dir(run.home).exists())
+
+    def test_broken_hooks_file_stops_before_writing(self):
+        run = Run()
+        ag.hooks_path(run.home).parent.mkdir(parents=True)
+        ag.hooks_path(run.home).write_bytes(b"[1, 2]")
+        code, out = run.install(base_answers(assistants=["antigravity"]))
+        self.assertNotEqual(code, 0, out)
+        self.assertEqual(ag.hooks_path(run.home).read_bytes(), b"[1, 2]")
+        self.assertFalse(run.vault.exists())
+
+    def test_instructions_over_the_size_limit_are_refused(self):
+        with self.assertRaises(lib.InstallerError):
+            ag.instructions_text("x" * ag.INSTRUCTIONS_LIMIT, "core", "en")
+
+    def test_agent_with_an_unknown_tool_is_refused(self):
+        bundle = lib.Bundle("odd", {("odd.md",): b"---\nname: odd\ntools: Read, Teleport\n---\nbody\n"})
+        with self.assertRaises(lib.InstallerError):
+            ag.convert_agent(bundle)
+
+
 class CodeRulesTest(unittest.TestCase):
     def test_no_deleting_call_in_the_installer_code(self):
         deleting = re.compile(r"\b(os\.remove|os\.unlink|\.unlink\(|rmtree|os\.rmdir|\.rmdir\(|shutil\.move|send2trash)")
-        for name in ("install.py", "uninstall.py", "installer_lib.py"):
+        for name in ("install.py", "uninstall.py", "installer_lib.py", "antigravity.py"):
             self.assertIsNone(deleting.search((HERE / name).read_text(encoding="utf-8")), name)
 
 
