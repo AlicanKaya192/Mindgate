@@ -1,6 +1,8 @@
 """PreToolUse guard: checks Bash and PowerShell commands before they run.
 
 Claude Code calls this script before every shell command (global ~/.claude/settings.json → hooks.PreToolUse).
+Other assistants call it with `--client codex|gemini|antigravity`; hook_io.py reads their payload and answers in
+their format (a recursive delete is denied where the client cannot ask the user).
 The script reads the hook JSON from stdin, compares the command with patterns and gives one of three decisions:
 
   deny     — not run, Claude is told why (deleting the home folder / drive root, formatting a disk, changing a
@@ -30,8 +32,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
 import common  # noqa: E402
+import hook_io  # noqa: E402
 import session_mode as sm  # noqa: E402
 from common import VAULT, name, vault_path  # noqa: E402
+
+CLIENT = "claude"   # set from --client in main(); decides the answer format (hook_io.py)
+CLIENT_HOMES = "|".join(re.escape(home) for home in hook_io.CLIENT_HOMES)   # ~/.claude, ~/.codex, ~/.gemini, ~/.agents
 
 
 def localized(pair: tuple[str, str]) -> str:
@@ -100,7 +106,7 @@ HOME_SUB = re.compile(
     [\\/]* \*? (?= [\s"'`;&|)>] | $ )
     """
 )
-PROTECTED = re.compile(rf"(?i){VAULT_AT}|[\\/]\.claude(?:[\\/]|\b)|\.obsidian|\.git(?:[\\/]|\b)|\.ssh|appdata|program files"
+PROTECTED = re.compile(rf"(?i){VAULT_AT}|[\\/](?:{CLIENT_HOMES})(?:[\\/]|\b)|\.obsidian|\.git(?:[\\/]|\b)|\.ssh|appdata|program files"
                        r"|windows[\\/]system32")
 
 # --- Command patterns -------------------------------------------------------
@@ -295,7 +301,7 @@ def resolves_into_vault(text: str, cwd: str) -> bool:
 # (ni, robocopy, curl -o, dozens of git sub-commands). Allow list: a command that touches the record area (vault,
 # ~/.claude) passes only if every part of it only reads. Limit: a path built by string joining or a script in Temp
 # is not seen.
-RECORD_AREA = re.compile(rf"(?i){VAULT_AT}|\.claude(?:[\\/]|\b)")
+RECORD_AREA = re.compile(rf"(?i){VAULT_AT}|(?:{CLIENT_HOMES})(?:[\\/]|\b)")
 CHANGE_DIR = re.compile(r"(?i)(?<![\w-])(?:cd|pushd|set-location|sl|chdir)\s+(\"[^\"]+\"|'[^']+'|[^\s;&|]+)")
 PART_SEPARATOR = re.compile(r"&&|\|\||[;&|\n]")
 NULL_REDIRECT = re.compile(r"(?i)\d?>{1,2}\s*(?:/dev/null|\$null|nul)\b|\d>&\d")
@@ -383,13 +389,7 @@ def find_unquoted(pattern, text: str):
 
 
 def decide(decision: str, reason: str) -> None:
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": decision,
-            "permissionDecisionReason": f"{localized(('[Command guard]', '[Koruma kapısı]'))} {reason}",
-        }
-    }, ensure_ascii=False))
+    hook_io.emit(CLIENT, decision, f"{localized(('[Command guard]', '[Koruma kapısı]'))} {reason}")
 
 
 def part_of(text: str, position: int) -> str:
@@ -499,7 +499,7 @@ def check(command: str, cwd: str, sid: str = "") -> None:
                 f"Silme hedefi bir ortam değişkeniyle kuruluyor: `{shown}`. Değişken boş kalırsa kök/ev dizini silinir "
                 "(yaşanmış olay). Tam, sabit yol kullan.")))
             return
-        decide("ask", localized(DELETE_REASON).format(part=shown) + " " + localized((
+        decide(hook_io.ASK_OR_DENY, localized(DELETE_REASON).format(part=shown) + " " + localized((
             "A recursive/forced deletion cannot be undone; if possible send it to the Recycle Bin.",
             "Özyinelemeli/zorlamalı silme geri alınamaz; mümkünse Geri Dönüşüm Kutusu'na gönder.")))
         return
@@ -545,16 +545,16 @@ def check(command: str, cwd: str, sid: str = "") -> None:
 
 
 def main() -> None:
+    global CLIENT
     try:
         sys.stdout.reconfigure(encoding="utf-8")
         sys.stdin.reconfigure(encoding="utf-8")
-        data = json.loads(sys.stdin.read() or "{}")
-        if data.get("tool_name") not in ("Bash", "PowerShell"):
-            return
-        command = (data.get("tool_input") or {}).get("command") or ""
-        check(str(command), str(data.get("cwd") or ""), str(data.get("session_id") or ""))
-    except Exception as error:  # the guard must never crash; when unsure, ask
-        decide("ask", localized((f"The command guard could not parse the command ({type(error).__name__}); the user "
+        CLIENT = hook_io.client_from_args(sys.argv[1:])
+        call = hook_io.read_call(CLIENT, json.loads(sys.stdin.read() or "{}"), hook_io.SHELL)
+        if call is not None:
+            check(call.command, call.cwd, call.session_id)
+    except Exception as error:  # the guard must never crash; Claude asks, the other clients deny (hook_io.FAIL)
+        decide(hook_io.FAIL, localized((f"The command guard could not parse the command ({type(error).__name__}); the user "
                                  "should approve.",
                                  f"Koruma kapısı komutu çözümleyemedi ({type(error).__name__}); kullanıcı onaylasın.")))
 

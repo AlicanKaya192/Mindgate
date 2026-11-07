@@ -36,6 +36,7 @@ DEFAULT_FILE = OUTPUT / "session_mode.json"
 ENV_VAR = "SESSION_MODE_FILE"   # only for guard tests that run in a subprocess
 RECORDED, UNRECORDED, WAITING = "recorded", "unrecorded", "waiting"
 ANSWERS = (RECORDED, UNRECORDED)
+UNKNOWN_SESSION = "?"          # a client that sent no session id (hook_io.py): counted as unrecorded
 HANDOFF_S = 300                   # /clear: time between SessionEnd and the new SessionStart; older ones belong to another chat
 RECENT_CHAT_S = 15 * 60           # when /clear arrives as "startup": at most this long since the previous chat's last activity
 SCHEDULED_TASK = "scheduled task"   # the --reason value of scheduled tasks; a task's choice is not handed to a chat
@@ -90,6 +91,8 @@ def _corruption_trace(error: CorruptFile) -> None:
 
 
 def mode(sid: str) -> str:
+    if sid == UNKNOWN_SESSION:
+        return UNRECORDED
     try:
         entry = read()["sessions"].get(sid)
     except CorruptFile as error:
