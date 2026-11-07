@@ -20,9 +20,9 @@ The installer follows the same idea. It asks before every step, explains what ha
 
 The vault comes with a fixed folder structure (inbox, projects, ideas, problems, knowledge, research, rules, archive and more), 16 note templates, an index, an append-only log, a pending list for everything that waits for your answer, and handoff cards that tell the next session where the work stopped. The schema is in [`vault/CLAUDE.md`](vault/CLAUDE.md).
 
-Claude Code gets 13 agents, 39 skills and a global instruction file that points it to the vault. The rules file has 46 numbered rules; three of them are optional and offered by the installer.
+Claude Code gets 13 agents, 39 skills and a global instruction file that points it to the vault. The rules file has 46 numbered rules; three of them are optional and offered by the installer. Antigravity, Gemini CLI and Codex CLI can get the guards, instructions, skills and agents too (experimental, see Other assistants).
 
-The vault has 20 Python scripts (standard library only) with 21 test files. They write the pending list and the log under a lock, search the notes, check the vault's health, scan for secrets and hidden instructions, and keep session records. The hooks are:
+The vault has 21 Python scripts (standard library only) with 22 test files. They write the pending list and the log under a lock, search the notes, check the vault's health, scan for secrets and hidden instructions, and keep session records. The hooks are:
 
 | Hook | When it runs | What it does |
 |---|---|---|
@@ -72,10 +72,11 @@ On macOS and Linux use `python3` instead of `py -3`. The dry run asks the same q
 5. **Global instructions** (`~/.claude/CLAUDE.md`). If you have the file, it shows its size, headings and first lines, then offers `import` (the core goes to `~/.claude/mindgate/CLAUDE.md` and one marked import line is added to your file), `merge` (the core goes to the end of your file between marked lines) or `skip`. If you do not have it: `write` or `skip`.
 6. **Hooks** (`~/.claude/settings.json`). Lists each hook with what it does; `all`, `none` or `pick`. Your own settings and hooks are not touched, and a hook that is already there is not added again.
 7. **Skills and agents.** Copied to `~/.claude/skills/` and `~/.claude/agents/`. If a different skill or agent with the same name exists, you choose `skip` or `rename` (installed as `mindgate-<name>`).
-8. **Scheduled tasks.** The daily and the weekly task, one question each. Then two more: should the tasks read the sessions of all your projects (default no), and should they run `git push` (default no). With the weekly task, one more: may it read one web page, GitHub trending (default no).
-9. **Optional rules.** #9 usage limit (asks two percentages) and #17 only this computer (saves a fingerprint of the computer name, not the name). #29 needs the dashboard, which is not in v1, so it is not offered.
-10. **Summary.** Every file that will be written. Nothing has been written yet; the confirmation defaults to no.
-11. **Writing.** The list of what was installed, with the backups, goes to `~/.claude/mindgate/install-manifest.json`.
+8. **Other assistants (experimental).** Antigravity, Gemini CLI and Codex CLI, one question each (default no). Each one gets the guards in its own hooks file, the instructions between marked lines and the skills and agents chosen in step 7; see Other assistants below.
+9. **Scheduled tasks.** The daily and the weekly task, one question each. Then two more: should the tasks read the sessions of all your projects (default no), and should they run `git push` (default no). With the weekly task, one more: may it read one web page, GitHub trending (default no).
+10. **Optional rules.** #9 usage limit (asks two percentages) and #17 only this computer (saves a fingerprint of the computer name, not the name). #29 needs the dashboard, which is not in v1, so it is not offered.
+11. **Summary.** Every file that will be written. Nothing has been written yet; the confirmation defaults to no.
+12. **Writing.** The list of what was installed, with the backups, goes to `~/.claude/mindgate/install-manifest.json`.
 
 For unattended runs every answer can come from a file: see [`setup/answers.example.json`](setup/answers.example.json). With `--answers` the installer refuses to use your real home folder; give it a test folder with `--home`.
 
@@ -88,7 +89,30 @@ py -3 setup/uninstall.py --dry-run
 py -3 setup/uninstall.py
 ```
 
-The uninstaller reads the install manifest. `settings.json` and `CLAUDE.md` are put back from the backups when they have not changed since the install; when they have changed, only the Mindgate hooks, import line or block are taken out. Installed skills, agents, scheduled tasks and `~/.claude/mindgate/` are not deleted: they are moved into `~/.claude/mindgate-removed-<time>/`, which you can delete yourself later. The vault is never touched, because it holds your notes.
+The uninstaller reads the install manifest. `settings.json` and `CLAUDE.md` are put back from the backups when they have not changed since the install; when they have changed, only the Mindgate hooks, import line or block are taken out. Installed skills, agents, scheduled tasks and `~/.claude/mindgate/` are not deleted: they are moved into `~/.claude/mindgate-removed-<time>/`, which you can delete yourself later. The vault is never touched, because it holds your notes. Files written for other assistants (under `~/.gemini`, `~/.codex` and `~/.agents`) are handled the same way: your own files come back as they were, the rest is moved into the same removed folder.
+
+### Other assistants (experimental)
+
+Step 8 of the installer can set up Google Antigravity, Google Gemini CLI and OpenAI Codex CLI as well. For ChatGPT, Gemini and similar chat apps there is a text-only pack: [`chat-pack/`](chat-pack/README.md).
+
+| | Claude Code | Antigravity | Gemini CLI | Codex CLI | Chat apps |
+|---|---|---|---|---|---|
+| Command guard | yes | yes | yes | yes | no |
+| Write guard | yes | yes | yes | yes (`apply_patch`) | no |
+| Site guard | before and after reading | before reading | before reading | no: web tools do not reach hooks | no |
+| What Claude would ask | asked | asked | refused | single delete: Codex's own approval; recursive delete: refused | no guards |
+| Instructions | `~/.claude/CLAUDE.md` | `~/.gemini/AGENTS.md` | `~/.gemini/GEMINI.md` | `~/.codex/AGENTS.md` | pasted text |
+| Skills | `~/.claude/skills` | `~/.gemini/config/skills` | `~/.agents/skills` | `~/.agents/skills` | uploaded files |
+| Agents | `~/.claude/agents` | `~/.gemini/config/agents` | `~/.gemini/agents` | `~/.codex/agents` (TOML) | no |
+| Session records, handoff cards, context check, agent gate, search context | yes | no | no | no | no |
+| Scheduled tasks | yes | no | no | no | no |
+| Tried with | the real program | sample hook data | sample hook data | sample hook data | no |
+
+- "Sample hook data" means the payloads in each assistant's documents (read on 7 November 2026), not the real program. Field names can change; when a field is missing or renamed, the guard refuses the call instead of letting it through.
+- When Antigravity and Gemini CLI are both chosen, they share one block in `~/.gemini/GEMINI.md` (Antigravity reads that file too). Gemini CLI and Codex share `~/.agents/skills`.
+- Codex runs a new or changed hook only after you review it with `/hooks`. A Codex agent file cannot limit tools, so the read-only agents rely on their instructions there.
+- Gemini CLI's documents show no way to ask the user from a hook, so what Claude would ask (an unlisted site, a delete) is refused there.
+- In no assistant do the read tools pass a guard; `.env` files are protected only in the shell.
 
 ### What a vault looks like
 
@@ -100,6 +124,7 @@ The Obsidian graph view of one Mindgate vault after about a month of daily use. 
 
 ```
 setup/            installer, uninstaller, their tests, answers example, hooks template
+  antigravity/, gemini/, codex/   hook templates of the other assistants
   tasks/          daily and weekly scheduled tasks
 vault/            the English base vault
   CLAUDE.md       vault schema
@@ -107,6 +132,7 @@ vault/            the English base vault
   _templates/     16 note templates
   _system/        scripts and tests, skills/, agents/, instructions/
 locales/tr/       Turkish texts and names.json; the installer builds the Turkish vault from vault/ and these
+chat-pack/        texts and guide for chat apps (Turkish in locales/tr/chat-pack/)
 docs/screenshots/ the images in this README
 .github/          issue and pull request templates
 SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md (each with a .tr.md)
@@ -247,7 +273,7 @@ Known limits: some note texts that the scripts generate (for example the headers
 
 ### Security notes
 
-The installer writes only these: the vault folder you choose, `~/.claude/CLAUDE.md` (or an import line in it), the hooks in `~/.claude/settings.json`, the skills and agents under `~/.claude/`, the task files under `~/.claude/scheduled-tasks/`, and `~/.claude/mindgate/` (manifest, backups and, with `import`, the core instructions). An existing file that is changed is copied first to `~/.claude/mindgate/backups/<time stamp>/`. It downloads nothing and installs no packages. Run it with `--dry-run` first to see the full list.
+The installer writes only these: the vault folder you choose, `~/.claude/CLAUDE.md` (or an import line in it), the hooks in `~/.claude/settings.json`, the skills and agents under `~/.claude/`, the task files under `~/.claude/scheduled-tasks/`, and `~/.claude/mindgate/` (manifest, backups and, with `import`, the core instructions); for each other assistant you choose, its hooks file, instructions file, skills and agents under `~/.gemini`, `~/.codex` or `~/.agents`. An existing file that is changed is copied first to `~/.claude/mindgate/backups/<time stamp>/`. It downloads nothing and installs no packages. Run it with `--dry-run` first to see the full list.
 
 Hooks run commands on your computer: every hook calls a Python script in your vault each time Claude Code reaches that event. Read [`setup/hooks.template.json`](setup/hooks.template.json) and the scripts in [`vault/_system/`](vault/_system/) before you install them. The guards reduce risk; they do not make a model safe on their own.
 
@@ -258,6 +284,7 @@ Found a security problem? Please report it privately as described in [`SECURITY.
 ### Limits and roadmap
 
 - macOS and Linux are not tested.
+- Antigravity, Gemini CLI and Codex CLI are experimental: tried only with sample hook data from their documents, not with the real programs.
 - The optional dashboard is not part of v1; steps that would publish or update it are left out, and rule #29 is not offered.
 - The installer does not create a git repository in the vault or install the pre-commit secret scan. On a fresh install `health.py` notes that the pre-commit secret scan is not installed.
 - Some generated texts stay English in a Turkish install (see Languages).
@@ -290,9 +317,9 @@ Kurulum programı (installer; bundan sonra "kurucu") da aynı fikirle yazıldı.
 
 Vault sabit bir klasör yapısıyla gelir (gelen kutusu, projeler, fikirler, sorunlar, bilgi, araştırmalar, kurallar, arşiv ve diğerleri). Yanında 16 not şablonu, bir dizin (index), yalnızca sona eklenen bir günlük (log), cevabınızı bekleyen her şeyin toplandığı bir bekleyenler listesi ve sonraki oturuma işin nerede kaldığını söyleyen devir kartları vardır. Şema [`locales/tr/vault/CLAUDE.md`](locales/tr/vault/CLAUDE.md) dosyasındadır.
 
-Claude Code'a 13 ajan, 39 beceri ve onu vault'a yönlendiren global bir talimat dosyası kurulur. Kural dosyasında numaralı 46 kural vardır; bunların üçü isteğe bağlıdır; kurucu bunları size önerir.
+Claude Code'a 13 ajan, 39 beceri ve onu vault'a yönlendiren global bir talimat dosyası kurulur. Kural dosyasında numaralı 46 kural vardır; bunların üçü isteğe bağlıdır; kurucu bunları size önerir. Antigravity, Gemini CLI ve Codex CLI'a da kapılar, talimatlar, beceriler ve ajanlar kurulabilir (deneysel, bkz. Başka asistanlar).
 
-Vault'ta 20 Python betiği (yalnızca standart kütüphane) ve 21 test dosyası bulunur. Betikler bekleyenler listesine ve log'a kilitli yazar, notlarda arama yapar, vault'un sağlığını denetler, sır ve gizli talimat taraması yapar, oturum kayıtlarını tutar. Hook'lar şunlardır:
+Vault'ta 21 Python betiği (yalnızca standart kütüphane) ve 22 test dosyası bulunur. Betikler bekleyenler listesine ve log'a kilitli yazar, notlarda arama yapar, vault'un sağlığını denetler, sır ve gizli talimat taraması yapar, oturum kayıtlarını tutar. Hook'lar şunlardır:
 
 | Hook | Ne zaman çalışır | Ne yapar |
 |---|---|---|
@@ -342,10 +369,11 @@ macOS ve Linux'ta `py -3` yerine `python3` yazın. Kuru çalıştırma (dry run)
 5. **Global talimatlar** (`~/.claude/CLAUDE.md`). Dosyanız varsa boyutunu, başlıklarını ve ilk satırlarını gösterir; sonra `import` (çekirdek `~/.claude/mindgate/CLAUDE.md` dosyasına yazılır, sizin dosyanıza işaretli tek bir içe aktarma satırı eklenir), `merge` (çekirdek, işaretli satırlar arasında dosyanızın sonuna eklenir) ya da `skip` seçeneklerini sunar. Dosyanız yoksa: `write` ya da `skip`.
 6. **Hook'lar** (`~/.claude/settings.json`). Her hook'u ne yaptığıyla birlikte listeler; `all`, `none` ya da `pick`. Kendi ayarlarınıza ve hook'larınıza dokunulmaz; zaten kurulu olan bir hook yeniden eklenmez.
 7. **Beceriler ve ajanlar.** `~/.claude/skills/` ve `~/.claude/agents/` altına kopyalanır. Aynı adda ama farklı içerikte bir beceri ya da ajan varsa `skip` ya da `rename` (`mindgate-<ad>` olarak kurulur) seçilir.
-8. **Zamanlanmış görevler.** Günlük ve haftalık görev, her biri için bir soru. Ardından iki soru daha: görevler bütün projelerinizin oturumlarını okusun mu (varsayılan hayır), `git push` çalıştırsın mı (varsayılan hayır). Haftalık görev kurulursa bir soru daha: tek bir web sayfası (GitHub trending) okunsun mu (varsayılan hayır).
-9. **İsteğe bağlı kurallar.** #9 kullanım sınırı (iki yüzde değeri sorar) ve #17 yalnızca bu bilgisayar (bilgisayar adının kendisini değil, parmak izini kaydeder). #29 panoya bağlıdır; pano v1'de olmadığı için önerilmez.
-10. **Özet.** Yazılacak her dosya. Henüz hiçbir şey yazılmamıştır; onay sorusunun varsayılanı hayırdır.
-11. **Yazma.** Kurulanların ve yedeklerin listesi `~/.claude/mindgate/install-manifest.json` dosyasına yazılır.
+8. **Başka asistanlar (deneysel).** Antigravity, Gemini CLI ve Codex CLI, her biri için bir soru (varsayılan hayır). Her birine kendi hook dosyasında kapılar, işaretli satırlar arasında talimatlar ve 7. adımda seçilen beceriler ve ajanlar kurulur; aşağıdaki Başka asistanlar bölümüne bakın.
+9. **Zamanlanmış görevler.** Günlük ve haftalık görev, her biri için bir soru. Ardından iki soru daha: görevler bütün projelerinizin oturumlarını okusun mu (varsayılan hayır), `git push` çalıştırsın mı (varsayılan hayır). Haftalık görev kurulursa bir soru daha: tek bir web sayfası (GitHub trending) okunsun mu (varsayılan hayır).
+10. **İsteğe bağlı kurallar.** #9 kullanım sınırı (iki yüzde değeri sorar) ve #17 yalnızca bu bilgisayar (bilgisayar adının kendisini değil, parmak izini kaydeder). #29 panoya bağlıdır; pano v1'de olmadığı için önerilmez.
+11. **Özet.** Yazılacak her dosya. Henüz hiçbir şey yazılmamıştır; onay sorusunun varsayılanı hayırdır.
+12. **Yazma.** Kurulanların ve yedeklerin listesi `~/.claude/mindgate/install-manifest.json` dosyasına yazılır.
 
 Gözetimsiz çalıştırmada bütün cevaplar bir dosyadan okunabilir: [`setup/answers.example.json`](setup/answers.example.json). `--answers` verildiğinde kurucu gerçek ev klasörünüzü kullanmayı reddeder; `--home` ile bir test klasörü verin.
 
@@ -358,7 +386,30 @@ py -3 setup/uninstall.py --dry-run
 py -3 setup/uninstall.py
 ```
 
-Kaldırıcı, kurulum kaydını (manifest) okur. `settings.json` ve `CLAUDE.md`, kurulumdan sonra değişmemişse yedeklerden geri yüklenir; değişmişse yalnızca Mindgate hook'ları, içe aktarma satırı ya da blok çıkarılır. Kurulan beceriler, ajanlar, zamanlanmış görevler ve `~/.claude/mindgate/` silinmez: `~/.claude/mindgate-removed-<zaman>/` klasörüne taşınır; o klasörü sonra kendiniz silebilirsiniz. Notlarınızı tuttuğu için vault'a hiç dokunulmaz.
+Kaldırıcı, kurulum kaydını (manifest) okur. `settings.json` ve `CLAUDE.md`, kurulumdan sonra değişmemişse yedeklerden geri yüklenir; değişmişse yalnızca Mindgate hook'ları, içe aktarma satırı ya da blok çıkarılır. Kurulan beceriler, ajanlar, zamanlanmış görevler ve `~/.claude/mindgate/` silinmez: `~/.claude/mindgate-removed-<zaman>/` klasörüne taşınır; o klasörü sonra kendiniz silebilirsiniz. Notlarınızı tuttuğu için vault'a hiç dokunulmaz. Başka asistanlar için yazılan dosyalar (`~/.gemini`, `~/.codex` ve `~/.agents` altında) aynı biçimde ele alınır: sizin dosyalarınız eski hâline döner, gerisi aynı klasöre taşınır.
+
+### Başka asistanlar (deneysel)
+
+Kurucunun 8. adımı Google Antigravity, Google Gemini CLI ve OpenAI Codex CLI'ı da kurabilir. ChatGPT, Gemini ve benzeri sohbet uygulamaları için yalnızca metinden oluşan bir paket var: [`locales/tr/chat-pack/`](locales/tr/chat-pack/README.md).
+
+| | Claude Code | Antigravity | Gemini CLI | Codex CLI | Sohbet uygulamaları |
+|---|---|---|---|---|---|
+| Komut kapısı | var | var | var | var | yok |
+| Yazma kapısı | var | var | var | var (`apply_patch`) | yok |
+| Site kapısı | okumadan önce ve sonra | okumadan önce | okumadan önce | yok: web araçları hook'a gelmez | yok |
+| Claude'un soracağı şey | sorulur | sorulur | reddedilir | tek dosya silme: Codex'in kendi onayı; özyinelemeli silme: reddedilir | kapı yok |
+| Talimat | `~/.claude/CLAUDE.md` | `~/.gemini/AGENTS.md` | `~/.gemini/GEMINI.md` | `~/.codex/AGENTS.md` | yapıştırılan metin |
+| Beceriler | `~/.claude/skills` | `~/.gemini/config/skills` | `~/.agents/skills` | `~/.agents/skills` | yüklenen dosyalar |
+| Ajanlar | `~/.claude/agents` | `~/.gemini/config/agents` | `~/.gemini/agents` | `~/.codex/agents` (TOML) | yok |
+| Oturum kayıtları, devir kartları, bağlam ölçümü, ajan kapısı, arama bağlamı | var | yok | yok | yok | yok |
+| Zamanlanmış görevler | var | yok | yok | yok | yok |
+| Neyle denendi | gerçek programla | örnek hook verisiyle | örnek hook verisiyle | örnek hook verisiyle | denenmedi |
+
+- "Örnek hook verisi", her asistanın belgesindeki örnek veridir (7 Kasım 2026'da okundu); gerçek programla denenmedi. Alan adları değişebilir; bir alan yoksa ya da adı değiştiyse kapı çağrıyı geçirmez, reddeder.
+- Antigravity ve Gemini CLI birlikte seçilince `~/.gemini/GEMINI.md` içindeki tek bloğu paylaşırlar (Antigravity bu dosyayı da okur). Gemini CLI ve Codex `~/.agents/skills` klasörünü paylaşır.
+- Codex yeni ya da değişmiş bir hook'u, siz `/hooks` ile inceleyip onaylayınca çalıştırır. Codex ajan dosyası araçları sınırlayamaz; salt okur ajanlar orada yalnızca talimatlarına dayanır.
+- Gemini CLI belgelerinde hook'un kullanıcıya soru sormasının bir yolu yok; bu yüzden Claude'un soracağı şey (listede olmayan site, silme) orada reddedilir.
+- Hiçbir asistanda okuma araçları kapıdan geçmez; `.env` dosyaları yalnızca kabukta korunur.
 
 ### Bir vault nasıl görünür
 
@@ -370,6 +421,7 @@ Yaklaşık bir aylık günlük kullanımdan sonra bir Mindgate vault'unun Obsidi
 
 ```
 setup/            kurucu, kaldırıcı, testleri, örnek cevap dosyası, hook şablonu
+  antigravity/, gemini/, codex/   başka asistanların hook şablonları
   tasks/          günlük ve haftalık zamanlanmış görevler
 vault/            İngilizce temel vault
   CLAUDE.md       vault şeması
@@ -377,6 +429,7 @@ vault/            İngilizce temel vault
   _templates/     16 not şablonu
   _system/        betikler ve testler, skills/, agents/, instructions/
 locales/tr/       Türkçe metinler ve names.json; kurucu Türkçe vault'u vault/ ile bunlardan kurar
+chat-pack/        sohbet uygulamaları için metinler ve kılavuz (Türkçesi locales/tr/chat-pack/ altında)
 docs/screenshots/ bu README'deki görseller
 .github/          issue ve pull request şablonları
 SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md (her birinin .tr.md kopyası var)
@@ -519,7 +572,7 @@ Bilinen sınırlar: betiklerin ürettiği bazı not metinleri (örneğin devir v
 
 ### Güvenlik notu
 
-Kurucu yalnızca şunları yazar: seçtiğiniz vault klasörü, `~/.claude/CLAUDE.md` (ya da içine bir içe aktarma satırı), `~/.claude/settings.json` içindeki hook'lar, `~/.claude/` altındaki beceriler ve ajanlar, `~/.claude/scheduled-tasks/` altındaki görev dosyaları ve `~/.claude/mindgate/` (kurulum kaydı, yedekler ve `import` seçildiyse çekirdek talimatlar). Değişecek bir dosya önce `~/.claude/mindgate/backups/<zaman damgası>/` altına kopyalanır. Kurucu internetten bir şey indirmez, paket kurmaz. Tam listeyi görmek için önce `--dry-run` ile çalıştırın.
+Kurucu yalnızca şunları yazar: seçtiğiniz vault klasörü, `~/.claude/CLAUDE.md` (ya da içine bir içe aktarma satırı), `~/.claude/settings.json` içindeki hook'lar, `~/.claude/` altındaki beceriler ve ajanlar, `~/.claude/scheduled-tasks/` altındaki görev dosyaları ve `~/.claude/mindgate/` (kurulum kaydı, yedekler ve `import` seçildiyse çekirdek talimatlar); seçtiğiniz her başka asistan için `~/.gemini`, `~/.codex` ya da `~/.agents` altında hook dosyası, talimat dosyası, beceriler ve ajanlar. Değişecek bir dosya önce `~/.claude/mindgate/backups/<zaman damgası>/` altına kopyalanır. Kurucu internetten bir şey indirmez, paket kurmaz. Tam listeyi görmek için önce `--dry-run` ile çalıştırın.
 
 Hook'lar bilgisayarınızda komut çalıştırır: Claude Code ilgili olaya her geldiğinde her hook vault'unuzdaki bir Python betiğini çağırır. Kurmadan önce [`setup/hooks.template.json`](setup/hooks.template.json) dosyasını ve [`vault/_system/`](vault/_system/) altındaki betikleri okuyun. Kapılar riski azaltır; bir modeli tek başlarına güvenli yapmaz.
 
@@ -530,6 +583,7 @@ Bir güvenlik sorunu mu buldunuz? Lütfen herkese açık bir issue yerine [`SECU
 ### Sınırlar ve yol haritası
 
 - macOS ve Linux sınanmadı.
+- Antigravity, Gemini CLI ve Codex CLI deneyseldir: yalnızca belgelerindeki örnek hook verisiyle sınandı, gerçek programlarla denenmedi.
 - İsteğe bağlı pano v1'de yok; onu yayımlayacak ya da güncelleyecek adımlar çıkarıldı, #29 numaralı kural önerilmiyor.
 - Kurucu vault'ta git deposu açmaz ve commit öncesi sır taramasını kurmaz. Yeni bir kurulumda `health.py`, commit öncesi sır taramasının kurulu olmadığını bildirir.
 - Türkçe kurulumda üretilen bazı metinler İngilizce kalır (bkz. Dil desteği).
