@@ -1,8 +1,8 @@
 """Tests of the Mindgate installer and uninstaller.
 
-Every run uses a fake home and a fake vault place under `.yerel/k6/runs/` of the repository; the installer is always
-called with --home. Obsidian, the `claude` command, git and the system language are mocked, so no real setting is
-read. Nothing is deleted: the run folders stay under `.yerel/k6/runs/`.
+Every run uses a fake home and a fake vault place under `.yerel/k6/runs/` of the repository (or the folder named by
+the MINDGATE_TEST_RUNS environment variable); the installer is always called with --home. Obsidian, the `claude`
+command, git and the system language are mocked, so no real setting is read. Nothing is deleted: the run folders stay.
 
 Run (from setup/): py -3 -I -B installer_test.py -v
 """
@@ -26,7 +26,7 @@ import installer_messages as msg  # noqa: E402
 import uninstall  # noqa: E402
 
 REPO = HERE.parent
-RUNS = REPO / ".yerel" / "k6" / "runs"
+RUNS = Path(os.environ.get("MINDGATE_TEST_RUNS") or REPO / ".yerel" / "k6" / "runs")
 BLOCKLIST = REPO / ".yerel" / "yasak-liste.txt"
 NEW_FILES = ["install.py", "uninstall.py", "installer_lib.py", "installer_messages.py", "installer_test.py",
              "answers.example.json"]
@@ -45,8 +45,8 @@ def base_answers(**overrides) -> dict:
                "python_command": "py -3", "install_vault": True, "vault_path": "", "reuse_vault": True,
                "global_instructions": "import", "hooks": "all", "hooks_pick": [], "install_skills": True,
                "install_agents": True, "name_conflict": "skip", "daily_task": True, "weekly_task": True,
-               "scan_all_projects": False, "git_push": False, "optional_rules": [], "usage_limit_5h": 93,
-               "usage_limit_week": 98, "confirm": True}
+               "scan_all_projects": False, "git_push": False, "weekly_trending": False, "optional_rules": [],
+               "usage_limit_5h": 93, "usage_limit_week": 98, "confirm": True}
     answers.update(overrides)
     return answers
 
@@ -332,9 +332,29 @@ class LanguageTest(unittest.TestCase):
         config = json.loads((run.vault / "_system" / "config.json").read_text(encoding="utf-8"))
         self.assertEqual((config["language"], config["python"], config["names"]), ("en", "py -3", {"folders": {}, "files": {}}))
         self.assertEqual(config["daily"], {"scan_all_projects": False, "git_push": False})
+        self.assertEqual(config["weekly"], {"trending": False})
         app = json.loads((run.vault / ".obsidian" / "app.json").read_text(encoding="utf-8"))
         self.assertEqual(app["newFileFolderPath"], "inbox")
         self.assertTrue((run.claude / "CLAUDE.md").read_text(encoding="utf-8").startswith("# Global instructions"))
+
+    def test_weekly_trending_question_is_saved_in_the_config(self):
+        for answer in (False, True):
+            run = Run()
+            code, out = run.install(base_answers(weekly_trending=answer))
+            self.assertEqual(code, 0, out)
+            self.assertIn(msg.text("en", "trending_what"), out)
+            config = json.loads((run.vault / "_system" / "config.json").read_text(encoding="utf-8"))
+            self.assertIs(config["weekly"]["trending"], answer)
+
+    def test_weekly_trending_is_not_asked_without_the_weekly_task(self):
+        run = Run()
+        answers = base_answers(weekly_task=False)
+        del answers["weekly_trending"]          # a missing key would stop the installer if it were asked
+        code, out = run.install(answers)
+        self.assertEqual(code, 0, out)
+        self.assertNotIn(msg.text("en", "trending_what"), out)
+        config = json.loads((run.vault / "_system" / "config.json").read_text(encoding="utf-8"))
+        self.assertIs(config["weekly"]["trending"], False)
 
     def test_missing_obsidian_is_explained_and_does_not_stop(self):
         run = Run()

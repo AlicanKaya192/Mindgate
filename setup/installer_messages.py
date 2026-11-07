@@ -144,6 +144,12 @@ MESSAGES = {
                          "that ran in the vault.)",
         "push_question": "Should the tasks also run `git push` after the commit? (Usually no: pushing sends your notes "
                          "to a remote.)",
+        "trending_what": "The weekly task has one optional web step. What: it reads a single page, "
+                         "https://github.com/trending?since=weekly, and writes at most 5 projects that match your fields "
+                         "into a note. Why: to see new tools without searching yourself. It opens no other site and sends "
+                         "nothing; the site guard still asks you on every visit. If no: the step is skipped and the weekly "
+                         "summary says \"web step off\"; you can turn it on later in _system/config.json (weekly.trending).",
+        "trending_question": "Should the weekly summary read this one web page (GitHub trending)?",
         "task_exists": "A task folder with this name already exists and is not overwritten: {path}",
         "tasks_app_note": "The task files are written to ~/.claude/scheduled-tasks/. If the desktop app does not list "
                           "them, add the schedule in the app.",
@@ -322,6 +328,13 @@ MESSAGES = {
                          "çalışan oturumlar.)",
         "push_question": "Görevler commit'ten sonra `git push` da çalıştırsın mı? (Genelde hayır: push notlarınızı uzak "
                          "bir depoya gönderir.)",
+        "trending_what": "Haftalık görevin isteğe bağlı tek bir web adımı var. Ne: yalnızca "
+                         "https://github.com/trending?since=weekly sayfasını okur ve alanlarınıza uyan en çok 5 projeyi "
+                         "bir nota yazar. Neden: yeni araçları kendiniz aramadan görmek için. Başka siteye girmez, hiçbir "
+                         "şey göndermez; site kapısı her girişte yine size sorar. Hayır derseniz: adım atlanır ve haftalık "
+                         "özete \"web adımı kapalı\" yazılır; sonra _sistem/config.json içinde (weekly.trending) "
+                         "açabilirsiniz.",
+        "trending_question": "Haftalık özet için bu tek web sayfası (GitHub trending) okunsun mu?",
         "task_exists": "Bu adla bir görev klasörü zaten var, üzerine yazılmaz: {path}",
         "tasks_app_note": "Görev dosyaları ~/.claude/scheduled-tasks/ altına yazılır. Masaüstü uygulaması onları "
                           "listelemezse zamanlamayı uygulamadan ekleyin.",

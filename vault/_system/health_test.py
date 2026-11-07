@@ -1,9 +1,11 @@
 """health.py tests: duplicate pending numbers, closing without evidence, the Learned line in the log, note fields,
-problem history, regression markers, the monotonic baseline and the folders left out of the note scan.
+problem history, regression markers, the monotonic baseline, the folders left out of the note scan, skill and agent
+links (installed copies count) and the pre-commit check without git.
 
 Every test works in a new temporary folder under _system/output/test_health/; the real vault is never touched and
 nothing is deleted.
 """
+import json
 import sys
 import tempfile
 import unittest
@@ -22,11 +24,12 @@ class HealthTest(unittest.TestCase):
     def setUp(self):
         TEST_DIR.mkdir(parents=True, exist_ok=True)
         self.root = Path(tempfile.mkdtemp(dir=TEST_DIR))
-        self.old = health.VAULT
+        self.old = health.VAULT, health.CLAUDE
         health.VAULT = self.root
+        health.CLAUDE = self.root / "home" / ".claude"
 
     def tearDown(self):
-        health.VAULT = self.old
+        health.VAULT, health.CLAUDE = self.old
 
     def write(self, relative: str, text: str) -> None:
         (self.root / relative).parent.mkdir(parents=True, exist_ok=True)
@@ -163,6 +166,39 @@ class HealthTest(unittest.TestCase):
         self.write(f"{name('inbox')}/{name('sessions')}/record.md", "raw record\n")
         self.write(f"{name('knowledge')}/real.md", "---\ntype: concept\nupdated: 2026-10-14\n---\n")
         self.assertEqual(set(health.read_notes()), {"real"})
+
+    def test_installer_copies_count_as_links(self):
+        # the installer copies skills and agents into ~/.claude instead of linking them; a copy with the same content
+        # or one listed in the installer manifest is fine, a missing or unknown different file is not
+        skills, agents = f"{name('_system')}/{name('skills')}", f"{name('_system')}/{name('agents')}"
+        for skill in ("same", "recorded", "changed", "missing"):
+            self.write(f"{skills}/{skill}/SKILL.md", f"---\nname: {skill}\n---\n")
+        self.write(f"{agents}/scout.md", "agent\n")
+        self.write("home/.claude/skills/same/SKILL.md", "---\nname: same\n---\n")
+        self.write("home/.claude/skills/recorded/SKILL.md", "edited after the install\n")
+        self.write("home/.claude/skills/changed/SKILL.md", "someone else's skill\n")
+        self.write("home/.claude/agents/scout.md", "agent\n")
+        claude = self.root / "home" / ".claude"
+        manifest = {"tool": "mindgate", "version": 1,
+                    "installs": [{"skills": [str(claude / "skills" / "recorded")], "agents": [str(claude / "agents" / "scout.md")]}]}
+        self.write("home/.claude/mindgate/install-manifest.json", json.dumps(manifest))
+        result = health.links()
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.summary, "2 links missing or wrong")
+        self.assertIn("changed", result.details)
+        self.assertIn("missing", result.details)
+        self.write("home/.claude/skills/changed/SKILL.md", "---\nname: changed\n---\n")
+        self.write("home/.claude/skills/missing/SKILL.md", "---\nname: missing\n---\n")
+        self.write("home/.claude/agents/scout.md", "edited agent, listed in the manifest\n")
+        self.assertEqual(health.links().status, "ok")
+
+    def test_precommit_without_git_is_only_info(self):
+        result = health.precommit()
+        self.assertEqual((result.status, result.summary), ("info", "git not set up; secret scan hook not installed"))
+        (self.root / ".git" / "hooks").mkdir(parents=True)
+        self.assertEqual(health.precommit().status, "warning")
+        self.write(".git/hooks/pre-commit", f"#!/bin/sh\n# {health.HOOK_SIGNATURE}\n")
+        self.assertEqual(health.precommit().status, "ok")
 
     def test_missing_files_do_not_crash(self):
         self.assertEqual(health.pending().status, "warning")

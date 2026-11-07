@@ -73,7 +73,7 @@ MARKER_HEADINGS = ("Regression marker", "Regresyon işaretçisi")
 class Result:
     key: str
     check: str
-    status: str          # ok | warning | error
+    status: str          # ok | info | warning | error
     summary: str
     details: str = ""
     advice: str = ""
@@ -152,23 +152,56 @@ def compact_threshold() -> Result:
                   advice="set ~/.claude/settings.json → env → CLAUDE_AUTOCOMPACT_PCT_OVERRIDE to the config.json value")
 
 
+def installer_copies() -> tuple[set[str], set[str]]:
+    """Skill and agent names the Mindgate installer copied into ~/.claude, from its manifest; empty when there is none."""
+    try:
+        installs = json.loads((CLAUDE / "mindgate" / "install-manifest.json").read_text(encoding="utf-8"))["installs"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return set(), set()
+    skills, agents = set(), set()
+    for record in installs if isinstance(installs, list) else []:
+        if isinstance(record, dict):
+            skills |= {re.split(r"[\\/]", p)[-1] for p in record.get("skills") or [] if isinstance(p, str)}
+            agents |= {re.split(r"[\\/]", p)[-1].removesuffix(".md") for p in record.get("agents") or [] if isinstance(p, str)}
+    return skills, agents
+
+
+def available(installed: Path, source: Path, copied: bool) -> bool:
+    """Linked to the vault source, or a copy in ~/.claude with the same content or listed in the installer manifest."""
+    if same_file(installed, source):
+        return True
+    try:
+        return installed.is_file() and (copied or installed.read_bytes() == source.read_bytes())
+    except OSError:
+        return False
+
+
 def links() -> Result:
-    skills_dir = system_dir() / name("skills")
+    skills_dir, agents_dir = system_dir() / name("skills"), system_dir() / name("agents")
+    copied_skills, copied_agents = installer_copies()
     wrong = [d.name for d in sorted(skills_dir.iterdir()) if (d / "SKILL.md").is_file()
-             and not same_file(CLAUDE / "skills" / d.name / "SKILL.md", d / "SKILL.md")] if skills_dir.is_dir() else []
-    if not same_file(CLAUDE / "agents", system_dir() / name("agents")):
+             and not available(CLAUDE / "skills" / d.name / "SKILL.md", d / "SKILL.md", d.name in copied_skills)] \
+        if skills_dir.is_dir() else []
+    if not agents_dir.is_dir():
         wrong.append("agents folder")
+    elif not same_file(CLAUDE / "agents", agents_dir):
+        wrong += [f"agent {a.stem}" for a in sorted(agents_dir.glob("*.md"))
+                  if not available(CLAUDE / "agents" / a.name, a, a.stem in copied_agents)]
     if wrong:
         return Result("links", "Skill and agent links", "error", f"{len(wrong)} links missing or wrong",
-                      first(wrong), "link the folders into ~/.claude (Windows: mklink /J; elsewhere: ln -s), see skill-writing")
-    return Result("links", "Skill and agent links", "ok", "every skill and agent is linked to Claude Code")
+                      first(wrong), "run the installer again, or link the folders into ~/.claude (Windows: mklink /J; "
+                                    "elsewhere: ln -s), see skill-writing")
+    return Result("links", "Skill and agent links", "ok", "every skill and agent is available to Claude Code (link or copy)")
 
 
 def precommit() -> Result:
+    if not (VAULT / ".git").exists():
+        return Result("precommit", "Secret scan before commit", "info", "git not set up; secret scan hook not installed",
+                      advice=f"after git init: {PY} -I {name('_system')}/secret_scan.py --install")
     hook = VAULT / ".git" / "hooks" / "pre-commit"
     if hook.is_file() and HOOK_SIGNATURE in hook.read_text(encoding="utf-8", errors="replace"):
         return Result("precommit", "Secret scan before commit", "ok", "pre-commit hook installed")
-    return Result("precommit", "Secret scan before commit", "error", "no pre-commit hook",
+    return Result("precommit", "Secret scan before commit", "warning", "no pre-commit hook",
                   advice=f"{PY} -I {name('_system')}/secret_scan.py --install")
 
 
@@ -557,12 +590,13 @@ def main() -> int:
     if args.json:
         print(json.dumps([asdict(r) for r in results], ensure_ascii=False, indent=1))
     else:
-        mark = {"ok": "✓", "warning": "!", "error": "✗"}
+        mark = {"ok": "✓", "info": "i", "warning": "!", "error": "✗"}
         for r in results:
             print(f"{mark[r.status]} {r.check}: {r.summary}" + (f"\n    {r.details}" if r.details and r.status != "ok" else "")
                   + (f"\n    → {r.advice}" if r.advice else ""))
-        counts = {s: sum(1 for r in results if r.status == s) for s in ("ok", "warning", "error")}
-        print(f"\n{counts['ok']} ok, {counts['warning']} warnings, {counts['error']} errors")
+        counts = {s: sum(1 for r in results if r.status == s) for s in ("ok", "info", "warning", "error")}
+        print(f"\n{counts['ok']} ok, {counts['warning']} warnings, {counts['error']} errors"
+              + (f", {counts['info']} info" if counts["info"] else ""))
     return 1 if any(r.status == "error" for r in results) else 0
 
 

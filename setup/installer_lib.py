@@ -270,6 +270,7 @@ class ConfigChoices:
     python: str
     scan_all_projects: bool = False
     git_push: bool = False
+    weekly_trending: bool | None = None     # None: not asked (no weekly task installed now); the saved value stays
     optional_rules: list = field(default_factory=list)
     usage_limit: dict = field(default_factory=dict)
 
@@ -284,6 +285,11 @@ def apply_config(config: dict, choices: ConfigChoices) -> dict:
     daily = new.setdefault("daily", {})
     daily["scan_all_projects"] = choices.scan_all_projects
     daily["git_push"] = choices.git_push
+    weekly = new.setdefault("weekly", {})
+    if choices.weekly_trending is None:
+        weekly.setdefault("trending", False)
+    else:
+        weekly["trending"] = choices.weekly_trending
     rules = new.setdefault("optional_rules", {})
     rules["enabled"] = sorted(choices.optional_rules)
     rules["single_machine"] = 17 in choices.optional_rules

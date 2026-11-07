@@ -57,5 +57,8 @@
  "daily": {
   "scan_all_projects": false,
   "git_push": false
+ },
+ "weekly": {
+  "trending": false
  }
 }

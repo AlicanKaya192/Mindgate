@@ -324,6 +324,9 @@ class Installer:
             self.say("tasks_app_note")
             config.scan_all_projects = self.asker.yes_no("scan_all_projects", self.t("scan_question"), False)
             config.git_push = self.asker.yes_no("git_push", self.t("push_question"), False)
+        if "weekly" in self.choices.tasks:
+            self.say("trending_what")
+            config.weekly_trending = self.asker.yes_no("weekly_trending", self.t("trending_question"), False)
         self.choices.config = config
 
     def task_folder(self, task: str) -> Path:

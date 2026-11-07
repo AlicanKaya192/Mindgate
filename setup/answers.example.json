@@ -56,6 +56,9 @@
   "_git_push": "Step 8. Asked when a task is installed. false = commit only, no push (config.json daily.git_push).",
   "git_push": false,
 
+  "_weekly_trending": "Step 8. Asked only when the weekly task is installed. true = the last step of the weekly task reads one web page (https://github.com/trending?since=weekly), still only after the site guard asks you; false = the step is skipped (config.json weekly.trending).",
+  "weekly_trending": false,
+
   "_optional_rules": "Step 9. Numbers of the optional rules to turn on (rules/general-rules.md, 'Optional rules'): 9 usage limit, 17 only this computer (saves a fingerprint of the computer name). Rule 29 needs the dashboard, which is not part of v1.",
   "optional_rules": [],
   "_usage_limit_5h": "Step 9. Asked only with rule 9: percent of the 5-hour allowance.",
