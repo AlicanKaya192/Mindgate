@@ -1,0 +1,12 @@
+{
+  "attachmentFolderPath": "kaynaklar/assets",
+  "newFileLocation": "folder",
+  "newFileFolderPath": "gelen",
+  "alwaysUpdateLinks": true,
+  "newLinkFormat": "shortest",
+  "useMarkdownLinks": false,
+  "userIgnoreFilters": [
+    "_sablonlar/",
+    "_sistem/"
+  ]
+}

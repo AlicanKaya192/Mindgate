@@ -1,0 +1,138 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/command_guard.py\"",
+            "timeout": 10,
+            "statusMessage": "Guard is checking the command"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/write_guard.py\"",
+            "timeout": 10,
+            "statusMessage": "Write guard is checking protected files"
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch|mcp__Claude_Browser__navigate|mcp__Claude_Browser__preview_start|mcp__Claude_Browser__browser_batch|mcp__Claude_Browser__javascript_tool|mcp__claude-in-chrome__navigate|mcp__claude-in-chrome__browser_batch|mcp__claude-in-chrome__javascript_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/site_guard.py\"",
+            "timeout": 10,
+            "statusMessage": "Site guard is checking the address"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/agent_gate.py\"",
+            "timeout": 10,
+            "statusMessage": "Agent gate: checking task-writing and model"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/session_log.py\" save",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/session_log.py\" save",
+            "timeout": 15,
+            "statusMessage": "Writing the session record to the second brain"
+          },
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/context_check.py\" before",
+            "timeout": 15,
+            "statusMessage": "Adding what to keep when compacting"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/context_check.py\" stop",
+            "timeout": 15,
+            "statusMessage": "Measuring how full the context is"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/session_log.py\" remind",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "WebFetch|WebSearch|mcp__Claude_Browser__get_page_text|mcp__Claude_Browser__read_page|mcp__Claude_Browser__find|mcp__claude-in-chrome__get_page_text|mcp__claude-in-chrome__read_page|mcp__claude-in-chrome__find|mcp__Claude_Browser__browser_batch|mcp__Claude_Browser__javascript_tool|mcp__claude-in-chrome__browser_batch|mcp__claude-in-chrome__javascript_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/site_guard.py\" after",
+            "timeout": 10,
+            "statusMessage": "Site guard is scanning the fetched content"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/search.py\" --hook",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/context_check.py\" after",
+            "timeout": 15,
+            "statusMessage": "Saving the compaction summary to the vault"
+          }
+        ]
+      }
+    ]
+  }
+}

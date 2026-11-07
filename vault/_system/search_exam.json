@@ -1,0 +1,25 @@
+{
+ "_about": "Fixed question set for search_eval.py. Each question names the notes (file name without .md) that should come first. These sample questions point at the shipped schema (CLAUDE) and rules (general-rules); replace them with questions about your own notes once the vault grows.",
+ "questions": [
+  {"question": "may I delete a file without asking", "expected": ["general-rules"]},
+  {"question": "what to do when a port is already taken", "expected": ["general-rules"]},
+  {"question": "no AI signature in commits", "expected": ["general-rules"]},
+  {"question": "teach me only when I say teach", "expected": ["general-rules"]},
+  {"question": "before opening a website ask for permission", "expected": ["general-rules"]},
+  {"question": "a rejected proposal is a lesson", "expected": ["general-rules"]},
+  {"question": "record rule violations", "expected": ["general-rules"]},
+  {"question": "parallel chats writing to the vault at the same time", "expected": ["general-rules"]},
+  {"question": "unrecorded temporary chat", "expected": ["general-rules"]},
+  {"question": "usage limit thresholds", "expected": ["general-rules"]},
+  {"question": "which folder holds problems and solutions", "expected": ["CLAUDE"]},
+  {"question": "file naming lower case ascii hyphen", "expected": ["CLAUDE"]},
+  {"question": "frontmatter fields type status updated", "expected": ["CLAUDE"]},
+  {"question": "how are log entries written", "expected": ["CLAUDE"]},
+  {"question": "where do raw sources go", "expected": ["CLAUDE"]},
+  {"question": "templates folder list", "expected": ["CLAUDE"]},
+  {"question": "how the schema evolves", "expected": ["CLAUDE"]},
+  {"question": "orphan notes and wiki links", "expected": ["CLAUDE"]},
+  {"question": "monthly log rotation archive", "expected": ["CLAUDE"]},
+  {"question": "proactive behaviour small maintenance", "expected": ["CLAUDE"]}
+ ]
+}

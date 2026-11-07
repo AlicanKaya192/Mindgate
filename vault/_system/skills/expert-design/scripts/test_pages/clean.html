@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clean</title>
+<style>
+  :root { color-scheme: light dark; --background: #f7f6f3; --text: #1c1b19; --muted: #55524c; --accent: #8f1a52; --line: #d9d6cf; }
+  @media (prefers-color-scheme: dark) { :root { --background: #17181b; --text: #eeeef0; --muted: #b4b5ba; --accent: #ffb3d6; --line: #3a3b40; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 Arial, sans-serif; background: var(--background); color: var(--text); }
+  main { max-width: 640px; margin: 0 auto; padding: 24px 16px; min-height: 100vh; }
+  h1 { font-size: 32px; line-height: 1.2; margin: 0 0 16px; }
+  p { margin: 0 0 16px; color: var(--muted); }
+  a { color: var(--accent); }
+  label { display: block; margin-bottom: 8px; }
+  input { font: inherit; width: 100%; min-height: 48px; padding: 8px 16px; background: transparent; color: inherit; border: 1px solid var(--muted); }
+  button { font: inherit; min-height: 48px; min-width: 48px; padding: 8px 16px; margin-top: 16px; background: var(--accent); color: var(--background); border: 0; transition: background-color 150ms ease-out; }
+  button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  table { border-collapse: collapse; margin-top: 16px; }
+  td { padding: 8px 16px; font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--line); }
+  @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Customer records are ready</h1>
+  <p>All 48,210 rows in the file were scanned and two problems were found. <a href="#problems">See problems</a> or open a new file below.</p>
+  <label for="file">File name</label>
+  <input id="file" type="text" name="file">
+  <button type="button">Open file</button>
+  <button type="button"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect width="16" height="16" fill="currentColor"/></svg> With icon</button>
+  <button type="button"><span style="display:block">Two-block</span><span style="display:block">card button</span></button>
+  <button type="button"><span><b>968</b> rows<small style="display:block">four percent</small></span></button>
+  <table id="problems"><tr><td>Duplicates</td><td>968</td></tr></table>
+  <div style="border-radius:999px;padding:4px;width:max-content;border:1px solid var(--line);margin-top:16px"><button type="button" style="border-radius:999px;margin-top:0">Pill in a pill</button></div>
+</main>
+</body>
+</html>

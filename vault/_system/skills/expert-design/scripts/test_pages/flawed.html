@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flawed</title>
+<style>
+  body { margin: 0; font: 13px/1.1 Georgia, serif; background: #fff; color: #000; }
+  .wide { width: 1800px; height: 20px; }
+  .faded { color: oklch(85% 0.01 250); }
+  .tiny { width: 16px; height: 16px; padding: 0; transition: all 500ms; }
+  .stripe { border-left: 4px solid red; border-radius: 8px; padding: 13px; }
+  .gradient { background: linear-gradient(90deg, red, blue); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .label { font: 11px monospace; text-transform: uppercase; }
+  .long { width: 1000px; }
+  .narrow-button { width: 80px; }
+  .family1 { font-family: Arial; } .family2 { font-family: Verdana; } .family3 { font-family: Tahoma; }
+  .r { background: #e11; } .g { background: #1a1; } .b { background: #11e; } .y { background: #ee1; } .m { background: #e1e; }
+  .outer { border-radius: 30px; padding: 20px; background: #eee; } .inner { border-radius: 30px; background: #ddd; min-height: 80px; }
+  input { font-size: 13px; }
+  button:focus { outline: none; }
+  @keyframes spin { to { transform: rotate(1turn); } }
+  .spinning { animation: spin 2s infinite; }
+</style>
+</head>
+<body>
+<div class="wide"></div>
+<h2>Main heading is not an h1</h2>
+<p class="faded">The contrast of this text is low.</p>
+<button class="tiny" aria-label="Add"></button>
+<button class="tiny"></button>
+<img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="40" height="40">
+<input type="text">
+<p>Lorem ipsum dolor sit amet and John Doe are here.</p>
+<div class="stripe">Striped card</div>
+<h3 class="gradient">Gradient heading</h3>
+<span class="label">First</span><span class="label">Second</span><span class="label">Third</span>
+<p class="long">This paragraph was written to break the line length rule and it sits inside a very wide box, so more than a hundred characters fit on one line and it becomes hard to read; the text was made a little longer so that it moves to a second line, so the measurement sees more than one line, the average stays above ninety characters and the rule fires, and one more sentence was added so that it also spills onto a third line.</p>
+<button class="narrow-button">A very long button label breaks</button>
+<button>🚀 Start →</button>
+<span class="family1">a</span><span class="family2">b</span><span class="family3">c</span>
+<div class="r">k</div><div class="g">y</div><div class="b">m</div><div class="y">s</div><div class="m">p</div>
+<div class="outer"><div class="inner">Nested corner</div></div>
+<div style="content-visibility:auto;contain-intrinsic-size:auto 200px;margin-top:4000px"><button type="button" class="far-away" style="all:unset;font-size:10px;line-height:10px">Far away</button></div>
+<table><tr><td>1.234</td></tr></table>
+<div class="spinning">x</div>
+</body>
+</html>
