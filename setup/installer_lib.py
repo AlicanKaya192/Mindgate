@@ -233,10 +233,12 @@ def starter_files(language: str, names: dict, today: str) -> list:
     """Empty starting pages, folder entry pages, index.md and log.md in the install language."""
     files, links = [], {"rules": [local_name("general-rules", names)], "inbox": [], "folders": []}
     for key, (kind, title, description, body) in msg.STARTER_PAGES[language].items():
-        folder = msg.STARTER_FOLDERS[key]
+        place = msg.STARTER_FOLDERS[key]
+        folders = place if isinstance(place, tuple) else (place,)
+        folder = folders[0]
         stem = mapped(names, "files", key)
-        target = (local_name(folder, names), f"{stem}.md")
-        files.append(VaultFile((folder, f"{key}.md"), target, page(kind, title, description, body, today)))
+        target = (*(local_name(f, names) for f in folders), f"{stem}.md")
+        files.append(VaultFile((*folders, f"{key}.md"), target, page(kind, title, description, body, today)))
         links["inbox" if folder == "inbox" else "rules" if folder == "rules" else "folders"].append(stem)
     for folder, (title, description) in msg.ENTRY_PAGES[language].items():
         local = local_name(folder, names)

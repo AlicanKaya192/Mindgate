@@ -466,6 +466,16 @@ STARTER_PAGES = {
                                "before proposing something new.",
                                "| Date | Proposal | User's words | Reason | Chosen instead | Status |\n"
                                "|---|---|---|---|---|---|\n"),
+        "project-proposals": ("entry", "Project proposals",
+                              "Ideas Claude proposes that could become projects for the user, each with its "
+                              "description (rule #31). The user's own ideas go to the inbox.",
+                              "| Date | Proposal | What | Goal | Use for the user | Criteria (field, learning, "
+                              "already available, this computer) | Difficulty | Requirements | First step | Source "
+                              "| Status |\n|---|---|---|---|---|---|---|---|---|---|---|\n"),
+        "blocked-sites": ("entry", "Blocked sites",
+                          "Domains the site guard blocks (rule #27). The site guard and the command guard read this "
+                          "list; the site guard adds a row when it finds a clear sign of attack.",
+                          "## List\n\n| Domain | Date | Reason | Evidence (shortened) |\n|---|---|---|---|\n"),
         "profile": ("profile", "Profile",
                     "The user's goals, preferences and projects, filled in over time. No sensitive information "
                     "(passwords, IDs, bank, address, health).",
@@ -492,6 +502,16 @@ STARTER_PAGES = {
                                "önermeden önce okunur.",
                                "| Tarih | Öneri | Kullanıcının sözü | Neden | Yerine seçilen | Durum |\n"
                                "|---|---|---|---|---|---|\n"),
+        "project-proposals": ("entry", "Proje önerileri",
+                              "Claude'un kullanıcıya önerdiği, projeye dönüşebilecek fikirler; her biri "
+                              "açıklamasıyla (kural #31). Kullanıcının kendi fikirleri gelen kutusuna gider.",
+                              "| Tarih | Öneri | Ne | Hedef | Kullanıcıya faydası | Ölçütler (alan, öğrenme, "
+                              "elde olan, bu bilgisayar) | Zorluk | Gerekenler | İlk adım | Kaynak | Durum |\n"
+                              "|---|---|---|---|---|---|---|---|---|---|---|\n"),
+        "blocked-sites": ("entry", "Engelli siteler",
+                          "Site kapısının engellediği alan adları (kural #27). Site kapısı ve komut kapısı bu listeyi "
+                          "okur; site kapısı açık bir saldırı işareti bulunca satır ekler.",
+                          "## Liste\n\n| Alan adı | Tarih | Neden | Kanıt (kısaltılmış) |\n|---|---|---|---|\n"),
         "profile": ("profile", "Profil",
                     "Kullanıcının hedefleri, tercihleri ve projeleri; zamanla doldurulur. Hassas bilgi yok (şifre, "
                     "kimlik, banka, adres, sağlık).",
@@ -499,9 +519,10 @@ STARTER_PAGES = {
     },
 }
 
-# Where each starting page lives (English base folder; empty string = vault root).
+# Where each starting page lives (English base folder, or a tuple for a subfolder).
 STARTER_FOLDERS = {"pending": "inbox", "handoff": "inbox", "rule-violations": "rules",
-                   "lesson-candidates": "rules", "rejected-proposals": "ideas", "profile": "me"}
+                   "lesson-candidates": "rules", "rejected-proposals": "ideas", "project-proposals": "ideas",
+                   "blocked-sites": ("knowledge", "security"), "profile": "me"}
 
 # Folder entry pages: English base folder -> (title, description) per language. An entry page is named after its
 # folder, except where that name is already a template (`_templates/research.md`): two notes with one name make a wiki

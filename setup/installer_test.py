@@ -446,6 +446,23 @@ class InstalledContentTest(unittest.TestCase):
         self.assertTrue((self.runs["en"].vault / "research" / "research-notes.md").is_file())
         self.assertTrue((self.runs["tr"].vault / "arastirmalar" / "arastirmalar.md").is_file())
 
+    def test_wiki_links_in_notes_reach_installed_files(self):
+        """The same check as health.py's broken links: a fresh install starts with none."""
+        code = re.compile(r"```.*?```|`[^`\n]*`", re.S)
+        for language, run in self.runs.items():
+            names = lib.load_names(language)
+            skipped = {lib.local_name(key, names) for key in ("_templates", "_system", "sources")}
+            existing = {p.stem for p in files_under(run.vault)} | {p.name for p in files_under(run.vault)}
+            broken = []
+            for path in files_under(run.vault):
+                relative = path.relative_to(run.vault)
+                if path.suffix != ".md" or relative.parts[0] in skipped:
+                    continue
+                body = code.sub("", path.read_text(encoding="utf-8"))
+                broken += [f"{relative.as_posix()} → {target}" for target in re.findall(r"\[\[([^\]|#]+)", body)
+                           if target.strip() not in existing]
+            self.assertEqual(broken, [], language)
+
     def test_profile_page_is_an_empty_template(self):
         for language, (path, title) in {"en": (("me", "profile.md"), "# Profile"),
                                         "tr": (("ben", "profil.md"), "# Profil")}.items():
