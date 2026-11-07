@@ -1,0 +1,68 @@
+{
+  "_about": "Answers for an unattended run: install.py --answers answers.json --home <test folder>. Every question the installer may ask has a key here; a missing key stops the installer before anything is written. With --answers the installer refuses to run against your real home folder. Keys starting with '_' are notes and are ignored.",
+
+  "_language": "Step 1. en | tr",
+  "language": "en",
+
+  "_continue_without_claude": "Step 2. Asked only when neither ~/.claude nor the claude command is found. false stops the installer.",
+  "continue_without_claude": false,
+  "_continue_without_obsidian": "Step 2. Asked only when Obsidian is not found. false stops the installer.",
+  "continue_without_obsidian": true,
+
+  "_python_command": "Step 3. The command that runs Python 3.10+; it fills {{PY}} in hooks, tasks and notes. Windows: py -3, macOS/Linux: python3.",
+  "python_command": "py -3",
+
+  "_install_vault": "Step 4. false skips the vault and every later step (they need a vault).",
+  "install_vault": true,
+  "_vault_path": "Step 4. Folder of the vault. Absolute, or relative to --home. A folder with other files in it is refused.",
+  "vault_path": "Documents/Mindgate-Vault",
+  "_reuse_vault": "Step 4. Asked only when vault_path already holds a Mindgate vault in the same language (second install). true uses it without copying anything into it.",
+  "reuse_vault": true,
+
+  "_global_instructions": "Step 5. When ~/.claude/CLAUDE.md exists: import (core in ~/.claude/mindgate/CLAUDE.md + one marked import line) | merge (core between marked lines at the end of your file) | skip. When it does not exist: write | skip (import and merge count as write).",
+  "global_instructions": "import",
+
+  "_hooks": "Step 6. all | none | pick. Hooks that are already installed are never added again.",
+  "hooks": "all",
+  "_hooks_pick": "Step 6. Used only with hooks = pick: the hook ids to add.",
+  "hooks_pick": [
+    "PreToolUse:command_guard",
+    "PreToolUse:write_guard",
+    "PreToolUse:site_guard",
+    "PreToolUse:agent_gate",
+    "SessionEnd:session_log save",
+    "PreCompact:session_log save",
+    "PreCompact:context_check before",
+    "Stop:context_check stop",
+    "SessionStart:session_log remind",
+    "PostToolUse:site_guard after",
+    "UserPromptSubmit:search --hook",
+    "PostCompact:context_check after"
+  ],
+
+  "_install_skills": "Step 7. Copy the skills to ~/.claude/skills/.",
+  "install_skills": true,
+  "_install_agents": "Step 7. Copy the agents to ~/.claude/agents/.",
+  "install_agents": true,
+  "_name_conflict": "Step 7. When a skill or agent with the same name exists (and differs): skip | rename (installed as mindgate-<name>). Never overwritten.",
+  "name_conflict": "skip",
+
+  "_daily_task": "Step 8. Write the daily task to ~/.claude/scheduled-tasks/.",
+  "daily_task": true,
+  "_weekly_task": "Step 8. Write the weekly task.",
+  "weekly_task": true,
+  "_scan_all_projects": "Step 8. Asked when a task is installed. false = only sessions that ran in the vault (config.json daily.scan_all_projects).",
+  "scan_all_projects": false,
+  "_git_push": "Step 8. Asked when a task is installed. false = commit only, no push (config.json daily.git_push).",
+  "git_push": false,
+
+  "_optional_rules": "Step 9. Numbers of the optional rules to turn on (rules/general-rules.md, 'Optional rules'): 9 usage limit, 17 only this computer (saves a fingerprint of the computer name). Rule 29 needs the dashboard, which is not part of v1.",
+  "optional_rules": [],
+  "_usage_limit_5h": "Step 9. Asked only with rule 9: percent of the 5-hour allowance.",
+  "usage_limit_5h": 93,
+  "_usage_limit_week": "Step 9. Asked only with rule 9: percent of the weekly allowance.",
+  "usage_limit_week": 98,
+
+  "_confirm": "Step 10. Write everything in the summary. false writes nothing. The uninstaller uses this key too.",
+  "confirm": true
+}
