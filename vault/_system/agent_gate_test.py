@@ -57,6 +57,9 @@ class AgentGateTest(unittest.TestCase):
         self.assertEqual(ag.decide(self.data("opus", skill="idea"))[0], "deny")
 
     def test_reason_follows_install_language(self):
+        prefix = {"en": "Agent gate (#28)", "tr": "Ajan kapısı (#28)"}
+        self.assertTrue(ag.decide(self.data(None, skill="task-writing"))[1].startswith(prefix[common.LANGUAGE]))
+        common.LANGUAGE = "en"
         self.assertTrue(ag.decide(self.data(None, skill="task-writing"))[1].startswith("Agent gate (#28)"))
         common.LANGUAGE = "tr"
         self.assertTrue(ag.decide(self.data(None, skill="task-writing"))[1].startswith("Ajan kapısı (#28)"))

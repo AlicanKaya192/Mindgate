@@ -43,7 +43,8 @@
     "blocked-sites": "engelli-siteler",
     "task": "gorev",
     "decision": "karar",
-    "report": "rapor"
+    "report": "rapor",
+    "research-notes": "arastirmalar"
   },
   "templates": {
     "research": "arastirma",

@@ -1,8 +1,8 @@
 """Tests of the Mindgate installer and uninstaller.
 
-Every run uses a fake home and a fake vault place under `.yerel/k5/runs/` of the repository; the installer is always
+Every run uses a fake home and a fake vault place under `.yerel/k6/runs/` of the repository; the installer is always
 called with --home. Obsidian, the `claude` command, git and the system language are mocked, so no real setting is
-read. Nothing is deleted: the run folders stay under `.yerel/k5/runs/`.
+read. Nothing is deleted: the run folders stay under `.yerel/k6/runs/`.
 
 Run (from setup/): py -3 -I -B installer_test.py -v
 """
@@ -26,15 +26,11 @@ import installer_messages as msg  # noqa: E402
 import uninstall  # noqa: E402
 
 REPO = HERE.parent
-RUNS = REPO / ".yerel" / "k5" / "runs"
+RUNS = REPO / ".yerel" / "k6" / "runs"
 BLOCKLIST = REPO / ".yerel" / "yasak-liste.txt"
 NEW_FILES = ["install.py", "uninstall.py", "installer_lib.py", "installer_messages.py", "installer_test.py",
              "answers.example.json"]
 PLACEHOLDER = re.compile(r"\{\{(VAULT|PY|HOME|LANG|USER)\}\}")
-# Vault test files that assume the English base install (see test_turkish_vault_tests_fail_only_where_they_assume_english)
-TURKISH_KNOWN_FAILURES = {"agent_gate_test.py", "command_guard_test.py", "common_test.py", "context_check_test.py",
-                          "graph_test.py", "instructions_test.py", "records_test.py", "search_test.py",
-                          "session_log_test.py", "site_guard_test.py", "write_guard_test.py"}
 ANY_PLACEHOLDER = re.compile(r"\{\{[^{}\n]*\}\}")
 USER_HOOKS = {"hooks": {
     "PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": "echo own-pre"}]}],
@@ -405,6 +401,58 @@ class InstalledContentTest(unittest.TestCase):
             self.assertIsNone(PLACEHOLDER.search(core))
             self.assertIn(run.vault.as_posix(), core)
 
+    def notes(self, run: Run) -> dict:
+        """Note name (lower-case stem) -> installed .md paths, skill folders left out (SKILL.md is in every one)."""
+        found: dict = {}
+        for path in files_under(run.vault):
+            relative = path.relative_to(run.vault).parts
+            if path.suffix == ".md" and relative[1:2] not in (("skills",), ("beceriler",)):
+                found.setdefault(path.stem.lower(), []).append("/".join(relative))
+        return found
+
+    def test_no_two_notes_share_a_name(self):
+        """Obsidian resolves [[name]] by file name; two notes with one name (once `research/research.md` and
+        `_templates/research.md`) make the link ambiguous."""
+        for language, run in self.runs.items():
+            double = {stem: paths for stem, paths in self.notes(run).items() if len(paths) > 1}
+            self.assertEqual(double, {}, language)
+
+    def test_index_links_reach_installed_notes(self):
+        for language, run in self.runs.items():
+            links = re.findall(r"\[\[([^\]|#]+)", (run.vault / "index.md").read_text(encoding="utf-8"))
+            self.assertTrue(links)
+            self.assertEqual([l for l in links if l.lower() not in self.notes(run)], [], language)
+        self.assertIn("[[research-notes]]", (self.runs["en"].vault / "index.md").read_text(encoding="utf-8"))
+        self.assertTrue((self.runs["en"].vault / "research" / "research-notes.md").is_file())
+        self.assertTrue((self.runs["tr"].vault / "arastirmalar" / "arastirmalar.md").is_file())
+
+    def test_profile_page_is_an_empty_template(self):
+        for language, (path, title) in {"en": (("me", "profile.md"), "# Profile"),
+                                        "tr": (("ben", "profil.md"), "# Profil")}.items():
+            text = (self.runs[language].vault / Path(*path)).read_text(encoding="utf-8")
+            head, body = text.split("\n---\n", 1)
+            self.assertIn("type: profile", head)
+            lines = [l for l in body.splitlines() if l.strip()]
+            self.assertEqual(lines[0], title)
+            self.assertTrue(lines[1].startswith("> "))            # one description line
+            self.assertTrue(all(l.startswith("## ") for l in lines[2:]), f"{language}: only headings: {lines[2:]}")
+            self.assertGreaterEqual(len(lines[2:]), 3)
+            self.assertIn(path[1][:-3], {stem for stem in self.notes(self.runs[language])})
+
+    def test_search_exam_follows_the_install_language(self):
+        exams = {}
+        for language, run in self.runs.items():
+            system = "_system" if language == "en" else "_sistem"
+            exams[language] = json.loads((run.vault / system / "search_exam.json").read_text(encoding="utf-8"))["questions"]
+            names = self.notes(run)
+            expected = {stem for q in exams[language] for stem in q["expected"]}
+            self.assertEqual([s for s in expected if s.lower() not in names], [], f"{language}: exam names missing notes")
+        self.assertEqual({s for q in exams["tr"] for s in q["expected"]}, {"genel-kurallar", "CLAUDE"})
+        self.assertEqual(len(exams["tr"]), len(exams["en"]))
+        english = {q["question"] for q in exams["en"]}
+        self.assertFalse([q["question"] for q in exams["tr"] if q["question"] in english])
+        self.assertTrue(any(re.search(r"[çğıöşü]", q["question"]) for q in exams["tr"]))
+
     def test_usage_limit_is_saved(self):
         config = json.loads((self.runs["en"].vault / "_system" / "config.json").read_text(encoding="utf-8"))
         self.assertEqual(config["optional_rules"]["usage_limit"], {"five_hour_percent": 93, "weekly_percent": 98})
@@ -424,23 +472,20 @@ class VaultTestsInInstalledVault(unittest.TestCase):
                               capture_output=True, text=True, encoding="utf-8", errors="replace", env=env,
                               cwd=run.vault, stdin=subprocess.DEVNULL, timeout=900)
 
-    def test_english_vault_tests_pass(self):
-        result = self.run_vault_tests("en")
-        self.assertEqual(result.returncode, 0, result.stdout[-3000:] + result.stderr[-2000:])
-        print("\n[en] " + result.stdout.strip().splitlines()[-1], file=sys.stderr)
-
-    def test_turkish_vault_tests_fail_only_where_they_assume_english(self):
-        """These vault test files check the shipped English config or use English folder names in their fixtures
-        (for example "the shipped config is English", "English install: the reason is English", fixtures under
-        `me/` and `inbox/sessions/`); in a Turkish install those checks cannot pass. Any other failing file, or a
-        crash (errors=), is a real problem."""
-        result = self.run_vault_tests("tr")
+    def assert_all_pass(self, language: str) -> None:
+        """Every test file of the installed vault passes, in the installed language; no tolerance."""
+        result = self.run_vault_tests(language)
         lines = result.stdout.strip().splitlines()
-        failed = {line.split()[1] for line in lines if line.startswith("FAILED ")}
-        print(f"\n[tr] {lines[-1]}; failing: {', '.join(sorted(failed))}", file=sys.stderr)
-        self.assertRegex(lines[-1], r"/21 test files passed$")
-        self.assertLessEqual(failed, TURKISH_KNOWN_FAILURES, result.stdout[-3000:])
-        self.assertFalse([line for line in lines if "errors=" in line], result.stdout[-3000:])
+        self.assertEqual(result.returncode, 0, result.stdout[-3000:] + result.stderr[-2000:])
+        self.assertRegex(lines[-1], r"^(\d+)/\1 test files passed$")
+        self.assertFalse([line for line in lines if line.startswith("FAILED ")], result.stdout[-3000:])
+        print(f"\n[{language}] {lines[-1]}", file=sys.stderr)
+
+    def test_english_vault_tests_pass(self):
+        self.assert_all_pass("en")
+
+    def test_turkish_vault_tests_pass(self):
+        self.assert_all_pass("tr")
 
 
 class ConsoleTest(unittest.TestCase):

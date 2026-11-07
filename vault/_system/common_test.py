@@ -102,11 +102,19 @@ class NameMapTest(unittest.TestCase):
         self.assertIn("broken.json", error)
         self.assertEqual(common.load_names(settings), {"folders": {}, "files": {}})
 
-    def test_shipped_config_is_english_with_empty_names(self):
+    def test_config_language_matches_its_name_map(self):
+        """The repository ships the English base (empty names); an install writes its own language and names.
+        Either way the map must fit the vault it sits in: the folder holding config.json is name("_system")."""
         settings, error = common.load_config()
         self.assertEqual(error, "")
-        self.assertEqual(settings["language"], "en")
-        self.assertFalse(any(common.load_names(settings).values()))
+        self.assertIn(settings["language"], ("en", "tr"))
+        names = common.load_names(settings)
+        if settings["language"] == "en":
+            self.assertFalse(any(names.values()))
+        else:
+            self.assertTrue(names["folders"] and names["files"])
+            self.assertEqual(names["folders"].get("_system"), common.SYSTEM_DIR.name)
+        self.assertEqual(common.vault_path("_system"), common.SYSTEM_DIR)
 
 
 class HomeFolderTest(unittest.TestCase):

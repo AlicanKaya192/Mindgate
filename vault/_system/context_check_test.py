@@ -90,7 +90,9 @@ class ContextCheckTest(unittest.TestCase):
         text = cc.before({"session_id": "abc12345-x"})
         self.assertIn("abc12345-x", text)
         self.assertIn("exactly where it stopped", text)
-        self.assertIn("Write the summary in English", text)
+        self.assertIn(f"Write the summary in {cc.LANGUAGE_NAMES[common.LANGUAGE]}", text)
+        common.LANGUAGE = "en"
+        self.assertIn("Write the summary in English", cc.before({"session_id": "abc12345-x"}))
 
     def test_before_follows_install_language(self):
         common.LANGUAGE = "tr"

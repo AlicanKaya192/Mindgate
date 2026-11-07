@@ -171,8 +171,9 @@ class BuildDataTest(unittest.TestCase):
     def setUp(self):
         self.vault = ROOT / "vault"
         for relative, text in VAULT_NOTES.items():
-            (self.vault / relative).parent.mkdir(parents=True, exist_ok=True)
-            (self.vault / relative).write_text(text, encoding="utf-8")
+            path = self.vault.joinpath(*(common.name(segment) for segment in relative.split("/")))   # install language
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
         self.notes, self.links = graph.build_data(self.vault)
 
     def tearDown(self):

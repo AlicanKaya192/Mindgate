@@ -13,6 +13,7 @@ import records  # noqa: E402
 from common_test import TR_NAMES  # noqa: E402
 
 TEST_DIR = common.OUTPUT / "test_records"
+PENDING_MONTH = f"{common.name('pending')}-2026-09.md"   # archive of closed items: <pending name>-<month>.md
 PENDING_SAMPLE = """---
 type: entry
 updated: 2000-01-01
@@ -65,10 +66,11 @@ class RecordsTest(unittest.TestCase):
     def test_number_is_largest_plus_one_and_before_closed(self):
         no = records.add_pending("approval", "new | item", "note", "Chat")
         text = records.PENDING.read_text(encoding="utf-8")
-        self.assertEqual(no, "P-013")
-        self.assertLess(text.index("P-013"), text.index("## Closed"))
+        new = f"{records.PENDING_PREFIX}-013"                  # new ids take the prefix of the install language
+        self.assertEqual(no, new)
+        self.assertLess(text.index(new), text.index("## Closed"))
         self.assertIn("new / item", text)                      # | must not break the table
-        self.assertIn("pending | P-013", records.LOG.read_text(encoding="utf-8"))
+        self.assertIn(f"pending | {new}", records.LOG.read_text(encoding="utf-8"))
 
     def test_invalid_type_and_missing_chat_rejected(self):
         with self.assertRaises(records.RecordError):
@@ -107,7 +109,7 @@ class RecordsTest(unittest.TestCase):
         self.assertIn("- [x] P-005", closed_part)
         self.assertIn("evidence: commit abc1234", closed_part)
         self.assertIn("done | P-005", records.LOG.read_text(encoding="utf-8"))   # evidence in the pending line, one log line
-        self.assertIn("P-003", (records.PENDING_ARCHIVE / "pending-2026-09.md").read_text(encoding="utf-8"))  # past month archived
+        self.assertIn("P-003", (records.PENDING_ARCHIVE / PENDING_MONTH).read_text(encoding="utf-8"))  # past month archived
         self.assertNotIn("P-003", records.PENDING.read_text(encoding="utf-8"))
         with self.assertRaises(records.RecordError):
             records.close_pending("P-005", "again", "x")         # already closed
@@ -245,7 +247,7 @@ class RecordsTest(unittest.TestCase):
         closed_part = records.PENDING.read_text(encoding="utf-8").split("## Kapananlar")[1]
         self.assertIn("- [x] B-020", closed_part)
         self.assertNotIn("B-003", records.PENDING.read_text(encoding="utf-8"))   # closed B- lines rotate too
-        self.assertIn("B-003", (records.PENDING_ARCHIVE / "pending-2026-09.md").read_text(encoding="utf-8"))
+        self.assertIn("B-003", (records.PENDING_ARCHIVE / PENDING_MONTH).read_text(encoding="utf-8"))
 
 
 class TurkishInstallTest(unittest.TestCase):
@@ -264,9 +266,9 @@ class TurkishInstallTest(unittest.TestCase):
                 self.assertEqual(records.HANDOFF_ARCHIVE, common.VAULT / "arsiv" / "devir")
                 self.assertEqual(records.PENDING_PREFIX, "B")
         finally:
-            importlib.reload(records)   # back to the shipped (English) map
-        self.assertEqual(records.PENDING, common.VAULT / "inbox" / "pending.md")
-        self.assertEqual(records.PENDING_PREFIX, "P")
+            importlib.reload(records)   # back to the map of this install
+        self.assertEqual(records.PENDING, common.vault_path("inbox", "pending.md"))
+        self.assertEqual(records.PENDING_PREFIX, "B" if common.LANGUAGE == "tr" else "P")
 
 
 class IndexTest(unittest.TestCase):

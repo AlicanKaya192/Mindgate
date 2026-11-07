@@ -149,14 +149,20 @@ def record_mode_failures() -> int:
 
 def language_failures() -> int:
     old = common.LANGUAGE
-    common.LANGUAGE = "tr"
     try:
+        common.LANGUAGE = "tr"
         turkish = in_process({"file_path": str(EXISTING_SOURCE), "content": "x"}).get("permissionDecisionReason", "")
+        common.LANGUAGE = "en"
+        english = in_process({"file_path": str(EXISTING_SOURCE), "content": "x"}).get("permissionDecisionReason", "")
     finally:
         common.LANGUAGE = old
-    english = run("Write", {"file_path": str(VAULT / "log.md"), "content": "x"}).get("permissionDecisionReason", "")
+    # The hook process reads the language from this install's config.json
+    installed = run("Write", {"file_path": str(VAULT / "log.md"), "content": "x"}).get("permissionDecisionReason", "")
+    expected = {"en": "[Write guard] log.md is only appended to",
+                "tr": "[Yazma kapısı] log.md yalnızca sona eklenir"}[common.LANGUAGE]
     return (failed(turkish.startswith("[Yazma kapısı]") and "değiştirilmez" in turkish, f"Turkish reason: {turkish}")
-            + failed(english.startswith("[Write guard] log.md is only appended to"), f"English reason: {english}"))
+            + failed(english.startswith("[Write guard]") and "are not changed" in english, f"English reason: {english}")
+            + failed(installed.startswith(expected), f"install language ({common.LANGUAGE}) reason: {installed}"))
 
 
 def main() -> None:

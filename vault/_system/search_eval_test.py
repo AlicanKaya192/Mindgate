@@ -25,6 +25,12 @@ class SearchEvalTest(unittest.TestCase):
         self.assertGreaterEqual(len(questions), 20)
         self.assertTrue(all(q["question"] and q["expected"] for q in questions))
 
+    def test_expected_notes_exist_in_this_vault(self):
+        """The exam names notes by file name in the install language (`general-rules` / `genel-kurallar`)."""
+        stems = {p.stem for p in se.search.VAULT.rglob("*.md")}
+        expected = {note for q in json.loads(se.EXAM.read_text(encoding="utf-8"))["questions"] for note in q["expected"]}
+        self.assertEqual(sorted(expected - stems), [])
+
 
 if __name__ == "__main__":
     unittest.main()

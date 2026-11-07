@@ -15,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import VAULT, vault_path  # noqa: E402
+from records import TYPES as PENDING_TYPES  # noqa: E402
 
 SYSTEM = vault_path("_system")
 CORE = vault_path("_system", "instructions") / "global-CLAUDE.md"
@@ -26,6 +27,9 @@ WORKING_PRINCIPLES = {12, 15, 23, 24, 25, 26, 30, 34, 36, 37, 38}
 CORE_LIMIT, CORE_LINES, SCHEMA_LIMIT = 10_000, 130, 12_000
 SKILL = re.compile(r"`/?([a-z][a-z0-9]*-[a-z0-9-]+|(?<=`/)[a-z]+)`")   # such as `/idea`, `task-writing`
 NOT_SKILLS = {"clear", "compact", "adr-001", "self-learning", "oz-ogrenme"}  # command, naming example, log label
+# Values read by code (pending types, frontmatter `status`), written in backticks in both languages: data, not skills
+CODE_VALUES = set(PENDING_TYPES) | {"active", "paused", "done", "archived", "open", "solved", "draft", "accepted",
+                                    "proposed", "superseded", "ready", "published"}
 SCRIPTS = ("records.py", "search.py", "health.py", "cost.py", "install_instructions.py")
 # Written by other parts of the translation; until they exist their check is skipped, not passed
 OTHER_PARTS = {"health.py"}
@@ -71,7 +75,7 @@ class InstructionCoverageTest(unittest.TestCase):
         skills = {d.name for d in vault_path("_system", "skills").iterdir() if (d / "SKILL.md").is_file()}
         agents = {p.stem for p in vault_path("_system", "agents").glob("*.md")}   # hyphenated agent names such as `red-team`
         for path in (CORE, SCHEMA):
-            missing = sorted(set(SKILL.findall(read(path))) - skills - agents - NOT_SKILLS)
+            missing = sorted(set(SKILL.findall(read(path))) - skills - agents - NOT_SKILLS - CODE_VALUES)
             self.assertFalse(missing, f"{path.name}: skill does not exist: {missing}")
 
     def test_shown_vault_paths_exist(self):

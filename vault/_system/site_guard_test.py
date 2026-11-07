@@ -197,16 +197,19 @@ def blocklist_writing(sg, t: Counter) -> None:
 
 
 def turkish_reason(sg, t: Counter) -> None:
+    data = {"tool_name": "WebFetch", "tool_input": {"url": "https://numpy.org"}}
     old = common.LANGUAGE
-    common.LANGUAGE = "tr"
+    installed = sg.before_decision(data)["permissionDecisionReason"]   # the language of this install's config.json
     try:
-        decision = sg.before_decision({"tool_name": "WebFetch", "tool_input": {"url": "https://numpy.org"}})
+        common.LANGUAGE = "tr"
+        reason = sg.before_decision(data)["permissionDecisionReason"]
+        common.LANGUAGE = "en"
+        english = sg.before_decision(data)["permissionDecisionReason"]
     finally:
         common.LANGUAGE = old
-    reason = decision["permissionDecisionReason"]
     t.expect("Turkish install: the reason is Turkish", (reason.startswith("[Site kontrolü]"), "Kural #32" in reason), (True, True))
-    english = sg.before_decision({"tool_name": "WebFetch", "tool_input": {"url": "https://numpy.org"}})["permissionDecisionReason"]
     t.expect("English install: the reason is English", (english.startswith("[Site guard]"), "Rule #32" in english), (True, True))
+    t.expect(f"this install ({old}): the reason follows config.json", installed, reason if old == "tr" else english)
 
 
 def after(data):

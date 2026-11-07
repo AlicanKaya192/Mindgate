@@ -240,9 +240,11 @@ def starter_files(language: str, names: dict, today: str) -> list:
         links["inbox" if folder == "inbox" else "rules" if folder == "rules" else "folders"].append(stem)
     for folder, (title, description) in msg.ENTRY_PAGES[language].items():
         local = local_name(folder, names)
-        files.append(VaultFile((folder, f"{folder}.md"), (local, f"{local}.md"),
+        base = msg.ENTRY_STEMS.get(folder, folder)            # a page named after its folder unless that is a template
+        stem = mapped(names, "files", base) if base != folder else local
+        files.append(VaultFile((folder, f"{base}.md"), (local, f"{stem}.md"),
                                page("entry", title, description, "", today)))
-        links["folders"].append(local)
+        links["folders"].append(stem)
     title, description, sections = msg.INDEX_PAGE[language]
     lines = [f"# {title}", "", f"> {description}", ""]
     for section in ("rules", "inbox", "folders"):

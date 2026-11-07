@@ -70,8 +70,14 @@ class SessionLogTest(unittest.TestCase):
 class RecordingModeTest(unittest.TestCase):
     """#43: record question in a new chat; the raw record of an unrecorded chat is not written."""
 
-    QUESTION, UNRECORDED = "[Second brain — record question]", "[Second brain — unrecorded chat]"
+    QUESTIONS = {"en": "[Second brain — record question]", "tr": "[İkinci beyin — kayıt sorusu]"}   # localized text
+    UNRECORDED = "[Second brain — unrecorded chat]"
     INHERITED = "[Second brain — recording mode inherited]"
+
+    @property
+    def QUESTION(self) -> str:
+        """The record question header of the active install language."""
+        return self.QUESTIONS[common.LANGUAGE]
 
     def setUp(self):
         self.root = new_folder()
@@ -108,12 +114,15 @@ class RecordingModeTest(unittest.TestCase):
         self.assertIn("[İkinci beyin — kayıt sorusu]", output)
         self.assertIn("Bu sohbetin vault'ta kaydı olsun mu?", output)
         self.assertIn("session_mode.py\" set abcd1234-5678 recorded", output)
-        self.assertNotIn(self.QUESTION, output)
+        self.assertNotIn(self.QUESTIONS["en"], output)
 
     def test_attention_header_has_one_form_per_language(self):
         old = session_log.on_hold_topics
         session_log.on_hold_topics = lambda: ["P-001 later"]
         try:
+            header = {"en": "[Second brain: attention] ", "tr": "[İkinci beyin: dikkat] "}[common.LANGUAGE]
+            self.assertTrue(session_log.attention_line().startswith(header))
+            common.LANGUAGE = "en"
             self.assertTrue(session_log.attention_line().startswith("[Second brain: attention] "))
             common.LANGUAGE = "tr"
             self.assertTrue(session_log.attention_line().startswith("[İkinci beyin: dikkat] "))
@@ -263,7 +272,7 @@ class NameMapTest(unittest.TestCase):
         finally:
             common.NAMES = old
             importlib.reload(session_log)
-        self.assertEqual(session_log.SESSIONS_DIR, common.VAULT / "inbox" / "sessions")
+        self.assertEqual(session_log.SESSIONS_DIR, common.vault_path("inbox", "sessions"))   # the map of this install
 
 
 if __name__ == "__main__":

@@ -277,18 +277,24 @@ def in_process_failures() -> list[int]:
     ]
     failures = [report(actual == expected, f"{label}: {actual!r}") for label, actual, expected in checks]
     old = common.LANGUAGE
-    common.LANGUAGE = "tr"
+    reasons = {}
     try:
-        buffer = io.StringIO()
-        with redirect_stdout(buffer):
-            cg.check("rm temp.txt", PROJECT_CWD)
-        reason = json.loads(buffer.getvalue())["hookSpecificOutput"]["permissionDecisionReason"]
+        for language in ("tr", "en"):
+            common.LANGUAGE = language
+            buffer = io.StringIO()
+            with redirect_stdout(buffer):
+                cg.check("rm temp.txt", PROJECT_CWD)
+            reasons[language] = json.loads(buffer.getvalue())["hookSpecificOutput"]["permissionDecisionReason"]
     finally:
         common.LANGUAGE = old
+    reason, english = reasons["tr"], reasons["en"]
     failures.append(report(reason.startswith("[Koruma kapısı] Silme işlemi") and "rm temp.txt" in reason,
                            f"Turkish install: the reason is Turkish: {reason[:60]}"))
-    english = guard_output("rm temp.txt", "Bash").get("permissionDecisionReason", "")
     failures.append(report(english.startswith("[Command guard] Deletion (rule #22)"), f"English install: {english[:60]}"))
+    # The hook process reads the language from this install's config.json
+    installed = guard_output("rm temp.txt", "Bash").get("permissionDecisionReason", "")
+    expected = {"en": "[Command guard] Deletion (rule #22)", "tr": "[Koruma kapısı] Silme işlemi"}[old]
+    failures.append(report(installed.startswith(expected), f"this install ({old}): {installed[:60]}"))
     return failures
 
 

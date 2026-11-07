@@ -453,6 +453,10 @@ STARTER_PAGES = {
                                "before proposing something new.",
                                "| Date | Proposal | User's words | Reason | Chosen instead | Status |\n"
                                "|---|---|---|---|---|---|\n"),
+        "profile": ("profile", "Profile",
+                    "The user's goals, preferences and projects, filled in over time. No sensitive information "
+                    "(passwords, IDs, bank, address, health).",
+                    "## Goals\n\n## Preferences\n\n## Design taste\n\n## Projects\n"),
     },
     "tr": {
         "pending": ("entry", "Bekleyenler",
@@ -475,14 +479,22 @@ STARTER_PAGES = {
                                "önermeden önce okunur.",
                                "| Tarih | Öneri | Kullanıcının sözü | Neden | Yerine seçilen | Durum |\n"
                                "|---|---|---|---|---|---|\n"),
+        "profile": ("profile", "Profil",
+                    "Kullanıcının hedefleri, tercihleri ve projeleri; zamanla doldurulur. Hassas bilgi yok (şifre, "
+                    "kimlik, banka, adres, sağlık).",
+                    "## Hedefler\n\n## Tercihler\n\n## Tasarım zevki\n\n## Projeler\n"),
     },
 }
 
 # Where each starting page lives (English base folder; empty string = vault root).
 STARTER_FOLDERS = {"pending": "inbox", "handoff": "inbox", "rule-violations": "rules",
-                   "lesson-candidates": "rules", "rejected-proposals": "ideas"}
+                   "lesson-candidates": "rules", "rejected-proposals": "ideas", "profile": "me"}
 
-# Folder entry pages: English base folder -> (title, description) per language.
+# Folder entry pages: English base folder -> (title, description) per language. An entry page is named after its
+# folder, except where that name is already a template (`_templates/research.md`): two notes with one name make a wiki
+# link such as [[research]] ambiguous in Obsidian. ENTRY_STEMS gives such a page its own English base name; its
+# Turkish name comes from the `files` table of names.json.
+ENTRY_STEMS = {"research": "research-notes"}
 ENTRY_PAGES = {
     "en": {
         "inbox": ("Inbox", "Quick capture: new ideas and notes go here first; session records arrive in `sessions/`."),

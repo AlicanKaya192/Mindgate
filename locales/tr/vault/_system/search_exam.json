@@ -1,0 +1,25 @@
+{
+ "_about": "search_eval.py için sabit soru seti. Her soru, en üstte çıkması gereken notları adlandırır (.md olmadan dosya adı). Bu örnek sorular kurulumla gelen şemayı (CLAUDE) ve kuralları (genel-kurallar) hedefler; vault büyüdükçe bunları kendi notlarınla ilgili sorularla değiştir.",
+ "questions": [
+  {"question": "sormadan dosya silebilir miyim", "expected": ["genel-kurallar"]},
+  {"question": "port doluysa ne yapılır", "expected": ["genel-kurallar"]},
+  {"question": "commit mesajında yapay zekâ imzası olmasın", "expected": ["genel-kurallar"]},
+  {"question": "ben öğret demeden öğretme", "expected": ["genel-kurallar"]},
+  {"question": "siteye girmeden önce izin iste", "expected": ["genel-kurallar"]},
+  {"question": "beğenilmeyen öneri derstir", "expected": ["genel-kurallar"]},
+  {"question": "kural ihlallerini kaydet", "expected": ["genel-kurallar"]},
+  {"question": "paralel sohbetler aynı anda vault'a yazıyor", "expected": ["genel-kurallar"]},
+  {"question": "kayıtsız geçici sohbet", "expected": ["genel-kurallar"]},
+  {"question": "kullanım sınırı eşikleri", "expected": ["genel-kurallar"]},
+  {"question": "sorunlar ve çözümler hangi klasörde", "expected": ["CLAUDE"]},
+  {"question": "dosya adlandırma küçük harf ascii tire", "expected": ["CLAUDE"]},
+  {"question": "frontmatter alanları type status updated", "expected": ["CLAUDE"]},
+  {"question": "log girdileri nasıl yazılır", "expected": ["CLAUDE"]},
+  {"question": "ham kaynaklar nereye konur", "expected": ["CLAUDE"]},
+  {"question": "şablonlar klasörü listesi", "expected": ["CLAUDE"]},
+  {"question": "şema nasıl evrilir", "expected": ["CLAUDE"]},
+  {"question": "yetim not ve wikilink", "expected": ["CLAUDE"]},
+  {"question": "aylık log döndürme arşiv", "expected": ["CLAUDE"]},
+  {"question": "proaktif davranış küçük bakım", "expected": ["CLAUDE"]}
+ ]
+}
