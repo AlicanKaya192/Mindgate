@@ -47,7 +47,7 @@
   "_name_conflict": "Step 7. When a skill or agent with the same name exists (and differs): skip | rename (installed as mindgate-<name>). Never overwritten.",
   "name_conflict": "skip",
 
-  "_assistants": "Step 8. Other assistants to set up too (experimental, tried only with sample hook data): [] | [\"antigravity\"]. Antigravity gets the guards in ~/.gemini/config/hooks.json, the instructions in ~/.gemini/AGENTS.md and the skills and agents chosen in step 7.",
+  "_assistants": "Step 8. Other assistants to set up too (experimental, tried only with sample hook data): any of \"antigravity\", \"gemini\", \"codex\". Each gets the guards in its own hooks file, the instructions between marked lines and the skills and agents chosen in step 7. Gemini CLI and Antigravity share ~/.gemini/GEMINI.md when both are chosen; Gemini CLI and Codex share ~/.agents/skills.",
   "assistants": [],
 
   "_daily_task": "Step 9. Write the daily task to ~/.claude/scheduled-tasks/.",

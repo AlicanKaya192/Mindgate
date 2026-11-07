@@ -54,6 +54,8 @@ OPTIONAL_HEADING = re.compile(r"(?m)^## (?:Optional rules|İsteğe bağlı kural
 RULE_ROW = re.compile(r"(?m)^\|\s*(\d+)\s*\|\s*\*\*(.+?)\*\*(.*)$")
 TEMPLATE_SCRIPT = re.compile(r"/_system/(\w+)\.py\"?\s*(.*)$")
 FRONTMATTER_NAME = re.compile(r"(?m)^name:[ \t]*.*$")
+TOML_NAME = re.compile(r"(?m)^name[ \t]*=[ \t]*.*$")
+FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.S)
 
 
 class InstallerError(Exception):
@@ -624,6 +626,7 @@ class Bundle:
     """A skill folder or an agent file ready to copy: its name and its files (relative path parts -> bytes)."""
     name: str
     files: dict
+    suffix: str = ".md"   # an agent file's extension (Codex agents are .toml)
 
 
 def skill_bundles(vault_files: list) -> list:
@@ -641,15 +644,69 @@ def agent_bundles(vault_files: list) -> list:
 
 
 def rename_bundle(bundle: Bundle, new_name: str, kind: str) -> Bundle:
-    """The bundle under a new name: the folder or file name and the `name:` line of its frontmatter change."""
+    """The bundle under a new name: the folder or file name and the name line (frontmatter or TOML) change."""
     files = {}
     for parts, data in bundle.files.items():
         if kind == "agent":
-            parts = (f"{new_name}.md",)
-        if parts[-1] in ("SKILL.md", f"{new_name}.md"):
+            parts = (f"{new_name}{bundle.suffix}",)
+        if parts[-1] == f"{new_name}.toml":
+            data = encode(TOML_NAME.sub(f"name = {json.dumps(new_name)}", decode(data), count=1))
+        elif parts[-1] in ("SKILL.md", f"{new_name}.md"):
             data = encode(FRONTMATTER_NAME.sub(f"name: {new_name}", decode(data), count=1))
         files[parts] = data
-    return Bundle(new_name, files)
+    return Bundle(new_name, files, bundle.suffix)
+
+
+def split_frontmatter(text: str, what: str) -> tuple:
+    """(frontmatter lines, body) of a Markdown file; InstallerError when it has no frontmatter."""
+    match = FRONTMATTER.match(text)
+    if not match:
+        raise InstallerError(f"{what}: no frontmatter")
+    return match.group(1).splitlines(), text[match.end():]
+
+
+def mapped_tools(claude_tools: str, tools: dict, client: str, agent: str) -> list:
+    """Claude tool names (comma list) → the client's tool names; an unknown tool stops the install."""
+    mapped = []
+    for name in (t.strip() for t in claude_tools.split(",") if t.strip()):
+        if name not in tools:
+            raise InstallerError(f"agent {agent}: no {client} tool for {name}")
+        mapped += [t for t in tools[name] if t not in mapped]
+    return mapped
+
+
+def convert_agent_frontmatter(bundle: Bundle, client: str, tools: dict, models: dict | None, dropped: set) -> Bundle:
+    """A Claude agent file with the client's frontmatter: `tools` translated, `model` translated (or dropped when
+    `models` is None), keys in `dropped` removed with their indented lines. Without a tools line every tool stays."""
+    (parts, data), = bundle.files.items()
+    frontmatter, body = split_frontmatter(decode(data), f"agent {bundle.name}")
+    lines, skipping = [], False
+    for line in frontmatter:
+        if line[:1] in (" ", "\t", "-"):          # a list item of the previous key
+            if not skipping:
+                lines.append(line)
+            continue
+        key, _, value = line.partition(":")
+        skipping = key in dropped or (key == "model" and models is None)
+        if skipping:
+            continue
+        if key == "tools":
+            line = "tools: [" + ", ".join(mapped_tools(value, tools, client, bundle.name)) + "]"
+        elif key == "model":
+            line = f"model: {models.get(value.strip(), 'inherit')}"
+        lines.append(line)
+    return Bundle(bundle.name, {parts: encode("---\n" + "\n".join(lines) + "\n---\n" + body)})
+
+
+def marked_instructions(current: str | None, body: str, limit: int, label: str) -> str:
+    """`current` with Mindgate's marked block added or refreshed; refused when the file would pass `limit` bytes."""
+    text = current or ""
+    new = replace_block(text, body) if has_block(text) else add_block(text, body)
+    size = len(encode(new))
+    if size > limit:
+        raise InstallerError(f"{label} would be {size} bytes; the assistant cuts files over {limit} bytes, so it was "
+                             "not written")
+    return new
 
 
 def task_content(task: str, language: str, values: Values) -> bytes:

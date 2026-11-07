@@ -12,7 +12,6 @@ the agent gate and the search context need Claude's hooks and are not installed 
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 
 import installer_lib as lib
@@ -26,7 +25,6 @@ TOOLS = {   # Claude tool → Antigravity tools (docs/hooks "Supported Tool Name
     "Edit": ["replace_file_content", "multi_replace_file_content"], "Skill": [],
 }
 MODELS = {"haiku": "flash", "sonnet": "inherit", "opus": "pro"}   # Antigravity: inherit | flash | pro
-FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.S)
 HEADER = {
     "en": "Mindgate rules for Antigravity. They were written for Claude Code: read \"Claude\" as yourself. Here the "
           "command, write and site guards run; session records, the context check and the scheduled tasks do not.",
@@ -90,42 +88,9 @@ def remove_hook_set(raw: bytes) -> bytes:
 
 def instructions_text(current: str | None, core: str, language: str) -> str:
     """The user's AGENTS.md with Mindgate's block added (or refreshed); refused when it passes the size limit."""
-    body = f"{HEADER[language]}\n\n{core}"
-    text = current or ""
-    new = lib.replace_block(text, body) if lib.has_block(text) else lib.add_block(text, body)
-    size = len(lib.encode(new))
-    if size > INSTRUCTIONS_LIMIT:
-        raise lib.InstallerError(f"~/.gemini/AGENTS.md would be {size} bytes; Antigravity cuts files over "
-                                 f"{INSTRUCTIONS_LIMIT} bytes, so it was not written")
-    return new
-
-
-def agent_tools(claude_tools: str, agent: str) -> list:
-    tools = []
-    for name in (t.strip() for t in claude_tools.split(",") if t.strip()):
-        if name not in TOOLS:
-            raise lib.InstallerError(f"agent {agent}: no Antigravity tool for {name}")
-        tools += [t for t in TOOLS[name] if t not in tools]
-    return tools
+    return lib.marked_instructions(current, f"{HEADER[language]}\n\n{core}", INSTRUCTIONS_LIMIT, "~/.gemini/AGENTS.md")
 
 
 def convert_agent(bundle: lib.Bundle) -> lib.Bundle:
-    """A Claude agent file in Antigravity's frontmatter: tools and model translated, `effort` dropped (no such field).
-    An agent without a tools line keeps every tool, as in Claude."""
-    (parts, data), = bundle.files.items()
-    text = lib.decode(data)
-    match = FRONTMATTER.match(text)
-    if not match:
-        raise lib.InstallerError(f"agent {bundle.name}: no frontmatter")
-    lines = []
-    for line in match.group(1).splitlines():
-        key, _, value = line.partition(":")
-        if key == "tools":
-            line = "tools: [" + ", ".join(agent_tools(value, bundle.name)) + "]"
-        elif key == "model":
-            line = f"model: {MODELS.get(value.strip(), 'inherit')}"
-        elif key == "effort":
-            continue
-        lines.append(line)
-    converted = "---\n" + "\n".join(lines) + "\n---\n" + text[match.end():]
-    return lib.Bundle(bundle.name, {parts: lib.encode(converted)})
+    """A Claude agent file in Antigravity's frontmatter: tools and model translated, `effort` dropped (no such field)."""
+    return lib.convert_agent_frontmatter(bundle, "Antigravity", TOOLS, MODELS, {"effort"})

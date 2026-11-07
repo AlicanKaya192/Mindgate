@@ -20,11 +20,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
 import antigravity as ag  # noqa: E402
+import codex  # noqa: E402
+import gemini  # noqa: E402
 import installer_lib as lib  # noqa: E402
 import installer_messages as msg  # noqa: E402
 
 TOTAL_STEPS = 12
-ASSISTANTS = ("antigravity",)   # other assistants the installer can set up (experimental)
+ASSISTANTS = ("antigravity", "gemini", "codex")   # other assistants the installer can set up (experimental)
 
 
 @dataclass
@@ -43,6 +45,12 @@ class Choices:
     assistants: list = field(default_factory=list)  # ids from ASSISTANTS
     antigravity_skills: list = field(default_factory=list)
     antigravity_agents: list = field(default_factory=list)
+    codex_hooks: list = field(default_factory=list)
+    codex_skills: list = field(default_factory=list)
+    codex_agents: list = field(default_factory=list)
+    gemini_hooks: list = field(default_factory=list)
+    gemini_skills: list = field(default_factory=list)
+    gemini_agents: list = field(default_factory=list)
     tasks: list = field(default_factory=list)       # English task keys
     config: lib.ConfigChoices | None = None
 
@@ -286,21 +294,65 @@ class Installer:
         self.choices.assistants = self.asker.pick("assistants", list(ASSISTANTS),
                                                   lambda a: self.t("assist_question", name=msg.ASSISTANT_NAMES[a]),
                                                   default=False)
-        if "antigravity" not in self.choices.assistants:
-            return
+        if "antigravity" in self.choices.assistants:
+            self.choose_antigravity()
+        if "codex" in self.choices.assistants:
+            self.choose_codex()
+        if "gemini" in self.choices.assistants:
+            self.choose_gemini()
+
+    def converted_bundles(self, folder_skills: Path, folder_agents: Path, convert) -> tuple:
+        """(skills, agents) for another assistant: the ones chosen in step 7, names resolved in its own folders."""
+        skills = self.resolve_names(lib.skill_bundles(self.vault_files()), folder_skills, "skill") \
+            if self.choices.want_skills else []
+        agents = self.resolve_names([convert(b) for b in lib.agent_bundles(self.vault_files())], folder_agents, "agent") \
+            if self.choices.want_agents else []
+        return skills, agents
+
+    def choose_codex(self) -> None:
+        self.say("assist_codex", hooks=codex.hooks_path(self.home), instructions=codex.instructions_path(self.home))
+        _, settings = self.read_json_hooks(codex.hooks_path(self.home))
+        present, self.choices.codex_hooks = lib.split_present(settings, self.codex_specs())
+        if present:
+            self.say("hooks_present", count=len(present))
+        self.choices.codex_skills, self.choices.codex_agents = self.converted_bundles(
+            codex.skills_dir(self.home), codex.agents_dir(self.home), codex.convert_agent)
+
+    def choose_gemini(self) -> None:
+        self.say("assist_gemini", hooks=gemini.settings_path(self.home), instructions=gemini.instructions_path(self.home))
+        _, settings = self.read_json_hooks(gemini.settings_path(self.home))
+        present, self.choices.gemini_hooks = lib.split_present(settings, self.gemini_specs())
+        if present:
+            self.say("hooks_present", count=len(present))
+        skills, self.choices.gemini_agents = self.converted_bundles(
+            codex.skills_dir(self.home), gemini.agents_dir(self.home), gemini.convert_agent)
+        # ~/.agents/skills is shared with Codex: copy the skills only once
+        self.choices.gemini_skills = [] if "codex" in self.choices.assistants else skills
+
+    def gemini_specs(self) -> list:
+        return gemini.hook_specs(self.values(), lib.local_name("_system", self.names()), self.choices.language)
+
+    def codex_specs(self) -> list:
+        return codex.hook_specs(self.values(), lib.local_name("_system", self.names()), self.choices.language)
+
+    def read_json_hooks(self, path: Path) -> tuple:
+        raw = path.read_bytes() if path.is_file() else None
+        try:
+            return raw, lib.parse_settings(raw)
+        except (ValueError, TypeError, UnicodeDecodeError) as error:
+            raise lib.InstallerError(self.t("other_hooks_broken", path=path,
+                                            error=f"{type(error).__name__}: {error}")) from None
+
+    def choose_antigravity(self) -> None:
         self.say("assist_antigravity", hooks=ag.hooks_path(self.home), instructions=ag.instructions_path(self.home))
-        if self.choices.want_skills:
-            self.choices.antigravity_skills = self.resolve_names(lib.skill_bundles(self.vault_files()),
-                                                                 ag.skills_dir(self.home), "skill")
-        if self.choices.want_agents:
-            agents = [ag.convert_agent(b) for b in lib.agent_bundles(self.vault_files())]
-            self.choices.antigravity_agents = self.resolve_names(agents, ag.agents_dir(self.home), "agent")
+        self.choices.antigravity_skills, self.choices.antigravity_agents = self.converted_bundles(
+            ag.skills_dir(self.home), ag.agents_dir(self.home), ag.convert_agent)
 
     def bundle_target(self, folder: Path, bundle: lib.Bundle, kind: str) -> Path:
-        return folder / bundle.name if kind == "skill" else folder / f"{bundle.name}.md"
+        return folder / bundle.name if kind == "skill" else folder / f"{bundle.name}{bundle.suffix}"
 
     def same_as_installed(self, folder: Path, bundle: lib.Bundle, kind: str) -> bool:
-        main = ("SKILL.md",) if kind == "skill" else (f"{bundle.name}.md",)
+        main = ("SKILL.md",) if kind == "skill" else (f"{bundle.name}{bundle.suffix}",)
         path = folder / bundle.name / "SKILL.md" if kind == "skill" else folder / main[0]
         return path.is_file() and path.read_bytes() == bundle.files[main]
 
@@ -314,7 +366,7 @@ class Installer:
             if self.same_as_installed(folder, bundle, kind):
                 same.append(bundle.name)
                 continue
-            new_name = self.free_name(folder, bundle.name, kind)
+            new_name = self.free_name(folder, bundle.name, kind, bundle.suffix)
             answer = self.asker.choose("name_conflict", self.t("conflict_question", kind=self.t(f"kind_{kind}"),
                                                                name=bundle.name, new_name=new_name), ["skip", "rename"], "skip")
             if answer == "rename":
@@ -323,9 +375,9 @@ class Installer:
             self.say("same_present", names=", ".join(same))
         return final
 
-    def free_name(self, folder: Path, name: str, kind: str) -> str:
+    def free_name(self, folder: Path, name: str, kind: str, suffix: str = ".md") -> str:
         candidate, n = f"mindgate-{name}", 2
-        while self.bundle_target(folder, lib.Bundle(candidate, {}), kind).exists():
+        while self.bundle_target(folder, lib.Bundle(candidate, {}, suffix), kind).exists():
             candidate, n = f"mindgate-{name}-{n}", n + 1
         return candidate
 
@@ -404,6 +456,8 @@ class Installer:
         self.plan_settings(plan)
         self.plan_bundles(plan)
         self.plan_antigravity(plan)
+        self.plan_codex(plan)
+        self.plan_gemini(plan)
         self.plan_tasks(plan)
         return plan
 
@@ -482,12 +536,47 @@ class Installer:
         mindgate = ag.hook_set(self.values(), lib.local_name("_system", self.names()))
         current = hooks.read_bytes() if hooks.is_file() else None
         self.add_change(plan, hooks, ag.add_hook_set(current, mindgate), "antigravity-hooks")
-        instructions = ag.instructions_path(self.home)
+        if "gemini" not in self.choices.assistants:   # otherwise Antigravity reads the shared block in GEMINI.md
+            instructions = ag.instructions_path(self.home)
+            text = lib.decode(instructions.read_bytes()) if instructions.is_file() else None
+            new = ag.instructions_text(text, self.core_text(), self.choices.language)
+            self.add_change(plan, instructions, lib.encode(new), "instructions", mode="merge")
+        self.plan_copies(plan, self.choices.antigravity_skills, ag.skills_dir(self.home),
+                         self.choices.antigravity_agents, ag.agents_dir(self.home))
+
+    def plan_codex(self, plan: Plan) -> None:
+        if "codex" not in self.choices.assistants:
+            return
+        self.plan_json_hooks(plan, codex.hooks_path(self.home), self.choices.codex_hooks)
+        instructions = codex.instructions_path(self.home)
         text = lib.decode(instructions.read_bytes()) if instructions.is_file() else None
-        new = ag.instructions_text(text, self.core_text(), self.choices.language)
+        new = codex.instructions_text(text, self.core_text(), self.choices.language)
         self.add_change(plan, instructions, lib.encode(new), "instructions", mode="merge")
-        for kind, bundles, folder in (("skill", self.choices.antigravity_skills, ag.skills_dir(self.home)),
-                                      ("agent", self.choices.antigravity_agents, ag.agents_dir(self.home))):
+        self.plan_copies(plan, self.choices.codex_skills, codex.skills_dir(self.home),
+                         self.choices.codex_agents, codex.agents_dir(self.home))
+
+    def plan_gemini(self, plan: Plan) -> None:
+        if "gemini" not in self.choices.assistants:
+            return
+        self.plan_json_hooks(plan, gemini.settings_path(self.home), self.choices.gemini_hooks)
+        instructions = gemini.instructions_path(self.home)
+        text = lib.decode(instructions.read_bytes()) if instructions.is_file() else None
+        shared = "antigravity" in self.choices.assistants
+        new = gemini.instructions_text(text, self.core_text(), self.choices.language, shared)
+        self.add_change(plan, instructions, lib.encode(new), "instructions", mode="merge")
+        self.plan_copies(plan, self.choices.gemini_skills, codex.skills_dir(self.home),
+                         self.choices.gemini_agents, gemini.agents_dir(self.home))
+
+    def plan_json_hooks(self, plan: Plan, path: Path, specs: list) -> None:
+        """Hook groups added to a Claude-shaped hooks file (Codex hooks.json, Gemini CLI settings.json)."""
+        if not specs:
+            return
+        _, settings = self.read_json_hooks(path)
+        hooks = [{"event": s.event, "command": s.command} for s in specs]
+        self.add_change(plan, path, lib.settings_bytes(lib.add_hooks(settings, specs)), "settings", hooks=hooks)
+
+    def plan_copies(self, plan: Plan, skills: list, skills_folder: Path, agents: list, agents_folder: Path) -> None:
+        for kind, bundles, folder in (("skill", skills, skills_folder), ("agent", agents, agents_folder)):
             for bundle in bundles:
                 root = folder / bundle.name if kind == "skill" else folder
                 plan.actions += [lib.Write(root.joinpath(*parts), data) for parts, data in sorted(bundle.files.items())]

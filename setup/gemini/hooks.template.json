@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "name": "mindgate-command-guard",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/command_guard.py\" --client gemini"
+          }
+        ]
+      },
+      {
+        "matcher": "write_file|replace",
+        "hooks": [
+          {
+            "type": "command",
+            "name": "mindgate-write-guard",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/write_guard.py\" --client gemini"
+          }
+        ]
+      },
+      {
+        "matcher": "web_fetch",
+        "hooks": [
+          {
+            "type": "command",
+            "name": "mindgate-site-guard",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/site_guard.py\" --client gemini"
+          }
+        ]
+      }
+    ]
+  }
+}

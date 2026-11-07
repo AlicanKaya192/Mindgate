@@ -14,6 +14,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -21,6 +22,8 @@ from unittest import mock
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import antigravity as ag  # noqa: E402
+import codex  # noqa: E402
+import gemini  # noqa: E402
 import install  # noqa: E402
 import installer_lib as lib  # noqa: E402
 import installer_messages as msg  # noqa: E402
@@ -30,7 +33,8 @@ REPO = HERE.parent
 RUNS = Path(os.environ.get("MINDGATE_TEST_RUNS") or REPO / ".yerel" / "k6" / "runs")
 BLOCKLIST = REPO / ".yerel" / "yasak-liste.txt"
 NEW_FILES = ["install.py", "uninstall.py", "installer_lib.py", "installer_messages.py", "installer_test.py",
-             "answers.example.json", "antigravity.py", "antigravity/hooks.template.json"]
+             "answers.example.json", "antigravity.py", "antigravity/hooks.template.json", "codex.py",
+             "codex/hooks.template.json", "gemini.py", "gemini/hooks.template.json"]
 PLACEHOLDER = re.compile(r"\{\{(VAULT|PY|HOME|LANG|USER)\}\}")
 ANY_PLACEHOLDER = re.compile(r"\{\{[^{}\n]*\}\}")
 USER_HOOKS = {"hooks": {
@@ -663,10 +667,145 @@ class AntigravityTest(unittest.TestCase):
             ag.convert_agent(bundle)
 
 
+USER_CODEX_HOOKS = {"hooks": {"PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": "echo mine"}]}]}}
+USER_GEMINI_SETTINGS = {"ui": {"theme": "Dracula"}, "hooks": {"AfterTool": [{"hooks": [{"type": "command", "command": "echo x"}]}]}}
+
+
+def run_hook(command: str, payload: dict) -> dict:
+    result = subprocess.run(command, shell=True, input=json.dumps(payload), capture_output=True, text=True, encoding="utf-8")
+    return json.loads(result.stdout) if result.stdout.strip() else {}
+
+
+def hook_commands(path: Path, event: str) -> list:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return [h["command"] for g in data["hooks"].get(event, []) for h in g["hooks"]]
+
+
+class CodexTest(unittest.TestCase):
+    def install(self, run: Run, **answers) -> str:
+        code, out = run.install(base_answers(assistants=["codex"], **answers))
+        self.assertEqual(code, 0, out)
+        return out
+
+    def test_fresh_home_gets_guards_instructions_skills_and_toml_agents(self):
+        run = Run()
+        self.install(run)
+        commands = hook_commands(codex.hooks_path(run.home), "PreToolUse")
+        self.assertEqual(len(commands), 2)
+        self.assertTrue(all(c.endswith("--client codex") for c in commands), commands)
+        self.assertLessEqual(len(codex.instructions_path(run.home).read_bytes()), codex.INSTRUCTIONS_LIMIT)
+        self.assertTrue((codex.skills_dir(run.home) / "idea" / "SKILL.md").is_file())
+        agents = sorted(codex.agents_dir(run.home).glob("*.toml"))
+        self.assertGreater(len(agents), 5)
+        for path in agents:
+            with self.subTest(agent=path.name):
+                data = tomllib.loads(path.read_text(encoding="utf-8"))
+                self.assertEqual(data["name"], path.stem)
+                self.assertTrue(data["description"] and data["developer_instructions"].strip())
+
+    def test_users_own_files_come_back_byte_for_byte(self):
+        run = Run()
+        codex.codex_dir(run.home).mkdir(parents=True)
+        codex.hooks_path(run.home).write_bytes(json.dumps(USER_CODEX_HOOKS, indent=2).encode("utf-8"))
+        codex.instructions_path(run.home).write_bytes(USER_AGENTS_MD)
+        before = codex.hooks_path(run.home).read_bytes()
+        self.install(run)
+        self.assertIn("echo mine", hook_commands(codex.hooks_path(run.home), "PreToolUse"))
+        code, out = run.uninstall()
+        self.assertEqual(code, 0, out)
+        self.assertEqual(codex.hooks_path(run.home).read_bytes(), before)
+        self.assertEqual(codex.instructions_path(run.home).read_bytes(), USER_AGENTS_MD)
+        self.assertFalse((codex.skills_dir(run.home) / "idea").exists())
+        self.assertFalse(any(codex.agents_dir(run.home).glob("*.toml")))
+
+    def test_second_install_adds_no_hook_twice(self):
+        run = Run()
+        self.install(run)
+        self.install(run, reuse_vault=True)
+        self.assertEqual(len(hook_commands(codex.hooks_path(run.home), "PreToolUse")), 2)
+
+    def test_installed_guards_deny_home_deletion_and_log_writes(self):
+        run = Run()
+        self.install(run)
+        command, write = hook_commands(codex.hooks_path(run.home), "PreToolUse")
+        shell = {"session_id": "t1", "cwd": str(run.root), "hook_event_name": "PreToolUse", "tool_name": "Bash",
+                 "tool_input": {"command": "rm -rf ~"}}
+        self.assertEqual(run_hook(command, shell)["hookSpecificOutput"]["permissionDecision"], "deny")
+        patch = f"*** Begin Patch\n*** Update File: {run.vault / 'log.md'}\n@@\n-a\n+b\n*** End Patch\n"
+        edit = {**shell, "tool_name": "apply_patch", "tool_input": {"command": patch}}
+        self.assertEqual(run_hook(write, edit)["hookSpecificOutput"]["permissionDecision"], "deny")
+
+    def test_instructions_over_32_kib_are_refused(self):
+        with self.assertRaises(lib.InstallerError):
+            codex.instructions_text("x" * codex.INSTRUCTIONS_LIMIT, "core", "en")
+
+    def test_agent_text_with_three_quotes_stays_valid_toml(self):
+        three = "'" * 3
+        text = f"---\nname: q\ndescription: Q\n---\nSay {three} and \"\"\" here.\n"
+        data = tomllib.loads(lib.decode(codex.convert_agent(lib.Bundle("q", {("q.md",): text.encode()})).files[("q.toml",)]))
+        self.assertIn(three, data["developer_instructions"])
+
+
+class GeminiTest(unittest.TestCase):
+    def install(self, run: Run, assistants: list, **answers) -> str:
+        code, out = run.install(base_answers(assistants=assistants, **answers))
+        self.assertEqual(code, 0, out)
+        return out
+
+    def test_fresh_home_gets_guards_instructions_skills_and_agents(self):
+        run = Run()
+        self.install(run, ["gemini"])
+        commands = hook_commands(gemini.settings_path(run.home), "BeforeTool")
+        self.assertEqual(len(commands), 3)
+        self.assertTrue(all(c.endswith("--client gemini") for c in commands), commands)
+        self.assertIn(gemini.HEADER["en"], gemini.instructions_path(run.home).read_text(encoding="utf-8"))
+        self.assertTrue((codex.skills_dir(run.home) / "idea" / "SKILL.md").is_file())
+        scout = (gemini.agents_dir(run.home) / "scout.md").read_text(encoding="utf-8")
+        self.assertIn("tools: [read_file, read_many_files, grep_search, glob, list_directory, run_shell_command", scout)
+        self.assertNotRegex(scout, r"(?m)^(model|effort|skills):")
+
+    def test_other_settings_stay_and_come_back_byte_for_byte(self):
+        run = Run()
+        ag.gemini_dir(run.home).mkdir(parents=True)
+        gemini.settings_path(run.home).write_bytes(json.dumps(USER_GEMINI_SETTINGS, indent=2).encode("utf-8"))
+        before = gemini.settings_path(run.home).read_bytes()
+        self.install(run, ["gemini"])
+        installed = json.loads(gemini.settings_path(run.home).read_text(encoding="utf-8"))
+        self.assertEqual(installed["ui"], USER_GEMINI_SETTINGS["ui"])
+        self.assertEqual(installed["hooks"]["AfterTool"], USER_GEMINI_SETTINGS["hooks"]["AfterTool"])
+        code, out = run.uninstall()
+        self.assertEqual(code, 0, out)
+        self.assertEqual(gemini.settings_path(run.home).read_bytes(), before)
+        self.assertFalse(gemini.instructions_path(run.home).exists())
+
+    def test_installed_guards_deny_what_claude_would_ask(self):
+        run = Run()
+        self.install(run, ["gemini"])
+        command, _, site = hook_commands(gemini.settings_path(run.home), "BeforeTool")
+        base = {"session_id": "t1", "cwd": str(run.root), "hook_event_name": "BeforeTool"}
+        shell = {**base, "tool_name": "run_shell_command", "tool_input": {"command": "rm -rf ~/x"}}
+        self.assertEqual(run_hook(command, shell)["decision"], "deny")
+        fetch = {**base, "tool_name": "web_fetch", "tool_input": {"prompt": "Summarize https://docs.python.org/3/"}}
+        self.assertEqual(run_hook(site, fetch)["decision"], "deny")
+
+    def test_all_three_assistants_share_files_without_writing_twice(self):
+        run = Run()
+        self.install(run, ["antigravity", "gemini", "codex"])
+        self.assertFalse(ag.instructions_path(run.home).exists(), "Antigravity reads the shared GEMINI.md")
+        self.assertIn(gemini.SHARED_HEADER["en"], gemini.instructions_path(run.home).read_text(encoding="utf-8"))
+        self.assertTrue((codex.skills_dir(run.home) / "idea" / "SKILL.md").is_file())
+        self.assertTrue((ag.skills_dir(run.home) / "idea" / "SKILL.md").is_file())
+        code, out = run.uninstall()
+        self.assertEqual(code, 0, out)
+        for path in (gemini.settings_path(run.home), codex.hooks_path(run.home), ag.hooks_path(run.home),
+                     codex.skills_dir(run.home) / "idea"):
+            self.assertFalse(path.exists(), path)
+
+
 class CodeRulesTest(unittest.TestCase):
     def test_no_deleting_call_in_the_installer_code(self):
         deleting = re.compile(r"\b(os\.remove|os\.unlink|\.unlink\(|rmtree|os\.rmdir|\.rmdir\(|shutil\.move|send2trash)")
-        for name in ("install.py", "uninstall.py", "installer_lib.py", "antigravity.py"):
+        for name in ("install.py", "uninstall.py", "installer_lib.py", "antigravity.py", "codex.py", "gemini.py"):
             self.assertIsNone(deleting.search((HERE / name).read_text(encoding="utf-8")), name)
 
 

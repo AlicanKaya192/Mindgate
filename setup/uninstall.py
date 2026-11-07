@@ -19,6 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
 import antigravity as ag  # noqa: E402
+import codex  # noqa: E402
 import installer_lib as lib  # noqa: E402
 import installer_messages as msg  # noqa: E402
 
@@ -47,7 +48,8 @@ class Uninstaller:
     def __init__(self, home: Path, asker, dry_run: bool = False, output=print):
         self.home = home
         self.claude = lib.claude_dir(home)
-        self.roots = (self.claude, ag.gemini_dir(home))   # only files under these are touched
+        # only files under these are touched: the homes of Claude, Antigravity and Gemini CLI, Codex, shared skills
+        self.roots = (self.claude, ag.gemini_dir(home), codex.codex_dir(home), codex.skills_dir(home))
         self.asker = asker
         self.dry_run = dry_run
         self.out = output

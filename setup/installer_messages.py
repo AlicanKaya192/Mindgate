@@ -129,6 +129,18 @@ MESSAGES = {
                        "tried only with sample hook data from the assistant's documents, not with the real program.",
         "assist_no": "nothing is written for that assistant; Claude Code is set up as before.",
         "assist_question": "Set up {name} too?",
+        "other_hooks_broken": "{path} is not valid JSON or does not hold a JSON object ({error}). I stop here so that "
+                              "nothing breaks it further. Nothing was written.",
+        "assist_codex": "Codex gets: the command and write guards in {hooks} (your own hooks stay), the instructions "
+                        "between marked lines in {instructions}, the skills in ~/.agents/skills and the agents as TOML "
+                        "files in ~/.codex/agents. Codex runs a new hook only after you review it with /hooks. Codex "
+                        "cannot ask: a single delete is left to Codex's own approval, a recursive delete is refused. "
+                        "Web pages are not checked (Codex web tools do not reach hooks), and an agent file cannot limit "
+                        "tools.",
+        "assist_gemini": "Gemini CLI gets: the command, write and site guards in the \"hooks\" part of {hooks} (your "
+                         "other settings stay), the instructions between marked lines in {instructions} (Antigravity "
+                         "reads this file too), the skills in ~/.agents/skills and the agents in ~/.gemini/agents. Gemini "
+                         "CLI cannot ask: what Claude would ask (an unlisted site, a delete) is refused.",
         "assist_antigravity": "Antigravity gets: the command, write and site guards in {hooks} (a hook set named "
                               "\"mindgate\"; your other hook sets stay), the instructions between marked lines in "
                               "{instructions}, and the skills and agents you chose above. Session records, the context "
@@ -324,6 +336,19 @@ MESSAGES = {
                        "yalnızca asistanın belgelerindeki örnek hook verisiyle denendi, gerçek programla denenmedi.",
         "assist_no": "o asistan için hiçbir şey yazılmaz; Claude Code önceki gibi kurulur.",
         "assist_question": "{name} da kurulsun mu?",
+        "other_hooks_broken": "{path} geçerli bir JSON değil ya da JSON nesnesi tutmuyor ({error}). Dosyayı daha çok "
+                              "bozmamak için burada duruyorum. Hiçbir şey yazılmadı.",
+        "assist_codex": "Codex'e kurulacaklar: {hooks} içinde komut ve yazma kapıları (kendi hook'larınız yerinde "
+                        "kalır), {instructions} içinde işaretli satırlar arasında talimatlar, ~/.agents/skills içinde "
+                        "beceriler ve ~/.codex/agents içinde TOML dosyası olarak ajanlar. Codex yeni bir hook'u siz "
+                        "/hooks ile inceleyip onaylayınca çalıştırır. Codex soru soramaz: tek dosya silme Codex'in "
+                        "kendi onayına kalır, özyinelemeli silme reddedilir. Web sayfaları denetlenmez (Codex'in web "
+                        "araçları hook'a gelmez) ve ajan dosyası araçları sınırlayamaz.",
+        "assist_gemini": "Gemini CLI'a kurulacaklar: {hooks} dosyasının \"hooks\" bölümünde komut, yazma ve site "
+                         "kapıları (öteki ayarlarınız yerinde kalır), {instructions} içinde işaretli satırlar arasında "
+                         "talimatlar (Antigravity de bu dosyayı okur), ~/.agents/skills içinde beceriler ve "
+                         "~/.gemini/agents içinde ajanlar. Gemini CLI soru soramaz: Claude'un soracağı şey (listede "
+                         "olmayan site, silme) reddedilir.",
         "assist_antigravity": "Antigravity'ye kurulacaklar: {hooks} içinde komut, yazma ve site kapıları (\"mindgate\" "
                               "adlı bir hook takımı; öteki takımlarınız yerinde kalır), {instructions} içinde işaretli "
                               "satırlar arasında talimatlar ve yukarıda seçtiğiniz beceriler ve ajanlar. Oturum kayıtları, "
@@ -595,7 +620,7 @@ LOG_PAGE = {
 }
 
 USER_WORD = {"en": "the user", "tr": "kullanıcı"}
-ASSISTANT_NAMES = {"antigravity": "Google Antigravity"}
+ASSISTANT_NAMES = {"antigravity": "Google Antigravity", "gemini": "Google Gemini CLI", "codex": "OpenAI Codex CLI"}
 
 
 def text(language: str, key: str, /, **values) -> str:
