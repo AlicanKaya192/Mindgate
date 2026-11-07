@@ -6,3 +6,4 @@ locales/tr/vault/_system/*.py
 locales/tr/vault/_system/config.json
 locales/tr/vault/_system/skills/*/scripts/
 locales/tr/setup/hooks.raw.json
+demo/vault-*/
