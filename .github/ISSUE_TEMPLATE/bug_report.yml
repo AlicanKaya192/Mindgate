@@ -1,0 +1,78 @@
+name: Bug report
+description: Something does not work as described.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. You can write in English or Turkish (İngilizce ya da Türkçe yazabilirsiniz).
+
+        **Security problems do not go here:** use the private report described in SECURITY.md.
+        **Do not paste your notes, vault content, session records or anything personal.** Replace paths
+        with `C:\Users\you\...` or `~/...`.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What were you doing, what did you expect, and what happened instead?
+      placeholder: |
+        I ran the installer with --dry-run. I expected only a summary,
+        but it asked me to confirm the hooks step.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can it be reproduced?
+      description: Step by step, so it can be tried the same way.
+      placeholder: |
+        1. py -3 setup/install.py --dry-run
+        2. Choose English
+        3. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options:
+        - Installer or uninstaller
+        - A guard (command, write, site, agent)
+        - Session hooks (start, end, compaction, context)
+        - A skill or an agent
+        - Rules, schema or templates
+        - Scheduled tasks
+        - Turkish install or translation
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, `python --version`, Claude Code version, and the Mindgate commit you used.
+      placeholder: "Windows 11 24H2, Python 3.12.4, Claude Code 2.x, commit abc1234"
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Error text or output
+      description: Paste the relevant part only, with personal paths and names removed.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I looked for an existing issue about the same problem.
+          required: true
+        - label: I removed personal paths, names and note content from this report.
+          required: true

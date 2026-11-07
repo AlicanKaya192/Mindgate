@@ -1,0 +1,54 @@
+name: Feature idea
+description: Suggest a skill, agent, rule, guard or installer change.
+title: "[Idea]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You can write in English or Turkish (İngilizce ya da Türkçe yazabilirsiniz).
+        Describe **which problem it solves** more than what should be added; that leads to a better solution.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Which problem does it solve?
+      description: What can you not do today, or where does Claude get it wrong?
+      placeholder: |
+        After a long session I lose track of which decisions were made,
+        and the handoff card does not list them.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Your idea for a solution
+      description: Optional.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options:
+        - Installer or uninstaller
+        - A guard (command, write, site, agent)
+        - Session hooks
+        - Skills
+        - Agents
+        - Rules, schema or templates
+        - Scheduled tasks
+        - Languages and translation
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I looked for an existing issue with the same idea.
+          required: true
+        - label: The idea does not need to send notes or personal data off the computer, or it says so clearly above.
+          required: true

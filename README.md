@@ -90,11 +90,11 @@ py -3 setup/uninstall.py
 
 The uninstaller reads the install manifest. `settings.json` and `CLAUDE.md` are put back from the backups when they have not changed since the install; when they have changed, only the Mindgate hooks, import line or block are taken out. Installed skills, agents, scheduled tasks and `~/.claude/mindgate/` are not deleted: they are moved into `~/.claude/mindgate-removed-<time>/`, which you can delete yourself later. The vault is never touched, because it holds your notes.
 
-### Demo vault
+### What a vault looks like
 
-`py -3 demo/make_demo.py` builds an English and a Turkish vault under `demo/` with invented content: one student project, ideas, a solved problem, concept notes, a research note, pending items, log entries and a handoff card. It installs into a throwaway home folder, so your real `~/.claude` is not used. Details: [`demo/README.md`](demo/README.md).
+The Obsidian graph view of one Mindgate vault after about a month of daily use. Every dot is a note and every line is a link; titles are hidden.
 
-<!-- screenshot: demo-vault-obsidian.png — the English demo vault open in Obsidian -->
+![Obsidian graph view of a Mindgate vault after a month of use](docs/screenshots/vault-graph.png)
 
 ### Repository layout
 
@@ -107,7 +107,9 @@ vault/            the English base vault
   _templates/     16 note templates
   _system/        scripts and tests, skills/, agents/, instructions/
 locales/tr/       Turkish texts and names.json; the installer builds the Turkish vault from vault/ and these
-demo/             make_demo.py, answer files, invented seed notes
+docs/screenshots/ the images in this README
+.github/          issue and pull request templates
+SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md (each with a .tr.md)
 TRANSLATION-GUIDE.md
 NOTICE.md
 LICENSE
@@ -251,11 +253,13 @@ Hooks run commands on your computer: every hook calls a Python script in your va
 
 ![Command guard asking before a deletion](docs/screenshots/guard-blocks-command.png)
 
+Found a security problem? Please report it privately as described in [`SECURITY.md`](SECURITY.md), not in a public issue.
+
 ### Limits and roadmap
 
 - macOS and Linux are not tested.
 - The optional dashboard is not part of v1; steps that would publish or update it are left out, and rule #29 is not offered.
-- The installer does not create a git repository in the vault or install the pre-commit secret scan. On a fresh install `health.py --full` reports the missing pre-commit hook, and it also reports the skill links as missing because the installer copies the skills while the check expects linked folders.
+- The installer does not create a git repository in the vault or install the pre-commit secret scan. On a fresh install `health.py` notes that the pre-commit secret scan is not installed.
 - Some generated texts stay English in a Turkish install (see Languages).
 
 ### License
@@ -356,11 +360,11 @@ py -3 setup/uninstall.py
 
 Kaldırıcı, kurulum kaydını (manifest) okur. `settings.json` ve `CLAUDE.md`, kurulumdan sonra değişmemişse yedeklerden geri yüklenir; değişmişse yalnızca Mindgate hook'ları, içe aktarma satırı ya da blok çıkarılır. Kurulan beceriler, ajanlar, zamanlanmış görevler ve `~/.claude/mindgate/` silinmez: `~/.claude/mindgate-removed-<zaman>/` klasörüne taşınır; o klasörü sonra kendiniz silebilirsiniz. Notlarınızı tuttuğu için vault'a hiç dokunulmaz.
 
-### Örnek vault
+### Bir vault nasıl görünür
 
-`py -3 demo/make_demo.py`, `demo/` altında uydurma içerikli bir İngilizce ve bir Türkçe vault oluşturur: bir öğrenci projesi, fikirler, çözülmüş bir sorun, kavram notları, bir araştırma notu, bekleyen maddeler, log girdileri ve bir devir kartı. Kurulumu geçici bir ev klasörüne yapar; gerçek `~/.claude` klasörünüz kullanılmaz. Ayrıntılar: [`demo/README.md`](demo/README.md).
+Yaklaşık bir aylık günlük kullanımdan sonra bir Mindgate vault'unun Obsidian'daki grafik görünümü. Her nokta bir not, her çizgi bir bağlantı; başlıklar gizli.
 
-<!-- screenshot: demo-vault-obsidian.png — the English demo vault open in Obsidian -->
+![Obsidian graph view of a Mindgate vault after a month of use](docs/screenshots/vault-graph.png)
 
 ### Depo yapısı
 
@@ -373,7 +377,9 @@ vault/            İngilizce temel vault
   _templates/     16 not şablonu
   _system/        betikler ve testler, skills/, agents/, instructions/
 locales/tr/       Türkçe metinler ve names.json; kurucu Türkçe vault'u vault/ ile bunlardan kurar
-demo/             make_demo.py, cevap dosyaları, uydurma başlangıç notları
+docs/screenshots/ bu README'deki görseller
+.github/          issue ve pull request şablonları
+SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md (her birinin .tr.md kopyası var)
 TRANSLATION-GUIDE.md
 NOTICE.md
 LICENSE
@@ -519,11 +525,13 @@ Hook'lar bilgisayarınızda komut çalıştırır: Claude Code ilgili olaya her 
 
 ![Command guard asking before a deletion](docs/screenshots/guard-blocks-command.png)
 
+Bir güvenlik sorunu mu buldunuz? Lütfen herkese açık bir issue yerine [`SECURITY.tr.md`](SECURITY.tr.md) belgesinde anlatıldığı gibi gizli olarak bildirin.
+
 ### Sınırlar ve yol haritası
 
 - macOS ve Linux sınanmadı.
 - İsteğe bağlı pano v1'de yok; onu yayımlayacak ya da güncelleyecek adımlar çıkarıldı, #29 numaralı kural önerilmiyor.
-- Kurucu vault'ta git deposu açmaz ve commit öncesi sır taramasını kurmaz. Yeni bir kurulumda `health.py --full` eksik pre-commit hook'unu bildirir; kurucu becerileri kopyaladığı, denetim ise bağlı klasörler beklediği için beceri bağlantılarını da eksik gösterir.
+- Kurucu vault'ta git deposu açmaz ve commit öncesi sır taramasını kurmaz. Yeni bir kurulumda `health.py`, commit öncesi sır taramasının kurulu olmadığını bildirir.
 - Türkçe kurulumda üretilen bazı metinler İngilizce kalır (bkz. Dil desteği).
 
 ### Lisans

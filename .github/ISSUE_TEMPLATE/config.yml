@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/AlicanKaya192/Mindgate/security/advisories/new
+    about: Report security problems privately here, not in a public issue.
+  - name: Contributing guide
+    url: https://github.com/AlicanKaya192/Mindgate/blob/main/CONTRIBUTING.md
+    about: Read this before you send code, a translation or a new skill.
