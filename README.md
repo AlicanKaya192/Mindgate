@@ -40,7 +40,7 @@ The vault has 20 Python scripts (standard library only) with 21 test files. They
 
 `session_log save` is registered for two events, so the installer lists 12 hook entries. The exact commands are in [`setup/hooks.template.json`](setup/hooks.template.json).
 
-<!-- screenshot: session-start.png — the session start message with rule titles and handoff cards -->
+![Session start hook output](docs/screenshots/session-start.png)
 
 ### Requirements
 
@@ -61,7 +61,7 @@ py -3 setup/install.py
 
 On macOS and Linux use `python3` instead of `py -3`. The dry run asks the same questions, prints every file it would write and stops without writing.
 
-<!-- screenshot: installer-language.png — the bilingual first question -->
+![Installer: the bilingual first question](docs/screenshots/installer-language.png)
 
 #### What the installer asks
 
@@ -79,7 +79,7 @@ On macOS and Linux use `python3` instead of `py -3`. The dry run asks the same q
 
 For unattended runs every answer can come from a file: see [`setup/answers.example.json`](setup/answers.example.json). With `--answers` the installer refuses to use your real home folder; give it a test folder with `--home`.
 
-<!-- screenshot: installer-dry-run.png — the dry run summary before anything is written -->
+![Installer: dry-run summary before anything is written](docs/screenshots/installer-dry-run.png)
 
 ### Uninstall
 
@@ -235,7 +235,7 @@ The daily task ([`setup/tasks/daily/SKILL.md`](setup/tasks/daily/SKILL.md)) read
 
 Neither task deletes files or pushes by default. Both read only the sessions that ran in the vault unless you chose otherwise during install.
 
-<!-- screenshot: daily-task-output.png — the summary at the end of a daily task run -->
+![Health check on the demo vault](docs/screenshots/health-check.png)
 
 ### Languages
 
@@ -249,7 +249,7 @@ The installer writes only these: the vault folder you choose, `~/.claude/CLAUDE.
 
 Hooks run commands on your computer: every hook calls a Python script in your vault each time Claude Code reaches that event. Read [`setup/hooks.template.json`](setup/hooks.template.json) and the scripts in [`vault/_system/`](vault/_system/) before you install them. The guards reduce risk; they do not make a model safe on their own.
 
-<!-- screenshot: guard-blocks-command.png — the command guard stopping a command outside the project -->
+![Command guard asking before a deletion](docs/screenshots/guard-blocks-command.png)
 
 ### Limits and roadmap
 
@@ -306,7 +306,7 @@ Vault'ta 20 Python betiği (yalnızca standart kütüphane) ve 21 test dosyası 
 
 `session_log save` iki olaya bağlı olduğu için kurucu 12 hook girdisi listeler. Komutların tam hâli [`setup/hooks.template.json`](setup/hooks.template.json) dosyasındadır.
 
-<!-- screenshot: session-start.png — the session start message with rule titles and handoff cards -->
+![Session start hook output](docs/screenshots/session-start.png)
 
 ### Gereksinimler
 
@@ -327,7 +327,7 @@ py -3 setup/install.py
 
 macOS ve Linux'ta `py -3` yerine `python3` yazın. Kuru çalıştırma (dry run) aynı soruları sorar, yazacağı her dosyayı listeler ve hiçbir şey yazmadan durur.
 
-<!-- screenshot: installer-language.png — the bilingual first question -->
+![Installer: the bilingual first question](docs/screenshots/installer-language.png)
 
 #### Kurucunun sordukları
 
@@ -345,7 +345,7 @@ macOS ve Linux'ta `py -3` yerine `python3` yazın. Kuru çalıştırma (dry run)
 
 Gözetimsiz çalıştırmada bütün cevaplar bir dosyadan okunabilir: [`setup/answers.example.json`](setup/answers.example.json). `--answers` verildiğinde kurucu gerçek ev klasörünüzü kullanmayı reddeder; `--home` ile bir test klasörü verin.
 
-<!-- screenshot: installer-dry-run.png — the dry run summary before anything is written -->
+![Installer: dry-run summary before anything is written](docs/screenshots/installer-dry-run.png)
 
 ### Kaldırma
 
@@ -503,7 +503,7 @@ Günlük görev ([`locales/tr/setup/tasks/daily/SKILL.md`](locales/tr/setup/task
 
 İki görev de dosya silmez ve varsayılan olarak push etmez. Kurulumda başka bir seçim yapmadıysanız ikisi de yalnızca vault'ta çalışmış oturumları okur.
 
-<!-- screenshot: daily-task-output.png — the summary at the end of a daily task run -->
+![Health check on the demo vault](docs/screenshots/health-check.png)
 
 ### Dil desteği
 
@@ -517,7 +517,7 @@ Kurucu yalnızca şunları yazar: seçtiğiniz vault klasörü, `~/.claude/CLAUD
 
 Hook'lar bilgisayarınızda komut çalıştırır: Claude Code ilgili olaya her geldiğinde her hook vault'unuzdaki bir Python betiğini çağırır. Kurmadan önce [`setup/hooks.template.json`](setup/hooks.template.json) dosyasını ve [`vault/_system/`](vault/_system/) altındaki betikleri okuyun. Kapılar riski azaltır; bir modeli tek başlarına güvenli yapmaz.
 
-<!-- screenshot: guard-blocks-command.png — the command guard stopping a command outside the project -->
+![Command guard asking before a deletion](docs/screenshots/guard-blocks-command.png)
 
 ### Sınırlar ve yol haritası
 
