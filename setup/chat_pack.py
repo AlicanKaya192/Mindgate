@@ -24,7 +24,7 @@ import secret_scan  # noqa: E402
 SHORT_LIMIT = 1500   # the smaller custom instruction field of chat apps
 LONG_LIMIT = 5000    # the larger one (project or custom assistant instructions)
 NO_GATES_LINE = {
-    "en": "Gates, automatic records and scripts do not work in chat apps.",
+    "en": "Guards, automatic records and scripts do not work in chat apps.",
     "tr": "Kapılar, otomatik kayıt ve betikler sohbet uygulamalarında çalışmaz.",
 }
 STATIC_FILES = {"instructions-short": "txt", "instructions-long": "txt", "README": "md"}

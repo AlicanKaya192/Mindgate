@@ -1,6 +1,6 @@
 # Chat app pack
 
-**Gates, automatic records and scripts do not work in chat apps.** This pack lets you use the Mindgate rules and note format in ChatGPT, Gemini and similar chat apps. There the rules are only written instructions: nothing blocks a harmful command, nothing scans for secrets, and nothing is saved to your vault on its own.
+**Guards, automatic records and scripts do not work in chat apps.** This pack lets you use the Mindgate rules and note format in ChatGPT, Gemini and similar chat apps. There the rules are only written instructions: nothing blocks a harmful command, nothing scans for secrets, and nothing is saved to your vault on its own.
 
 ## What is in the pack
 | File | What to do with it |

@@ -317,7 +317,7 @@ Kurulum programı (installer; bundan sonra "kurucu") da aynı fikirle yazıldı.
 
 Vault sabit bir klasör yapısıyla gelir (gelen kutusu, projeler, fikirler, sorunlar, bilgi, araştırmalar, kurallar, arşiv ve diğerleri). Yanında 16 not şablonu, bir dizin (index), yalnızca sona eklenen bir günlük (log), cevabınızı bekleyen her şeyin toplandığı bir bekleyenler listesi ve sonraki oturuma işin nerede kaldığını söyleyen devir kartları vardır. Şema [`locales/tr/vault/CLAUDE.md`](locales/tr/vault/CLAUDE.md) dosyasındadır.
 
-Claude Code'a 13 ajan, 39 beceri ve onu vault'a yönlendiren global bir talimat dosyası kurulur. Kural dosyasında numaralı 46 kural vardır; bunların üçü isteğe bağlıdır; kurucu bunları size önerir. Antigravity, Gemini CLI ve Codex CLI'a da kapılar, talimatlar, beceriler ve ajanlar kurulabilir (deneysel, bkz. Başka asistanlar).
+Claude Code'a 13 ajan, 39 beceri ve onu vault'a yönlendiren global bir talimat dosyası kurulur. Kural dosyasında numaralı 46 kural vardır; bunların üçü isteğe bağlıdır; kurucu bunları size önerir. Antigravity, Gemini CLI ve Codex CLI'ya da kapılar, talimatlar, beceriler ve ajanlar kurulabilir (deneysel, bkz. Başka asistanlar).
 
 Vault'ta 21 Python betiği (yalnızca standart kütüphane) ve 22 test dosyası bulunur. Betikler bekleyenler listesine ve log'a kilitli yazar, notlarda arama yapar, vault'un sağlığını denetler, sır ve gizli talimat taraması yapar, oturum kayıtlarını tutar. Hook'lar şunlardır:
 
@@ -390,7 +390,7 @@ Kaldırıcı, kurulum kaydını (manifest) okur. `settings.json` ve `CLAUDE.md`,
 
 ### Başka asistanlar (deneysel)
 
-Kurucunun 8. adımı Google Antigravity, Google Gemini CLI ve OpenAI Codex CLI'ı da kurabilir. ChatGPT, Gemini ve benzeri sohbet uygulamaları için yalnızca metinden oluşan bir paket var: [`locales/tr/chat-pack/`](locales/tr/chat-pack/README.md).
+Kurucunun 8. adımı Google Antigravity, Google Gemini CLI ve OpenAI Codex CLI'yı da kurabilir. ChatGPT, Gemini ve benzeri sohbet uygulamaları için yalnızca metinden oluşan bir paket var: [`locales/tr/chat-pack/`](locales/tr/chat-pack/README.md).
 
 | | Claude Code | Antigravity | Gemini CLI | Codex CLI | Sohbet uygulamaları |
 |---|---|---|---|---|---|
@@ -407,7 +407,7 @@ Kurucunun 8. adımı Google Antigravity, Google Gemini CLI ve OpenAI Codex CLI'�
 
 - "Örnek hook verisi", her asistanın belgesindeki örnek veridir (7 Kasım 2026'da okundu); gerçek programla denenmedi. Alan adları değişebilir; bir alan yoksa ya da adı değiştiyse kapı çağrıyı geçirmez, reddeder.
 - Antigravity ve Gemini CLI birlikte seçilince `~/.gemini/GEMINI.md` içindeki tek bloğu paylaşırlar (Antigravity bu dosyayı da okur). Gemini CLI ve Codex `~/.agents/skills` klasörünü paylaşır.
-- Codex yeni ya da değişmiş bir hook'u, siz `/hooks` ile inceleyip onaylayınca çalıştırır. Codex ajan dosyası araçları sınırlayamaz; salt okur ajanlar orada yalnızca talimatlarına dayanır.
+- Codex yeni ya da değişmiş bir hook'u ancak siz `/hooks` ile inceledikten sonra çalıştırır. Codex ajan dosyası araçları sınırlayamaz; salt okur ajanlar orada yalnızca talimatlarına dayanır.
 - Gemini CLI belgelerinde hook'un kullanıcıya soru sormasının bir yolu yok; bu yüzden Claude'un soracağı şey (listede olmayan site, silme) orada reddedilir.
 - Hiçbir asistanda okuma araçları kapıdan geçmez; `.env` dosyaları yalnızca kabukta korunur.
 

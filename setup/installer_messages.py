@@ -336,15 +336,15 @@ MESSAGES = {
                        "yalnızca asistanın belgelerindeki örnek hook verisiyle denendi, gerçek programla denenmedi.",
         "assist_no": "o asistan için hiçbir şey yazılmaz; Claude Code önceki gibi kurulur.",
         "assist_question": "{name} da kurulsun mu?",
-        "other_hooks_broken": "{path} geçerli bir JSON değil ya da JSON nesnesi tutmuyor ({error}). Dosyayı daha çok "
+        "other_hooks_broken": "{path} geçerli bir JSON değil ya da bir JSON nesnesi içermiyor ({error}). Dosyayı daha çok "
                               "bozmamak için burada duruyorum. Hiçbir şey yazılmadı.",
         "assist_codex": "Codex'e kurulacaklar: {hooks} içinde komut ve yazma kapıları (kendi hook'larınız yerinde "
                         "kalır), {instructions} içinde işaretli satırlar arasında talimatlar, ~/.agents/skills içinde "
-                        "beceriler ve ~/.codex/agents içinde TOML dosyası olarak ajanlar. Codex yeni bir hook'u siz "
-                        "/hooks ile inceleyip onaylayınca çalıştırır. Codex soru soramaz: tek dosya silme Codex'in "
+                        "beceriler ve ~/.codex/agents içinde TOML dosyası olarak ajanlar. Codex yeni bir hook'u ancak "
+                        "siz /hooks ile inceledikten sonra çalıştırır. Codex soru soramaz: tek dosya silme Codex'in "
                         "kendi onayına kalır, özyinelemeli silme reddedilir. Web sayfaları denetlenmez (Codex'in web "
                         "araçları hook'a gelmez) ve ajan dosyası araçları sınırlayamaz.",
-        "assist_gemini": "Gemini CLI'a kurulacaklar: {hooks} dosyasının \"hooks\" bölümünde komut, yazma ve site "
+        "assist_gemini": "Gemini CLI'ya kurulacaklar: {hooks} dosyasının \"hooks\" bölümünde komut, yazma ve site "
                          "kapıları (öteki ayarlarınız yerinde kalır), {instructions} içinde işaretli satırlar arasında "
                          "talimatlar (Antigravity de bu dosyayı okur), ~/.agents/skills içinde beceriler ve "
                          "~/.gemini/agents içinde ajanlar. Gemini CLI soru soramaz: Claude'un soracağı şey (listede "
