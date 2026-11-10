@@ -1,0 +1,838 @@
+<style>
+/* Dashboard: rail, tabs and panels. Three dark palettes carry the same roles, so switching one never moves the layout. */
+#dash-root, #dash-root[data-palette="ink"] {
+  --ground: #0b1020; --panel: #121a2b; --panel-2: #18223a; --line: #26324c;
+  --text: #e6e3dc; --muted: #9aa2ab; --accent: #8ab4f0; --accent-ground: #1c2a3d;
+  --good: #6fc59a; --warn: #e5ae5b; --bad: #ee8379;
+  --c1: #8ab4f0; --c2: #e5ae5b; --c3: #b59cf0; --c4: #6fc59a; --c5: #ee8fa8; --c6: #9aa2ab;
+}
+#dash-root[data-palette="graphite"] {
+  --ground: #161412; --panel: #1f1c19; --panel-2: #28241f; --line: #3a342d;
+  --text: #ece8e1; --muted: #a39e95; --accent: #d9925f; --accent-ground: #3a271a;
+  --good: #8cc08a; --warn: #e6c15a; --bad: #e8796b;
+  --c1: #d9925f; --c2: #e6c15a; --c3: #8cb4c9; --c4: #8cc08a; --c5: #c99ac0; --c6: #a39e95;
+}
+#dash-root[data-palette="pine"] {
+  --ground: #091612; --panel: #0f221b; --panel-2: #152c24; --line: #223d32;
+  --text: #e3ede8; --muted: #93a79f; --accent: #b5d67a; --accent-ground: #25321a;
+  --good: #6dc7b0; --warn: #e8b65e; --bad: #ee8a7e;
+  --c1: #b5d67a; --c2: #e8b65e; --c3: #8fb6e8; --c4: #6dc7b0; --c5: #e79bb0; --c6: #93a79f;
+}
+#dash-root {
+  --sp1: 4px; --sp2: 8px; --sp3: 12px; --sp4: 16px; --sp5: 24px;
+  --radius: 10px; --radius-inner: 6px;
+  --fs-small: 12px; --fs-body: 14px; --fs-heading: 16px;
+  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-num: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --body-h: 420px;
+  color-scheme: dark; background: var(--ground); color: var(--text);
+  transition: background-color .2s ease-out;
+}
+.mg, .mg * { box-sizing: border-box; }
+.mg { display: grid; grid-template-columns: 208px minmax(0, 1fr); min-height: 640px; font: 400 var(--fs-body)/1.45 var(--font); color: var(--text); background: var(--ground); }
+.mg-h1, .mg-h2, .mg-h3, .mg-sub, .mg-list, .mg-text, .mg-pre, .mg-two, .mg-empty, .mg-fields, .mg-fields dd { margin: 0; }
+.mg-h1 { font-size: 24px; font-weight: 650; letter-spacing: -.01em; }
+.mg-h2 { font-size: var(--fs-heading); font-weight: 600; }
+.mg-h3 { font-size: var(--fs-small); color: var(--muted); font-weight: 600; margin-bottom: var(--sp1); }
+.mg [hidden] { display: none !important; }
+.mg :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mg-panel :focus-visible { outline-offset: -2px; }
+.mg-muted { color: var(--muted); }
+.mg-small { font-size: var(--fs-small); }
+.mg-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.mg-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Rail: name, tabs, palette */
+.mg-rail { display: flex; flex-direction: column; gap: var(--sp3); padding: var(--sp5) var(--sp3); border-right: 1px solid var(--line); min-width: 0; }
+.mg-name { font-weight: 700; padding: 0 var(--sp3); }
+.mg-tabs { display: flex; flex-direction: column; gap: 2px; }
+.mg-tab { display: flex; align-items: center; gap: var(--sp2); background: none; border: 0; padding: var(--sp2) var(--sp3); border-radius: var(--radius-inner); color: var(--muted); font: inherit; cursor: pointer; white-space: nowrap; text-align: left; transition: background-color .12s ease-out, color .12s ease-out; }
+.mg-tab:hover { color: var(--text); background: var(--panel-2); }
+.mg-tab[aria-current="page"] { color: var(--accent); background: var(--accent-ground); font-weight: 600; }
+.mg-palette { margin-top: auto; padding: 0 var(--sp3); display: flex; flex-direction: column; gap: var(--sp2); }
+.mg-palette-pick { display: flex; gap: var(--sp2); }
+.mg-swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line); cursor: pointer; padding: 0; }
+.mg-swatch[aria-pressed="true"] { border-color: var(--text); }
+.mg-sw-ink { background: linear-gradient(135deg, #0b1020 50%, #8ab4f0 50%); }
+.mg-sw-graphite { background: linear-gradient(135deg, #161412 50%, #d9925f 50%); }
+.mg-sw-pine { background: linear-gradient(135deg, #091612 50%, #b5d67a 50%); }
+
+/* Main area, header and measures */
+.mg-main { display: flex; flex-direction: column; gap: var(--sp4); padding: var(--sp5); min-width: 0; }
+.mg-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp5); flex-wrap: wrap; }
+.mg-head > div:first-child { min-width: 0; }
+.mg-sub { margin-top: var(--sp1); }
+.mg-measures { display: flex; flex-wrap: wrap; gap: var(--sp2); }
+.mg-measure { display: flex; flex-direction: column; align-items: flex-start; min-width: 112px; padding: var(--sp2) var(--sp3); background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); color: inherit; font: inherit; cursor: pointer; text-align: left; transition: border-color .12s ease-out; }
+.mg-measure:hover { border-color: var(--accent); }
+.mg-measure > span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mg-measure-v { font-size: 22px; font-weight: 600; line-height: 1.2; }
+.mg-measure.mg-alert .mg-measure-v { color: var(--warn); }
+
+/* Panel: fixed head, body scrolls inside */
+.mg-page { display: flex; flex-direction: column; gap: var(--sp4); min-width: 0; }
+.mg-panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); display: flex; flex-direction: column; min-width: 0; }
+.mg-panel-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--sp2) var(--sp3); padding: var(--sp4) var(--sp4) var(--sp3); }
+.mg-extra { font-size: var(--fs-small); color: var(--muted); white-space: nowrap; }
+.mg-body { padding: 0 var(--sp4) var(--sp4); overflow: auto; max-height: var(--body-h); scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.mg-tall { --body-h: 880px; }
+.mg-empty { color: var(--muted); padding: var(--sp2) 0; }
+.mg-controls { display: flex; flex-wrap: wrap; gap: var(--sp2); align-items: center; }
+.mg-input { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-inner); padding: var(--sp1) var(--sp2); font: inherit; font-size: var(--fs-small); min-height: 28px; min-width: 0; max-width: 100%; }
+.mg-input::placeholder { color: var(--muted); }
+
+/* Badges */
+.mg-badge { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-small); color: var(--muted); white-space: nowrap; }
+.mg-badge::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--dot, var(--c6)); }
+.mg-c1 { --dot: var(--c1); } .mg-c2 { --dot: var(--c2); } .mg-c3 { --dot: var(--c3); } .mg-c4 { --dot: var(--c4); } .mg-c5 { --dot: var(--c5); } .mg-c6 { --dot: var(--c6); }
+.mg-good { --dot: var(--good); } .mg-warn { --dot: var(--warn); } .mg-bad { --dot: var(--bad); }
+.mg-badge.mg-warn { color: var(--warn); }
+
+/* Rows */
+.mg-list { list-style: none; padding: 0; }
+.mg-row { padding: var(--sp3) var(--sp2); border-top: 1px solid var(--line); border-radius: var(--radius-inner); }
+.mg-row:first-child { border-top: 0; }
+.mg [role="button"] { cursor: pointer; }
+.mg-row[role="button"]:hover { background: var(--panel-2); }
+.mg-row[aria-current="true"] { background: var(--accent-ground); }
+.mg-row[aria-current="true"] .mg-title { color: var(--accent); }
+.mg-top { display: flex; align-items: center; flex-wrap: wrap; gap: 2px var(--sp3); margin-bottom: 2px; min-width: 0; }
+.mg-title { font-weight: 600; overflow-wrap: anywhere; min-width: 0; }
+.mg-right { margin-left: auto; font-size: var(--fs-small); color: var(--muted); white-space: nowrap; }
+.mg-code { font-size: var(--fs-small); color: var(--muted); font-variant-numeric: tabular-nums; }
+.mg-two { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; color: var(--muted); max-width: 75ch; }
+
+/* Count bars */
+.mg-bar-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp1) var(--sp3); padding: var(--sp2); border-top: 1px solid var(--line); border-radius: var(--radius-inner); }
+.mg-bar-row:first-child { border-top: 0; }
+.mg-bar-row[role="button"]:hover { background: var(--panel-2); }
+.mg-bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mg-bar { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: var(--panel-2); }
+.mg-bar-fill { display: block; height: 100%; border-radius: 2px; background: var(--accent); opacity: .8; }
+
+/* Table */
+.mg-table { width: 100%; border-collapse: collapse; }
+.mg-table th { position: sticky; top: 0; background: var(--panel); text-align: left; font-weight: 500; font-size: var(--fs-small); color: var(--muted); padding: 0 var(--sp3) var(--sp2) 0; border-bottom: 1px solid var(--line); }
+.mg-table td { padding: var(--sp2) var(--sp3) var(--sp2) 0; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+.mg-table td:first-child { font-weight: 600; }
+.mg-table tr:last-child td { border-bottom: 0; }
+.mg-table tr[role="button"]:hover td { background: var(--panel-2); }
+.mg-table .mg-end { text-align: right; white-space: nowrap; padding-left: var(--sp3); }
+.mg-table th:last-child, .mg-table td:last-child { padding-right: 0; }
+
+/* Grids per tab */
+.mg-grid { display: grid; gap: var(--sp4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); align-items: stretch; }
+.mg-grid-two { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+.mg-grid-wide-left { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
+.mg-rows-2 { grid-row: span 2; }
+.mg-full { grid-column: 1 / -1; }
+.mg-pair { display: grid; gap: var(--sp4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); min-width: 0; }
+
+/* Drawer: opens from the right, edge line only */
+.mg-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .45); z-index: 20; }
+.mg-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(480px, 100%); background: var(--panel); border-left: 1px solid var(--line); z-index: 21; display: flex; flex-direction: column; animation: mg-in .16s ease-out; }
+@keyframes mg-in { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.mg-d-head { display: flex; align-items: flex-start; gap: var(--sp3); padding: var(--sp5) var(--sp5) var(--sp3); }
+.mg-d-head .mg-h2 { flex: 1; font-size: 18px; overflow-wrap: anywhere; }
+.mg-close { background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius-inner); padding: var(--sp1) var(--sp3); color: inherit; font: inherit; cursor: pointer; min-height: 32px; }
+.mg-d-body { padding: 0 var(--sp5) var(--sp5); overflow: auto; display: flex; flex-direction: column; gap: var(--sp4); }
+.mg-text { white-space: pre-line; overflow-wrap: anywhere; }
+.mg-pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.mg-badges { display: flex; flex-wrap: wrap; gap: var(--sp3); }
+.mg-fields { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp1) var(--sp4); font-size: var(--fs-small); }
+.mg-fields dt { color: var(--muted); }
+.mg-fields dd { overflow-wrap: anywhere; }
+
+@media (prefers-reduced-motion: reduce) {
+  #dash-root, .mg * { transition: none !important; animation: none !important; }
+}
+/* Narrow screen: the rail becomes a top bar, panels stack */
+@media (max-width: 900px) {
+  #dash-root { --fs-body: 16px; --fs-small: 13px; }
+  .mg { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .mg-rail { flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--line); padding: var(--sp3) var(--sp4); }
+  .mg-name { padding: 0; }
+  .mg-palette { margin: 0 0 0 auto; padding: 0; }
+  .mg-palette > .mg-small { display: none; }
+  .mg-swatch { width: 44px; height: 44px; }
+  .mg-tabs { order: 3; flex-basis: 100%; flex-direction: row; flex-wrap: wrap; }
+  .mg-tab { min-height: 44px; }
+  .mg-main { padding: var(--sp4); }
+  .mg-measures { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mg-measure { min-width: 0; min-height: 44px; }
+  .mg-grid, .mg-grid-two, .mg-grid-wide-left, .mg-pair { grid-template-columns: minmax(0, 1fr); }
+  .mg-rows-2, .mg-full { grid-row: auto; grid-column: auto; }
+  .mg-tall { --body-h: 520px; }
+  .mg-input { min-height: 44px; font-size: 16px; flex: 1 1 140px; }
+  .mg-close, .mg-row, .mg-bar-row { min-height: 44px; }
+}
+@media (max-width: 640px) {
+  .mg-table thead { display: none; }
+  .mg-table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 0 var(--sp3); padding: var(--sp2) 0; border-bottom: 1px solid var(--line); }
+  .mg-table td { border: 0 !important; padding: 0 !important; }
+  .mg-table td:nth-child(4) { grid-column: 1 / -1; padding-top: 2px !important; color: var(--muted); }
+}
+</style>
+
+<div class="mg" id="mg">
+  <nav class="mg-rail" id="mg-rail" data-i18n-label="tabsLabel">
+    <div class="mg-name" data-i18n="app"></div>
+    <div class="mg-tabs" id="mg-tabs"></div>
+    <div class="mg-palette"><span class="mg-small mg-muted" data-i18n="palette"></span><div class="mg-palette-pick" id="mg-palette"></div></div>
+  </nav>
+  <main class="mg-main" id="mg-main">
+    <header class="mg-head">
+      <div><h1 class="mg-h1" id="mg-title"></h1><p class="mg-sub mg-muted" id="mg-sub"></p></div>
+      <div class="mg-measures" id="mg-measures"></div>
+    </header>
+
+    <section class="mg-page" data-tab="today" hidden>
+      <div class="mg-grid mg-grid-two">
+        <section class="mg-panel mg-rows-2 mg-tall"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.today-pending"></h2><span class="mg-extra" data-extra="today-pending"></span></div>
+          <div class="mg-body" data-source="pending" data-list="today-pending" data-limit="0"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.today-handoff"></h2><span class="mg-extra" data-extra="today-handoff"></span></div>
+          <div class="mg-body" data-source="handoff" data-list="today-handoff" data-limit="6"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.today-log"></h2><span class="mg-extra" data-extra="today-log"></span></div>
+          <div class="mg-body" data-source="log" data-list="today-log" data-limit="10"></div></section>
+        <section class="mg-panel mg-full"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.today-health"></h2><span class="mg-extra" data-extra="today-health"></span></div>
+          <div class="mg-body" data-source="health" data-list="today-health" data-limit="0"></div></section>
+      </div>
+    </section>
+
+    <section class="mg-page" data-tab="projects" hidden>
+      <div class="mg-grid mg-grid-two">
+        <section class="mg-panel mg-rows-2 mg-tall"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.projects-list"></h2><span class="mg-extra" data-extra="projects-list"></span></div>
+          <div class="mg-body" data-source="notes" data-list="projects-list" data-limit="0"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.project-progress"></h2><span class="mg-extra" data-extra="project-progress"></span></div>
+          <div class="mg-body" data-source="progress" data-list="project-progress" data-limit="40"></div></section>
+        <div class="mg-pair">
+          <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.project-tasks"></h2><span class="mg-extra" data-extra="project-tasks"></span></div>
+            <div class="mg-body" data-source="tasks" data-list="project-tasks" data-limit="0"></div></section>
+          <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.project-notes"></h2><span class="mg-extra" data-extra="project-notes"></span></div>
+            <div class="mg-body" data-source="notes" data-list="project-notes" data-limit="0"></div></section>
+        </div>
+      </div>
+    </section>
+
+    <section class="mg-page" data-tab="flow" hidden>
+      <div class="mg-grid">
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.flow-log"></h2><span class="mg-extra" data-extra="flow-log"></span></div>
+          <div class="mg-body" data-source="log" data-list="flow-log" data-limit="0"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.flow-notes"></h2><span class="mg-extra" data-extra="flow-notes"></span></div>
+          <div class="mg-body" data-source="notes" data-list="flow-notes" data-limit="0"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.flow-pending"></h2><span class="mg-extra" data-extra="flow-pending"></span></div>
+          <div class="mg-body" data-source="pending" data-list="flow-pending" data-limit="0"></div></section>
+      </div>
+    </section>
+
+    <section class="mg-page" data-tab="agents" hidden>
+      <div class="mg-grid mg-grid-two">
+        <section class="mg-panel mg-rows-2 mg-tall"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.agents-list"></h2><span class="mg-extra" data-extra="agents-list"></span></div>
+          <div class="mg-body" data-source="agents" data-list="agents-list" data-limit="0"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.agents-runs"></h2><span class="mg-extra" data-extra="agents-runs"></span></div>
+          <div class="mg-body" data-source="agent_runs" data-list="agents-runs" data-limit="50"></div></section>
+        <div class="mg-pair">
+          <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.agents-councils"></h2><span class="mg-extra" data-extra="agents-councils"></span></div>
+            <div class="mg-body" data-source="councils" data-list="agents-councils" data-limit="0"></div></section>
+          <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.agents-expertise"></h2><span class="mg-extra" data-extra="agents-expertise"></span></div>
+            <div class="mg-body" data-source="expertise" data-list="agents-expertise" data-limit="0"></div></section>
+        </div>
+      </div>
+    </section>
+
+    <section class="mg-page" data-tab="knowledge" hidden>
+      <div class="mg-grid mg-grid-wide-left">
+        <section class="mg-panel mg-rows-2 mg-tall"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.knowledge-notes"></h2>
+            <div class="mg-controls">
+              <label class="mg-sr" for="mg-k-search" data-i18n="searchLabel"></label><input class="mg-input" id="mg-k-search" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder">
+              <label class="mg-sr" for="mg-k-type" data-i18n="typeLabel"></label><select class="mg-input" id="mg-k-type"></select>
+              <span class="mg-extra" data-extra="knowledge-notes"></span>
+            </div></div>
+          <div class="mg-body" data-source="notes" data-list="knowledge-notes" data-limit="100"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.knowledge-problems"></h2><span class="mg-extra" data-extra="knowledge-problems"></span></div>
+          <div class="mg-body" data-source="notes" data-list="knowledge-problems" data-limit="0"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.knowledge-decisions"></h2><span class="mg-extra" data-extra="knowledge-decisions"></span></div>
+          <div class="mg-body" data-source="notes" data-list="knowledge-decisions" data-limit="0"></div></section>
+      </div>
+    </section>
+
+    <section class="mg-page" data-tab="system" hidden>
+      <div class="mg-grid">
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.system-health"></h2><span class="mg-extra" data-extra="system-health"></span></div>
+          <div class="mg-body" data-source="health" data-list="system-health" data-limit="0"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.system-rules"></h2><span class="mg-extra" data-extra="system-rules"></span></div>
+          <div class="mg-body" data-source="rules" data-list="system-rules" data-limit="0"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.system-skills"></h2><span class="mg-extra" data-extra="system-skills"></span></div>
+          <div class="mg-body" data-source="skills" data-list="system-skills" data-limit="0"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.system-tools"></h2><span class="mg-extra" data-extra="system-tools"></span></div>
+          <div class="mg-body" data-source="system" data-list="system-tools" data-limit="0"></div></section>
+        <section class="mg-panel"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.system-cost"></h2><span class="mg-extra" data-extra="system-cost"></span></div>
+          <div class="mg-body" data-source="cost" data-list="system-cost" data-limit="0"></div></section>
+      </div>
+    </section>
+
+    <section class="mg-page" data-tab="log" hidden>
+      <section class="mg-panel mg-tall"><div class="mg-panel-head"><h2 class="mg-h2" data-i18n="panels.log-all"></h2>
+          <div class="mg-controls">
+            <label class="mg-sr" for="mg-l-op" data-i18n="operationLabel"></label><select class="mg-input" id="mg-l-op"></select>
+            <span class="mg-extra" data-extra="log-all"></span>
+          </div></div>
+        <div class="mg-body" data-source="log" data-list="log-all" data-limit="200"></div></section>
+    </section>
+  </main>
+  <div class="mg-overlay" id="mg-overlay" hidden></div>
+  <aside class="mg-drawer" id="mg-drawer" role="dialog" aria-modal="true" aria-labelledby="mg-d-title" hidden>
+    <div class="mg-d-head"><h2 class="mg-h2" id="mg-d-title"></h2><button type="button" class="mg-close" id="mg-d-close" data-i18n="close"></button></div>
+    <div class="mg-d-body" id="mg-d-body"></div>
+  </aside>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  /* ---------- Interface text: the only place for words the page shows ---------- */
+  const STRINGS = {
+    en: {
+      app: 'Second brain', tabsLabel: 'Dashboard sections', palette: 'Palette', close: 'Close',
+      tabs: { today: 'Today', projects: 'Projects', flow: 'Flow', agents: 'Agents', knowledge: 'Knowledge', system: 'System', log: 'Log' },
+      palettes: { ink: 'Ink', graphite: 'Graphite', pine: 'Pine' }, paletteButton: '{name} palette',
+      measures: { pending: 'Open pending items', tasks: 'Open tasks', warnings: 'System warnings' },
+      dataDate: 'Data from {date}',
+      panels: {
+        'today-pending': 'Waiting for you', 'today-handoff': 'Latest handoffs', 'today-log': 'Recent log', 'today-health': 'System warnings',
+        'projects-list': 'Projects', 'project-progress': 'Progress', 'project-tasks': 'Open tasks', 'project-notes': 'Project notes',
+        'flow-log': 'Log by operation', 'flow-notes': 'Notes by type', 'flow-pending': 'Pending by kind',
+        'agents-list': 'Agent team', 'agents-runs': 'Agent runs', 'agents-councils': 'Councils', 'agents-expertise': 'Expertise packs',
+        'knowledge-notes': 'Notes', 'knowledge-problems': 'Problems', 'knowledge-decisions': 'Decisions',
+        'system-health': 'Health check', 'system-rules': 'Rules', 'system-skills': 'Skills', 'system-tools': 'Tools, hooks and tasks', 'system-cost': 'Cost by model',
+        'log-all': 'Vault log',
+      },
+      state: { loading: 'Loading…', connect: 'Connect the data source to see this.', declined: 'Access to the data was declined.', error: 'The data could not be loaded.', missing: 'This data set was not found.' },
+      noDash: 'The dashboard runtime is not available.',
+      empty: 'Nothing yet.', none: '(none)', hidden: '(hidden)',
+      profileUpdated: 'Profile updated', ruleUpdated: 'Rule updated',
+      searchLabel: 'Search notes', searchPlaceholder: 'Search title, summary, tags', typeLabel: 'Filter by type', allTypes: 'All types',
+      operationLabel: 'Filter by operation', allOperations: 'All operations',
+      shown: '{n} / {m} shown', mode: 'Mode {n}', lessons: '{n} lessons', uses: '{n} uses', violations: '{n} violations', optional: 'optional',
+      hasTest: 'has a test', noTest: 'no test', linksCount: '{in} incoming, {out} outgoing',
+      f: {
+        summary: 'Summary', detail: 'Detail', text: 'Text', card: 'Handoff card', description: 'Description', advice: 'Advice', why: 'Why', links: 'Links',
+        type: 'Type', status: 'Status', project: 'Project', folder: 'Folder', path: 'Path', tags: 'Tags', aliases: 'Aliases', created: 'Created',
+        updated: 'Updated', words: 'Words', openTasks: 'Open tasks', date: 'Date', time: 'Time', session: 'Session', source: 'Source', closed: 'Closed',
+        kind: 'Kind', model: 'Model', runs: 'Runs', lastRun: 'Last run', mode: 'Mode', result: 'Result', agents: 'Agents', agent: 'Agent', calls: 'Calls',
+        lessons: 'Lessons', lastLesson: 'Last lesson', uses: 'Uses', lastUsed: 'Last used', event: 'Event', test: 'Test', cost: 'Cost', note: 'Note',
+        operation: 'Operation', name: 'Name', number: 'Number', days: 'Days',
+      },
+      types: { project: 'Project', progress: 'Progress', idea: 'Idea', problem: 'Problem', decision: 'Decision', experiment: 'Experiment', 'model-card': 'Model card',
+        'data-card': 'Data card', concept: 'Concept', source: 'Source', research: 'Research', profile: 'Profile', rule: 'Rule', draft: 'Draft', session: 'Session record',
+        entry: 'Entry page', person: 'Person', council: 'Council', other: 'Other' },
+      status: { active: 'Active', paused: 'Paused', done: 'Done', archived: 'Archived', open: 'Open', solved: 'Solved', draft: 'Draft', accepted: 'Accepted', held: 'On hold' },
+      operations: { setup: 'Setup', idea: 'Idea', project: 'Project', progress: 'Progress', problem: 'Problem', decision: 'Decision', experiment: 'Experiment',
+        ingest: 'Ingest', research: 'Research', query: 'Question', lint: 'Maintenance', rule: 'Rule', profile: 'Profile', release: 'Release', pending: 'Pending',
+        done: 'Done', learning: 'Learning', violation: 'Rule violation' },
+      kinds: { question: 'Question', approval: 'Approval', decision: 'Decision', task: 'Task', notice: 'Notice', 'on-hold': 'On hold' },
+      health: { ok: 'OK', info: 'Info', warning: 'Warning', error: 'Error' },
+      skillKinds: { workflow: 'Workflow', expertise: 'Expertise pack', method: 'Method' },
+      systemKinds: { tool: 'Tool', hook: 'Hook', task: 'Scheduled task' },
+      folders: { inbox: 'Inbox', projects: 'Projects', ideas: 'Ideas', councils: 'Councils', problems: 'Problems', knowledge: 'Knowledge', research: 'Research',
+        rules: 'Rules', drafts: 'Drafts', archive: 'Archive', sources: 'Sources' },
+    },
+    tr: {
+      app: 'İkinci beyin', tabsLabel: 'Pano bölümleri', palette: 'Palet', close: 'Kapat',
+      tabs: { today: 'Bugün', projects: 'Projeler', flow: 'Akış', agents: 'Ajanlar', knowledge: 'Bilgi', system: 'Sistem', log: 'Log' },
+      palettes: { ink: 'Mürekkep', graphite: 'Grafit', pine: 'Çam' }, paletteButton: '{name} paleti',
+      measures: { pending: 'Açık bekleyenler', tasks: 'Açık görevler', warnings: 'Sistem uyarıları' },
+      dataDate: 'Veri tarihi: {date}',
+      panels: {
+        'today-pending': 'Sizden beklenenler', 'today-handoff': 'Son devir kartları', 'today-log': 'Son log kayıtları', 'today-health': 'Sistem uyarıları',
+        'projects-list': 'Projeler', 'project-progress': 'İlerleme', 'project-tasks': 'Açık görevler', 'project-notes': 'Proje notları',
+        'flow-log': 'İşleme göre kayıtlar', 'flow-notes': 'Türe göre notlar', 'flow-pending': 'Türe göre bekleyenler',
+        'agents-list': 'Ajan takımı', 'agents-runs': 'Ajan çalıştırmaları', 'agents-councils': 'Kurullar', 'agents-expertise': 'Uzmanlık paketleri',
+        'knowledge-notes': 'Notlar', 'knowledge-problems': 'Sorunlar', 'knowledge-decisions': 'Kararlar',
+        'system-health': 'Sağlık denetimi', 'system-rules': 'Kurallar', 'system-skills': 'Beceriler', 'system-tools': "Araçlar, hook'lar ve görevler", 'system-cost': 'Modele göre maliyet',
+        'log-all': "Vault'un log'u",
+      },
+      state: { loading: 'Yükleniyor…', connect: 'Bunu görmek için veri kaynağını bağlayın.', declined: 'Veriye erişim reddedildi.', error: 'Veri yüklenemedi.', missing: 'Bu veri seti bulunamadı.' },
+      noDash: 'Pano çalışma ortamı kullanılamıyor.',
+      empty: 'Henüz yok.', none: '(yok)', hidden: '(gizlendi)',
+      profileUpdated: 'Profil güncellendi', ruleUpdated: 'Kural güncellendi',
+      searchLabel: 'Notlarda arayın', searchPlaceholder: 'Başlık, özet, etiket', typeLabel: 'Türe göre süzün', allTypes: 'Tüm türler',
+      operationLabel: 'İşleme göre süzün', allOperations: 'Tüm işlemler',
+      shown: '{n} / {m} gösteriliyor', mode: 'Mod {n}', lessons: '{n} ders', uses: '{n} kullanım', violations: '{n} ihlal', optional: 'isteğe bağlı',
+      hasTest: 'testi var', noTest: 'testi yok', linksCount: '{in} gelen, {out} giden',
+      f: {
+        summary: 'Özet', detail: 'Ayrıntı', text: 'Metin', card: 'Devir kartı', description: 'Açıklama', advice: 'Öneri', why: 'Gerekçe', links: 'Bağlantılar',
+        type: 'Tür', status: 'Durum', project: 'Proje', folder: 'Klasör', path: 'Yol', tags: 'Etiketler', aliases: 'Takma adlar', created: 'Oluşturma',
+        updated: 'Güncelleme', words: 'Kelime', openTasks: 'Açık görev', date: 'Tarih', time: 'Saat', session: 'Oturum', source: 'Kaynak', closed: 'Kapanış',
+        kind: 'Çeşit', model: 'Model', runs: 'Çalıştırma', lastRun: 'Son çalıştırma', mode: 'Mod', result: 'Sonuç', agents: 'Ajanlar', agent: 'Ajan', calls: 'Çağrı',
+        lessons: 'Ders', lastLesson: 'Son ders', uses: 'Kullanım', lastUsed: 'Son kullanım', event: 'Olay', test: 'Test', cost: 'Maliyet', note: 'Not',
+        operation: 'İşlem', name: 'Ad', number: 'Numara', days: 'Gün',
+      },
+      types: { project: 'Proje', progress: 'İlerleme', idea: 'Fikir', problem: 'Sorun', decision: 'Karar', experiment: 'Deney', 'model-card': 'Model kartı',
+        'data-card': 'Veri kartı', concept: 'Kavram', source: 'Kaynak özeti', research: 'Araştırma', profile: 'Profil', rule: 'Kural', draft: 'Taslak', session: 'Oturum kaydı',
+        entry: 'Giriş sayfası', person: 'Kişi', council: 'Kurul', other: 'Diğer' },
+      status: { active: 'Aktif', paused: 'Duraklatıldı', done: 'Tamamlandı', archived: 'Arşivlendi', open: 'Açık', solved: 'Çözüldü', draft: 'Taslak', accepted: 'Kabul edildi', held: 'Beklemede' },
+      operations: { setup: 'Kurulum', idea: 'Fikir', project: 'Proje', progress: 'İlerleme', problem: 'Sorun', decision: 'Karar', experiment: 'Deney',
+        ingest: 'Kaynak işleme', research: 'Araştırma', query: 'Soru', lint: 'Bakım', rule: 'Kural', profile: 'Profil', release: 'Sürüm', pending: 'Bekleyen',
+        done: 'Tamamlandı', learning: 'Öğrenme', violation: 'Kural ihlali' },
+      kinds: { question: 'Soru', approval: 'Onay', decision: 'Karar', task: 'Görev', notice: 'Bildirim', 'on-hold': 'Beklemede' },
+      health: { ok: 'Tamam', info: 'Bilgi', warning: 'Uyarı', error: 'Hata' },
+      skillKinds: { workflow: 'İş akışı', expertise: 'Uzmanlık paketi', method: 'Yöntem' },
+      systemKinds: { tool: 'Araç', hook: 'Hook', task: 'Zamanlanmış görev' },
+      folders: { inbox: 'Gelen', projects: 'Projeler', ideas: 'Fikirler', councils: 'Kurullar', problems: 'Sorunlar', knowledge: 'Bilgi', research: 'Araştırmalar',
+        rules: 'Kurallar', drafts: 'Taslaklar', archive: 'Arşiv', sources: 'Kaynaklar' },
+    },
+  };
+
+  /* ---------- Constants ---------- */
+  const DEFAULT_LANGUAGE = 'en';
+  const TABS = ['today', 'projects', 'flow', 'agents', 'knowledge', 'system', 'log'];
+  const PALETTES = ['ink', 'graphite', 'pine'];
+  const DATASETS = ['meta', 'notes', 'log', 'links', 'tasks', 'counts', 'progress', 'pending', 'agents', 'agent_runs',
+    'expertise', 'skills', 'rules', 'councils', 'handoff', 'health', 'system', 'cost'];
+  const BUILD_DELAY_MS = 120;   // data sets arrive one by one; arrivals inside this window are built once
+  const SEARCH_DELAY_MS = 200;
+  const HIDDEN_TEXT = '[hidden]';
+  const HEALTH_ORDER = { error: 0, warning: 1, info: 2, ok: 3 };
+  const SKILL_ORDER = { workflow: 0, expertise: 1, method: 2 };
+  const SYSTEM_ORDER = { tool: 0, hook: 1, task: 2 };
+  const PENDING_BADGE = { approval: 'mg-c1', decision: 'mg-c2', question: 'mg-c3', task: 'mg-c4', notice: 'mg-c5', 'on-hold': 'mg-c6' };
+  const HEALTH_BADGE = { ok: 'mg-good', info: 'mg-c1', warning: 'mg-warn', error: 'mg-bad' };
+  const SKILL_BADGE = { workflow: 'mg-c1', expertise: 'mg-c3', method: 'mg-c4' };
+  const SYSTEM_BADGE = { tool: 'mg-c1', hook: 'mg-c2', task: 'mg-c4' };
+  const TYPE_BADGE = { project: 'mg-c1', idea: 'mg-c2', decision: 'mg-c3', concept: 'mg-c4', problem: 'mg-c5', research: 'mg-c1', progress: 'mg-c4' };
+  const STATUS_BADGE = { open: 'mg-warn', solved: 'mg-good', done: 'mg-good', active: 'mg-c1' };
+
+  /* ---------- Helpers ---------- */
+  const $ = (selector) => document.querySelector(selector);
+  const el = (tag, cls, text) => { const x = document.createElement(tag); if (cls) x.className = cls; if (text != null) x.textContent = text; return x; };
+  const pick = (map, key) => (map && Object.hasOwn(map, key) ? map[key] : undefined);
+  let lang = DEFAULT_LANGUAGE;
+  const S = () => STRINGS[lang];
+  const lookup = (path) => path.split('.').reduce((node, part) => pick(node, part), S());
+  const fmt = (template, values) => String(template).replace(/\{(\w+)\}/g, (all, k) => (Object.hasOwn(values, k) ? values[k] : all));
+  const label = (group, value) => { const text = pick(S()[group], String(value ?? '')); return text === undefined ? String(value ?? '') : text; };
+  const show = (value) => {
+    const text = value == null ? '' : String(value);
+    return text.includes(HIDDEN_TEXT) ? text.split('\n').map((line) => (line.trim() === HIDDEN_TEXT ? S().hidden : line)).join('\n') : text;
+  };
+  // Display text: secret-scan marker in the page language, wiki links and bold marks as plain words
+  const plain = (value) => show(value).replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2').replace(/\[\[([^\]]+)\]\]/g, '$1').replace(/\*\*/g, '');
+  const oneLine = (value) => plain(value).replace(/\s+/g, ' ').trim();
+  let numberFormat, dateFormat, moneyFormat;
+  function setFormats() {
+    numberFormat = new Intl.NumberFormat(lang);
+    dateFormat = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+    moneyFormat = new Intl.NumberFormat(lang, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+  }
+  const num = (n) => numberFormat.format(Number(n) || 0);
+  const money = (n) => moneyFormat.format(Number(n) || 0);
+  function day(value) {
+    const text = String(value ?? '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return text || '—';
+    const d = new Date(`${text}T00:00:00Z`);
+    return Number.isNaN(d.getTime()) ? text : dateFormat.format(d);
+  }
+  const text = (r, field) => String(r[field] ?? '');
+  // Sorting is stable: rows with the same value keep their order in the data set
+  const newestFirst = (field) => (a, b) => text(b, field).localeCompare(text(a, field));
+  const byKeyNumber = (a, b) => (Number(b.key) || 0) - (Number(a.key) || 0);
+  const lower = (value) => String(value ?? '').toLocaleLowerCase(lang);
+
+  /* ---------- Data ---------- */
+  const statusOf = (id) => { const d = dash.data(id); return (d && d.status) || 'missing'; };
+  const rows = (id) => { const d = dash.data(id); return d && d.status === 'ok' && Array.isArray(d.data) ? d.data.filter((r) => r && r._placeholder !== true) : []; };
+  let noteIndex = new Map();
+  const projectName = (id) => { const n = noteIndex.get(id); return n ? plain(n.title).split(' — ')[0] : String(id ?? ''); };
+  const logTitle = (r) => (r.title ? plain(r.title) : r.operation === 'profile' ? S().profileUpdated : r.operation === 'rule' ? S().ruleUpdated : '—');
+
+  /* ---------- Panels ---------- */
+  const listBox = (list) => $(`[data-list="${list}"]`);
+  const limitOf = (box) => Number(box.dataset.limit) || 0;
+  const limited = (box, all) => (limitOf(box) > 0 ? all.slice(0, limitOf(box)) : all);
+  function setExtra(list, value) { const x = $(`[data-extra="${list}"]`); if (x) x.textContent = value; }
+  // A data set that is not ready writes its state into the panel; nothing is computed on missing data
+  function ready(list, ids) {
+    const state = ids.map(statusOf).find((s) => s !== 'ok');
+    if (!state) return true;
+    listBox(list).replaceChildren(el('p', 'mg-empty', pick(S().state, state) || S().state.error));
+    setExtra(list, '');
+    return false;
+  }
+  function fill(list, items, emptyText) {
+    const box = listBox(list);
+    if (!items.length) { box.replaceChildren(el('p', 'mg-empty', emptyText || S().empty)); return; }
+    const ul = el('ul', 'mg-list'); ul.append(...items); box.replaceChildren(ul);
+  }
+  // One list panel: readiness, sort/filter (getRows), limit from data-limit, row drawing, count in the head
+  function listPanel(list, ids, getRows, drawRow, extra) {
+    if (!ready(list, ids)) return;
+    const all = getRows();
+    const shown = limited(listBox(list), all);
+    fill(list, shown.map(drawRow));
+    setExtra(list, extra ? extra(all, shown) : all.length ? num(all.length) : '');
+  }
+  function clickable(x, action) {
+    x.tabIndex = 0; x.setAttribute('role', 'button');
+    x.addEventListener('click', action);
+    x.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); action(); } });
+    return x;
+  }
+  const badge = (value, cls) => el('span', `mg-badge ${cls || ''}`.trim(), value);
+  function item(r, parts, action) {
+    const li = el('li', 'mg-row'); li.dataset.key = String(r.key);
+    const top = el('div', 'mg-top');
+    (parts.badges || []).filter(Boolean).forEach((b) => top.append(b));
+    if (parts.code) top.append(el('span', 'mg-code', parts.code));
+    if (parts.title) top.append(el('span', 'mg-title', parts.title));
+    if (parts.right) top.append(el('span', 'mg-right', parts.right));
+    li.append(top);
+    if (parts.text) li.append(el('p', 'mg-two', parts.text));
+    return action ? clickable(li, action) : li;
+  }
+  // Count bars: one row per value of a field; the widest bar is the largest group
+  function countPanel(list, id, field, group, action) {
+    if (!ready(list, [id])) return;
+    const counts = new Map();
+    rows(id).forEach((r) => { const k = text(r, field); counts.set(k, (counts.get(k) || 0) + 1); });
+    const groups = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    const largest = groups.reduce((m, [, n]) => (n > m ? n : m), 0);
+    fill(list, groups.map(([key, n]) => {
+      const li = el('li', 'mg-bar-row'); li.dataset.key = key;
+      const bar = el('span', 'mg-bar'); const filled = el('span', 'mg-bar-fill'); filled.style.width = `${Math.round((n / largest) * 100)}%`;
+      bar.append(filled);
+      li.append(el('span', 'mg-bar-label', key ? label(group, key) : S().none), el('span', 'mg-num mg-muted', num(n)), bar);
+      return action ? clickable(li, () => action(key)) : li;
+    }));
+    setExtra(list, groups.length ? num(rows(id).length) : '');
+  }
+
+  /* ---------- Drawer (the one detail view) ---------- */
+  let drawerOpener = null;
+  function openDrawer(title, parts) {
+    if ($('#mg-drawer').hidden) drawerOpener = document.activeElement;
+    $('#mg-d-title').textContent = title || '—';
+    const body = $('#mg-d-body'); body.replaceChildren(...parts.filter(Boolean)); body.scrollTop = 0;
+    $('#mg-drawer').hidden = false; $('#mg-overlay').hidden = false;
+    $('#mg-rail').inert = true; $('#mg-main').inert = true;
+    $('#mg-d-close').focus();
+  }
+  function closeDrawer() {
+    if ($('#mg-drawer').hidden) return;
+    $('#mg-drawer').hidden = true; $('#mg-overlay').hidden = true;
+    $('#mg-rail').inert = false; $('#mg-main').inert = false;
+    if (drawerOpener && drawerOpener.isConnected) drawerOpener.focus();
+  }
+  function section(heading, body, pre) {
+    const k = el('div'); k.append(el('h3', 'mg-h3', heading), el('p', pre ? 'mg-pre' : 'mg-text', body || '—')); return k;
+  }
+  const badgeRow = (list) => { const k = el('div', 'mg-badges'); k.append(...list.filter(Boolean)); return k; };
+  function fields(pairs) {
+    const dl = el('dl', 'mg-fields');
+    pairs.forEach(([name, value]) => dl.append(el('dt', '', S().f[name]), el('dd', '', value === '' || value == null ? '—' : String(value))));
+    return dl;
+  }
+  function noteDrawer(n) {
+    openDrawer(plain(n.title), [
+      badgeRow([badge(label('types', n.type), pick(TYPE_BADGE, n.type)), n.status ? badge(label('status', n.status), pick(STATUS_BADGE, n.status)) : null]),
+      section(S().f.summary, plain(n.summary)),
+      n.detail ? section(S().f.detail, plain(n.detail)) : null,
+      section(S().f.links, fmt(S().linksCount, { in: num(n.links_in), out: num(n.links_out) })),
+      fields([['type', label('types', n.type)], ['status', label('status', n.status)], ['project', n.project ? projectName(n.project) : ''],
+        ['folder', label('folders', n.folder)], ['path', n.path], ['tags', plain(n.tags)], ['aliases', plain(n.aliases)], ['created', day(n.created)],
+        ['updated', day(n.updated)], ['words', num(n.words)], ['openTasks', num(n.open_tasks)]]),
+    ]);
+  }
+  const openNote = (id) => { const n = noteIndex.get(id); if (n) noteDrawer(n); };
+  function pendingDrawer(p) {
+    openDrawer(`${label('kinds', p.kind)} · ${p.id || p.key}`, [
+      badgeRow([badge(label('kinds', p.kind), pick(PENDING_BADGE, p.kind)), badge(label('status', p.status))]),
+      section(S().f.text, plain(p.text)),
+      fields([['date', day(p.date)], ['project', p.project ? projectName(p.project) : ''], ['source', p.source ? projectName(p.source) : ''], ['closed', p.closed ? day(p.closed) : '']]),
+    ]);
+  }
+  function logDrawer(r) {
+    openDrawer(logTitle(r), [badgeRow([badge(label('operations', r.operation))]), section(S().f.detail, plain(r.detail)),
+      fields([['date', day(r.date)], ['project', r.project ? projectName(r.project) : '']])]);
+  }
+  function handoffDrawer(h) {
+    openDrawer(plain(h.label), [section(S().f.card, plain(h.text), true), fields([['date', day(h.date)], ['time', h.time], ['session', h.session]])]);
+  }
+
+  /* ---------- Header: title and short measures ---------- */
+  function measure(name, tab) {
+    const b = el('button', 'mg-measure'); b.type = 'button'; b.dataset.measure = name;
+    b.append(el('span', 'mg-small mg-muted'), el('span', 'mg-num mg-measure-v', '—'));
+    b.addEventListener('click', () => openTab(tab, true));
+    return b;
+  }
+  function writeMeasure(name, value, alert) {
+    const b = $(`[data-measure="${name}"]`);
+    b.firstChild.textContent = S().measures[name];
+    b.lastChild.textContent = value;
+    b.classList.toggle('mg-alert', Boolean(alert));
+  }
+  const openPending = () => rows('pending').filter((p) => p.status === 'open');
+  const warnings = () => rows('health').filter((h) => h.status === 'warning' || h.status === 'error');
+  function writeHeader() {
+    $('#mg-title').textContent = S().tabs[active];
+    const meta = rows('meta')[0];
+    $('#mg-sub').textContent = meta && meta.generated ? fmt(S().dataDate, { date: day(meta.generated) }) : '';
+    const ok = (id) => statusOf(id) === 'ok';
+    writeMeasure('pending', ok('pending') ? num(openPending().length) : '—');
+    writeMeasure('tasks', ok('tasks') ? num(rows('tasks').filter((t) => Number(t.done) === 0).length) : '—');
+    const w = warnings().length;
+    writeMeasure('warnings', ok('health') ? num(w) : '—', w > 0);
+  }
+
+  /* ---------- Today ---------- */
+  function buildToday() {
+    listPanel('today-pending', ['pending'], () => openPending().sort((a, b) => newestFirst('date')(a, b) || text(b, 'key').localeCompare(text(a, 'key'))),
+      (p) => item(p, { badges: [badge(label('kinds', p.kind), pick(PENDING_BADGE, p.kind))], code: p.id, title: p.project ? projectName(p.project) : '', right: day(p.date), text: oneLine(p.text) },
+        () => pendingDrawer(p)));
+    listPanel('today-handoff', ['handoff'], () => rows('handoff'),
+      (h) => item(h, { title: plain(h.label), right: `${day(h.date)} ${text(h, 'time')}`.trim(), text: oneLine(h.text) }, () => handoffDrawer(h)));
+    listPanel('today-log', ['log'], () => rows('log').sort(byKeyNumber),
+      (r) => item(r, { badges: [badge(label('operations', r.operation))], title: logTitle(r), right: day(r.date) }, () => logDrawer(r)));
+    listPanel('today-health', ['health'], () => healthSorted().filter((h) => h.status === 'warning' || h.status === 'error'), healthRow);
+  }
+  const healthSorted = () => rows('health').map((h, i) => [h, i])
+    .sort((a, b) => (pick(HEALTH_ORDER, a[0].status) ?? 9) - (pick(HEALTH_ORDER, b[0].status) ?? 9) || a[1] - b[1]).map(([h]) => h);
+  const healthRow = (h) => item(h, { badges: [badge(label('health', h.status), pick(HEALTH_BADGE, h.status))], title: plain(h.check), text: plain(h.summary) },
+    () => openDrawer(plain(h.check), [badgeRow([badge(label('health', h.status), pick(HEALTH_BADGE, h.status))]), section(S().f.summary, plain(h.summary)),
+      h.advice ? section(S().f.advice, plain(h.advice)) : null]));
+
+  /* ---------- Projects ---------- */
+  let selectedProject = '';
+  const projects = () => rows('notes').filter((n) => n.type === 'project').sort(newestFirst('updated'));
+  function selectProject(id, withDrawer) {
+    selectedProject = id;
+    listBox('projects-list').querySelectorAll('[data-key]').forEach((x) => { if (x.dataset.key === id) x.setAttribute('aria-current', 'true'); else x.removeAttribute('aria-current'); });
+    buildProjectDetail();
+    if (withDrawer) openNote(id);
+  }
+  function buildProjects() {
+    const list = projects();
+    if (!list.some((p) => p.key === selectedProject)) selectedProject = list.length ? list[0].key : '';
+    listPanel('projects-list', ['notes'], () => list,
+      (p) => item(p, { badges: [p.status ? badge(label('status', p.status), pick(STATUS_BADGE, p.status)) : null], title: projectName(p.key), right: day(p.updated), text: oneLine(p.summary) },
+        () => selectProject(p.key, true)));
+    selectProject(selectedProject, false);
+  }
+  function buildProjectDetail() {
+    if (statusOf('notes') === 'ok' && !selectedProject) {   // no project at all: the detail panels stay empty
+      ['project-progress', 'project-tasks', 'project-notes'].forEach((list) => { fill(list, []); setExtra(list, ''); });
+      return;
+    }
+    listPanel('project-progress', ['notes', 'progress'],
+      () => rows('progress').filter((r) => r.project === selectedProject).sort((a, b) => newestFirst('date')(a, b) || (Number(a.order) || 0) - (Number(b.order) || 0)),
+      (r) => item(r, { title: plain(r.label || r.title), right: day(r.date), text: oneLine(r.text) },
+        () => openDrawer(plain(r.label || r.title) || S().panels['project-progress'], [section(S().f.text, plain(r.text)),
+          fields([['date', day(r.date)], ['project', projectName(r.project)]])])),
+      () => projectName(selectedProject));
+    listPanel('project-tasks', ['notes', 'tasks'], () => rows('tasks').filter((t) => t.project === selectedProject && Number(t.done) === 0),
+      (t) => item(t, { title: plain(t.task), right: plain(t.note) }, () => (noteIndex.has(t.note_id) ? openNote(t.note_id)
+        : openDrawer(plain(t.task), [fields([['note', plain(t.note)], ['project', projectName(t.project)]])]))));
+    listPanel('project-notes', ['notes'], () => rows('notes').filter((n) => n.project === selectedProject).sort(newestFirst('updated')), noteRow);
+  }
+  const noteRow = (n) => item(n, { badges: [badge(label('types', n.type), pick(TYPE_BADGE, n.type))], title: plain(n.title), right: day(n.updated), text: oneLine(n.summary) }, () => noteDrawer(n));
+
+  /* ---------- Flow ---------- */
+  function buildFlow() {
+    countPanel('flow-log', 'log', 'operation', 'operations', (op) => { logOperation = op; dirty.add('log'); openTab('log', true); });
+    countPanel('flow-notes', 'notes', 'type', 'types', (type) => { knowledge.type = type; knowledge.query = ''; dirty.add('knowledge'); openTab('knowledge', true); });
+    countPanel('flow-pending', 'pending', 'kind', 'kinds');
+  }
+
+  /* ---------- Agents ---------- */
+  function buildAgents() {
+    if (ready('agents-list', ['agents'])) {
+      const agents = rows('agents');
+      const box = listBox('agents-list');
+      if (!agents.length) fill('agents-list', []);
+      else {
+        const table = el('table', 'mg-table'); const head = el('tr');
+        [['name'], ['model'], ['runs', 'mg-end'], ['lastRun', 'mg-end']].forEach(([name, cls]) => head.append(el('th', cls || '', S().f[name])));
+        const thead = el('thead'); thead.append(head); const tbody = el('tbody');
+        limited(box, agents).forEach((a) => {
+          const tr = el('tr'); tr.dataset.key = String(a.key);
+          tr.append(el('td', '', plain(a.name)), el('td', 'mg-muted', plain(a.model)), el('td', 'mg-end mg-num', num(a.runs)), el('td', 'mg-end mg-muted', a.last_run ? day(a.last_run) : '—'));
+          tbody.append(clickable(tr, () => openDrawer(plain(a.name), [section(S().f.description, plain(a.description)),
+            fields([['model', plain(a.model)], ['runs', num(a.runs)], ['lastRun', a.last_run ? day(a.last_run) : '']])])));
+        });
+        table.append(thead, tbody); box.replaceChildren(table);
+      }
+      setExtra('agents-list', agents.length ? num(agents.length) : '');
+    }
+    listPanel('agents-runs', ['agent_runs'], () => rows('agent_runs').sort(newestFirst('date')),
+      (r) => item(r, { badges: [r.mode ? badge(fmt(S().mode, { n: r.mode }), 'mg-c1') : null], code: plain(r.agent), title: plain(r.job), right: day(r.date), text: plain(r.result) },
+        () => openDrawer(plain(r.job), [section(S().f.result, plain(r.result)),
+          fields([['agent', plain(r.agent)], ['date', day(r.date)], ['mode', r.mode], ['model', plain(r.model)], ['project', r.project ? projectName(r.project) : '']])])));
+    listPanel('agents-councils', ['councils'], () => rows('councils').sort(newestFirst('date')),
+      (c) => item(c, { badges: [c.mode ? badge(fmt(S().mode, { n: c.mode }), 'mg-c2') : null], title: plain(c.title), right: day(c.date), text: plain(c.agents) },
+        () => (noteIndex.has(c.key) ? openNote(c.key) : openDrawer(plain(c.title), [fields([['mode', c.mode], ['agents', plain(c.agents)], ['result', plain(c.result)],
+          ['calls', c.calls], ['project', c.project ? projectName(c.project) : ''], ['date', day(c.date)]])]))));
+    listPanel('agents-expertise', ['expertise'], () => rows('expertise'),
+      (x) => item(x, { title: plain(x.name), right: fmt(S().lessons, { n: num(x.lessons) }), text: plain(x.description) },
+        () => openDrawer(plain(x.name), [section(S().f.description, plain(x.description)), fields([['lessons', num(x.lessons)], ['lastLesson', x.last_lesson ? day(x.last_lesson) : '']])])));
+  }
+
+  /* ---------- Knowledge ---------- */
+  const knowledge = { query: '', type: '' };
+  function fillSelect(select, allText, values, group, current) {
+    const first = el('option', '', allText); first.value = '';
+    const options = values.map((v) => { const o = el('option', '', label(group, v)); o.value = v; return o; });
+    select.replaceChildren(first, ...options);
+    select.value = values.includes(current) ? current : '';
+    return select.value;
+  }
+  const distinct = (list, field, group) => [...new Set(list.map((r) => text(r, field)).filter(Boolean))].sort((a, b) => label(group, a).localeCompare(label(group, b), lang));
+  function matchesQuery(n, terms) {
+    const haystack = lower(`${show(n.title)} ${show(n.summary)} ${show(n.tags)}`);
+    return terms.every((t) => haystack.includes(t));
+  }
+  function buildKnowledgeNotes() {
+    const terms = lower(knowledge.query).split(/\s+/).filter(Boolean);
+    listPanel('knowledge-notes', ['notes'],
+      () => rows('notes').filter((n) => (!knowledge.type || n.type === knowledge.type) && matchesQuery(n, terms)).sort(newestFirst('updated')),
+      noteRow, (all, shown) => fmt(S().shown, { n: num(shown.length), m: num(all.length) }));
+  }
+  function buildKnowledge() {
+    $('#mg-k-search').value = knowledge.query;
+    knowledge.type = fillSelect($('#mg-k-type'), S().allTypes, distinct(rows('notes'), 'type', 'types'), 'types', knowledge.type);
+    buildKnowledgeNotes();
+    const openFirst = (a, b) => (a.status === 'open' ? 0 : 1) - (b.status === 'open' ? 0 : 1) || newestFirst('updated')(a, b);
+    listPanel('knowledge-problems', ['notes'], () => rows('notes').filter((n) => n.type === 'problem').sort(openFirst),
+      (n) => item(n, { badges: [badge(label('status', n.status), pick(STATUS_BADGE, n.status))], title: plain(n.title), right: day(n.updated), text: oneLine(n.summary) }, () => noteDrawer(n)));
+    listPanel('knowledge-decisions', ['notes'], () => rows('notes').filter((n) => n.type === 'decision').sort(newestFirst('updated')),
+      (n) => item(n, { badges: [n.status ? badge(label('status', n.status), pick(STATUS_BADGE, n.status)) : null], title: plain(n.title), right: day(n.updated), text: oneLine(n.summary) }, () => noteDrawer(n)));
+  }
+
+  /* ---------- System ---------- */
+  function buildSystem() {
+    listPanel('system-health', ['health'], healthSorted, healthRow);
+    listPanel('system-rules', ['rules'], () => rows('rules').sort((a, b) => (Number(a.number) || 0) - (Number(b.number) || 0)),
+      (r) => {
+        const marks = [r.optional === true ? badge(S().optional, 'mg-c3') : null, Number(r.violations) > 0 ? badge(fmt(S().violations, { n: num(r.violations) }), 'mg-warn') : null];
+        return item(r, { badges: marks, code: `#${r.number}`, title: plain(r.title) }, () => openDrawer(`#${r.number} ${plain(r.title)}`, [badgeRow(marks.map((m) => m && m.cloneNode(true))),
+          section(S().f.text, plain(r.text)), r.why ? section(S().f.why, plain(r.why)) : null]));
+      });
+    listPanel('system-skills', ['skills'], () => rows('skills').sort((a, b) => (pick(SKILL_ORDER, a.kind) ?? 9) - (pick(SKILL_ORDER, b.kind) ?? 9) || text(a, 'name').localeCompare(text(b, 'name'))),
+      (s) => item(s, { badges: [badge(label('skillKinds', s.kind), pick(SKILL_BADGE, s.kind))], title: plain(s.name), right: fmt(S().uses, { n: num(s.uses) }), text: plain(s.description) },
+        () => openDrawer(plain(s.name), [badgeRow([badge(label('skillKinds', s.kind), pick(SKILL_BADGE, s.kind))]), section(S().f.description, plain(s.description)),
+          fields([['uses', num(s.uses)], ['lastUsed', s.last_used ? day(s.last_used) : '']])])));
+    listPanel('system-tools', ['system'], () => rows('system').sort((a, b) => (pick(SYSTEM_ORDER, a.kind) ?? 9) - (pick(SYSTEM_ORDER, b.kind) ?? 9) || text(a, 'name').localeCompare(text(b, 'name'))),
+      (t) => item(t, { badges: [badge(label('systemKinds', t.kind), pick(SYSTEM_BADGE, t.kind))], title: plain(t.name),
+        right: t.kind === 'tool' ? (Number(t.has_test) ? S().hasTest : S().noTest) : plain(t.event || t.status) },
+      () => openDrawer(plain(t.name), [badgeRow([badge(label('systemKinds', t.kind), pick(SYSTEM_BADGE, t.kind))]),
+        fields([['kind', label('systemKinds', t.kind)], ['event', plain(t.event)], ['status', plain(t.status)], ['date', t.date ? day(t.date) : ''],
+          ['test', t.kind === 'tool' ? (Number(t.has_test) ? S().hasTest : S().noTest) : '']])])));
+    let total = 0;
+    listPanel('system-cost', ['cost'], () => {
+      const byModel = new Map();
+      rows('cost').forEach((r) => { const m = text(r, 'model'); const g = byModel.get(m) || { key: m, model: m, cost: 0, days: 0 }; g.cost += Number(r.cost_usd) || 0; g.days += 1; byModel.set(m, g); });
+      const groups = [...byModel.values()].sort((a, b) => b.cost - a.cost || a.model.localeCompare(b.model));
+      total = groups.reduce((sum, g) => sum + g.cost, 0);
+      return groups;
+    }, (g) => item(g, { title: g.model || S().none, right: money(g.cost) }, () => openDrawer(g.model || S().none, [fields([['cost', money(g.cost)], ['days', num(g.days)]])])),
+    (all) => (all.length ? money(total) : ''));
+  }
+
+  /* ---------- Log ---------- */
+  let logOperation = '';
+  function buildLogList() {
+    listPanel('log-all', ['log'], () => rows('log').filter((r) => !logOperation || r.operation === logOperation).sort(byKeyNumber),
+      (r) => item(r, { badges: [badge(label('operations', r.operation))], code: r.key, title: logTitle(r), right: day(r.date), text: oneLine(r.detail) }, () => logDrawer(r)),
+      (all, shown) => fmt(S().shown, { n: num(shown.length), m: num(all.length) }));
+  }
+  function buildLog() {
+    logOperation = fillSelect($('#mg-l-op'), S().allOperations, distinct(rows('log'), 'operation', 'operations'), 'operations', logOperation);
+    buildLogList();
+  }
+
+  /* ---------- Tabs: only the open tab is built ---------- */
+  const BUILD = { today: buildToday, projects: buildProjects, flow: buildFlow, agents: buildAgents, knowledge: buildKnowledge, system: buildSystem, log: buildLog };
+  let active = 'today';
+  let dirty = new Set(TABS);
+  function buildOpen() { if (dirty.delete(active)) BUILD[active](); }
+  function openTab(id, link) {
+    active = TABS.includes(id) ? id : 'today';
+    document.querySelectorAll('.mg-page').forEach((p) => { p.hidden = p.dataset.tab !== active; });
+    document.querySelectorAll('.mg-tab').forEach((b) => { if (b.dataset.tab === active) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    writeHeader();
+    if (link && typeof dash.setLink === 'function') dash.setLink(active);
+    buildOpen();
+    document.querySelectorAll('.mg-body').forEach((b) => { b.scrollTop = 0; });
+  }
+
+  /* ---------- Language and palette ---------- */
+  function applyLanguage() {
+    $('#mg').setAttribute('lang', lang);
+    document.querySelectorAll('[data-i18n]').forEach((x) => { x.textContent = lookup(x.dataset.i18n) ?? ''; });
+    document.querySelectorAll('[data-i18n-label]').forEach((x) => x.setAttribute('aria-label', lookup(x.dataset.i18nLabel) ?? ''));
+    document.querySelectorAll('[data-i18n-placeholder]').forEach((x) => x.setAttribute('placeholder', lookup(x.dataset.i18nPlaceholder) ?? ''));
+    document.querySelectorAll('.mg-tab').forEach((b) => { b.textContent = S().tabs[b.dataset.tab]; });
+    document.querySelectorAll('.mg-swatch').forEach((b) => { const name = S().palettes[b.dataset.palette]; b.title = name; b.setAttribute('aria-label', fmt(S().paletteButton, { name })); });
+  }
+  function applyPalette(name) {
+    const root = document.getElementById('dash-root');
+    if (root) root.dataset.palette = name;
+    document.querySelectorAll('.mg-swatch').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.palette === name)));
+  }
+  function setup() {
+    TABS.forEach((id) => {
+      const b = el('button', 'mg-tab'); b.type = 'button'; b.dataset.tab = id;
+      b.addEventListener('click', () => openTab(id, true));
+      $('#mg-tabs').append(b);
+    });
+    PALETTES.forEach((name) => {
+      const b = el('button', `mg-swatch mg-sw-${name}`); b.type = 'button'; b.dataset.palette = name;
+      b.addEventListener('click', () => applyPalette(name));
+      $('#mg-palette').append(b);
+    });
+    $('#mg-measures').append(measure('pending', 'today'), measure('tasks', 'projects'), measure('warnings', 'system'));
+    let searchTimer = 0;
+    $('#mg-k-search').addEventListener('input', (e) => { knowledge.query = e.target.value; clearTimeout(searchTimer); searchTimer = setTimeout(buildKnowledgeNotes, SEARCH_DELAY_MS); });
+    $('#mg-k-type').addEventListener('change', (e) => { knowledge.type = e.target.value; buildKnowledgeNotes(); });
+    $('#mg-l-op').addEventListener('change', (e) => { logOperation = e.target.value; buildLogList(); });
+    $('#mg-d-close').addEventListener('click', closeDrawer);
+    $('#mg-overlay').addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+    setFormats(); applyLanguage(); applyPalette(PALETTES[0]);
+  }
+
+  /* ---------- Data arrival ---------- */
+  function dataArrived() {
+    const meta = rows('meta')[0];
+    const next = meta && Object.hasOwn(STRINGS, meta.language) ? meta.language : DEFAULT_LANGUAGE;
+    if (next !== lang) { lang = next; setFormats(); applyLanguage(); }
+    noteIndex = new Map(rows('notes').map((n) => [n.key, n]));
+    writeHeader();
+    dirty = new Set(TABS);
+    buildOpen();
+  }
+  // Cheap signature: status, length and a folded summary of the fields that change in place; data is not turned into JSON
+  const rowSignature = (r) => (r && typeof r === 'object'
+    ? `${r.key}~${r.status ?? ''}~${r.updated ?? ''}~${r.done ?? ''}~${r.closed ?? ''}~${r.cost_usd ?? ''}~${r.language ?? ''}~${typeof r.text === 'string' ? r.text.length : ''}`
+    : String(r));
+  const fold = (list) => { let h = 0; for (const r of list) { const s = rowSignature(r); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; } return h; };
+  const signature = () => DATASETS.map((id) => { const d = dash.data(id) || {}; const list = Array.isArray(d.data) ? d.data : []; return `${id}:${d.status}:${list.length}:${fold(list)}`; }).join('|');
+
+  setup();
+  if (typeof dash === 'undefined' || typeof dash.data !== 'function') { $('#mg-title').textContent = S().noDash; return; }
+  const requested = new URLSearchParams(location.search).get('tab');
+  let lastSignature = signature();
+  let buildTimer = 0;
+  active = TABS.includes(requested) ? requested : 'today';
+  dataArrived();
+  openTab(active, false);
+  dash.onData(() => {
+    const now = signature();
+    if (now === lastSignature) return;
+    lastSignature = now;
+    clearTimeout(buildTimer);
+    if (DATASETS.some((id) => statusOf(id) === 'loading')) buildTimer = setTimeout(dataArrived, BUILD_DELAY_MS);
+    else dataArrived();
+  });
+})();
+</script>

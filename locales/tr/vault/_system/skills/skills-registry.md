@@ -8,6 +8,7 @@ Claude Code becerileri. Kaynak dosyalar burada (`_sistem/beceriler/<ad>/SKILL.md
 |---|---|---|---|---|
 | `/kayitlari-tut` | Oturum kayıtlarını tara, konuşmayı gözden geçir, vault'a işle, log, commit | 0 | — | — |
 | `/yeni-proje` | Proje klasörü + ana sayfa, ilerleme, kurallar, ADR; index, log, profil | 0 | — | — |
+| `/pano` | Panoyu ilk çalışmada kullanıcının claude.ai hesabında yayımlar, sonra yalnızca değişen veri setlerini yükler | 0 | — | — |
 | `/sorun` | Sorun/çözüm notu (önce ara, varsa tekrar ekle), proje linki, index, log | 0 | — | — |
 | `/fikir` | Fikri anında Inbox'a yaz: kendi cümlesi + kısa değerlendirme + linkler | 0 | — | — |
 | `/sorgula` | Kullanıcıya konu bitene kadar tek tek soru sorar, cevapları ilgili notlara yazar (önce vault'ta arar; hassas bilgi yok) | 0 | — | — |
@@ -63,4 +64,4 @@ Ayrıntılı yöntem: `beceri-yazma` becerisi (dışarıdan gelen beceriyi uyarl
 
 1. `_sistem/beceriler/<ad>/SKILL.md` yaz: frontmatter `name`, `description` (ne zaman kullanılacağı dahil); gövde numaralı adımlar; vault yolu ve şema referansı; kesin kurallar.
 2. `~/.claude/skills/<ad>` bağını aç (Windows'ta: `cmd /c mklink /J "%USERPROFILE%\.claude\skills\<ad>" "<vault>\_sistem\beceriler\<ad>"`; başka sistemlerde `ln -s`).
-3. Bu tabloya satır ekle; `log.md`'ye `kurulum` girdisi. İsteğe bağlı pano: v1'de yok.
+3. Bu tabloya satır ekle; `log.md`'ye `kurulum` girdisi; pano onu bir sonraki `/pano` çalışmasında gösterir.

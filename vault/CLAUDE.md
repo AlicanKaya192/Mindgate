@@ -103,7 +103,7 @@ updated: YYYY-MM-DD
   - Format `## [YYYY-MM-DD] <operation> | <title>`. Operations: setup, idea, project, progress, problem, decision, experiment, ingest, research, query, lint, rule, profile, release, pending, done, learning, violation.
   - Work entries have `- Evidence:` and `- Learned:` lines.
 - **git:** After every meaningful change, commit with a message in the vault language; push if a remote is set. The pre-commit secret scan is not skipped; an example line gets the `secret-scan: allow` mark.
-- Optional dashboard: not included in v1.
+- **Dashboard (§10.1):** a claude.ai Data artifact in the user's own account, published and updated with `/dashboard` (`dashboard_data.py` builds the data; `me/`, `CLAUDE.md` and session records never go to it). After every content change: `/dashboard`; the end-of-chat reminder (`dashboard_check.py`) asks for it. A new kind of structure gets a dashboard section in the same job (#29). Without the Artifact tools, say that the dashboard could not be updated.
 - **Skills (§10.2):** Source `_system/skills/<name>/SKILL.md`, junction into `~/.claude/skills/`. Usage counter and adding skills: [[skills-registry]]. Work repeated by hand three times becomes a skill.
 - **Instructions:** The master copy of the global core is `_system/instructions/global-CLAUDE.md` (`install_instructions.py install`).
 

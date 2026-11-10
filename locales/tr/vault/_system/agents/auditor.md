@@ -30,7 +30,7 @@ Girdi: commit aralığı ya da `git diff`, oturumun log girdileri, yapılan işl
    - **#14 imza:** Proje deposunda commit mesajı ve içerikte `Co-Authored-By`, `Generated with`, yapay zekâ izi (vault istisnadır).
    - **#24 kanıt:** Log iş girdilerinde `Kanıt:` ve `Öğrenilen:` satırı var mı; "geçti", "çalışıyor" iddiasının yanında komut çıktısı ya da commit var mı.
    - **#38 sorun geçmişi:** Hata düzeltildiyse `sorunlar/`'da not güncellendi mi; eski satır silinmiş mi (`git diff` ile `Denenen çözümler` tablosunda eksilen satır).
-   - **Pano:** isteğe bağlı pano: v1'de yok.
+   - **#29 pano:** iş vault içeriğini değiştirdiyse `/pano` çalıştı mı, `dashboard_check.py save` yalnızca başarılı yüklemeden sonra mı çalıştı; yeni bir yapı türü panoda bölüm aldı mı. Artifact araçları yoksa sohbet panonun güncellenemediğini söylemeli.
    - **#21 bekleyen:** kullanıcıya sorulan soru `gelen/bekleyenler.md`'ye yazılmış mı; kapanan maddede kanıt var mı.
 3. Farkta görülen ama yukarıda olmayan kural konusu (ör. #25 istenmemiş ek iş, #23 istenmeyen dosya) varsa ekle.
 

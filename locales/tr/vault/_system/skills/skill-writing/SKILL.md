@@ -39,7 +39,7 @@ Yöntem becerisi (ajan değil). Ekleme adımları [[beceriler]] sayfasında ("Ye
 1. Beceri klasörüne bağı aç. Windows'ta: `cmd /c mklink /J "%USERPROFILE%\.claude\skills\<ad>" "<vault>\_sistem\beceriler\<ad>"`; macOS/Linux'ta: `ln -s "<vault>/_sistem/beceriler/<ad>" "{{HOME}}/.claude/skills/<ad>"`.
 2. Ajana önceden yükleneceksek ajan tanımının `skills:` listesine ekle. Ajan isteğe bağlı yükleyecekse ajan gövdesinde adını geç.
 3. Ajan tanımları yalnızca yeni oturumda yeniden yüklenir.
-4. [[beceriler]] tablosuna satır ekle, `log.md`'ye `kurulum` yaz. İsteğe bağlı pano: v1'de yok.
+4. [[beceriler]] tablosuna satır ekle, `log.md`'ye `kurulum` yaz; pano onu bir sonraki `/pano` çalışmasında gösterir.
 
 ## Fikir kaynakları
 - obra/superpowers `writing-skills` (MIT, Jesse Vincent).

@@ -58,7 +58,7 @@
 | Kullanıcı hakkında yeni bilgi; alanındaki bir konu | `ben/`; `bilgi/` kavram notu ve projeye link (öğretme yok) | #4, #6 |
 | İşte kalıcı bilgi öğrendin (#31) | Vault'ta ara, yoksa ekle (`oz-ogrenme`); sonda tek satır: "İkinci beyne eklenenler: …" | #31 |
 | Soru, onay, kullanıcıya iş, bildirim (#21) | Hemen `records.py pending add`; cevap gelince (hangi sohbette olursa olsun) kanıtla kapat; önce cevap verilmiş mi bak | şema §7.10 |
-| Vault'a yazdın | `records.py log` (`Evidence:`, `Learned:`), index, commit; uzak depo varsa push | şema §10 |
+| Vault'a yazdın | `records.py log` (`Evidence:`, `Learned:`), index, commit; uzak depo varsa push; `/pano` | şema §10 |
 | Site, link, web araması | #32 bildirimi ve izin; site kapısı | şema §7.6 |
 | Kod yazacaksın | Önce `test-yazma`, sonra `temiz-kod`; projenin kuralları önce | — |
 | Web uygulaması ya da API yayınlayacaksın | Önce `uzman-guvenlik` yayın öncesi listesi; bulgular kanıtla, düzeltme onayla | `uzman-guvenlik` |
@@ -83,4 +83,4 @@
 - **Günlük:** Her çalıştırma o ajanın sayfasındaki Günlük tablosuna yazılır (`bilgi/ajanlar/ajan-<ad>.md`).
 
 ## Uygulama, CLI ve IDE terminali
-Üçü aynı `~/.claude`'u kullanır; kurallar gevşemez. Vault işi için CLI'ı vault klasöründe aç. Yedekler: sohbet başlığı için `get_session` yoksa klasör adı; tarayıcı yoksa WebFetch ya da Chrome (#32 geçerli). Zamanlanmış görevler yalnızca masaüstü uygulaması açıkken çalışır. İsteğe bağlı pano: v1'de yok.
+Üçü aynı `~/.claude`'u kullanır; kurallar gevşemez. Vault işi için CLI'ı vault klasöründe aç. Yedekler: sohbet başlığı için `get_session` yoksa klasör adı; tarayıcı yoksa WebFetch ya da Chrome (#32 geçerli). Zamanlanmış görevler yalnızca masaüstü uygulaması açıkken çalışır. Artifact araçları yoksa panonun güncellenemediğini söyle (`dashboard_check.py save` çalıştırma).

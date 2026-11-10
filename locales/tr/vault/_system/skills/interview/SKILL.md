@@ -21,7 +21,7 @@ Amaç: kullanıcının kafasındakini vault'a aktarmak. Asıl eksik çoğu zaman
    - Kullanıcının cümlesi anlam değişmeden; frontmatter'da `source_type: stated`
    - Yeni bilgi eskisiyle çelişiyorsa eskiyi silme; `invalid` + `replaced_by` (§5)
 6. **Durma koşulu:** Soru ağacının dalları kapandı, kullanıcı "yeter" dedi ya da cevaplar tekrar etmeye başladı. Cevapsız kalan soru `records.py pending add --type question` ile bekleyenlere.
-7. **Kapanış:** kullanıcıya kısa özet: ne öğrenildi, hangi notlar güncellendi, açık kalan soru. Sonra log (`profil` ya da `ilerleme`, `Kanıt:` ve `Öğrenilen:`), commit (uzak depo tanımlıysa push), isteğe bağlı pano: v1'de yok, [[beceriler]] sayacı.
+7. **Kapanış:** kullanıcıya kısa özet: ne öğrenildi, hangi notlar güncellendi, açık kalan soru. Sonra log (`profil` ya da `ilerleme`, `Kanıt:` ve `Öğrenilen:`), commit (uzak depo tanımlıysa push), pano (`/pano`), [[beceriler]] sayacı.
 
 ## Yapma
 - Sorgulamayı derse ya da quiz'e çevirme (#15). Kullanıcının kararını yeniden tartışma; yalnızca eksik ve çelişkiyi sor.

@@ -31,7 +31,7 @@ Do the daily record-keeping for the user's Obsidian second-brain vault. Vault: `
 4. Update the `updated` field of the touched notes to today's date. Add new pages to `index.md`. Make sure new notes are not orphans.
 5. **Log:** Append a `## [YYYY-MM-DD] progress | Daily log` entry at the end of `log.md`: number of logs processed, pending items added/closed, which notes were added/updated (briefly). If there is nothing to process, write a short "no changes" entry. Add yesterday's usage to the entry: from the output of `{{PY}} -I _system/cost.py --days 2`, yesterday's API-equivalent total and the most expensive chat (`- Cost (yesterday): $… · most expensive: <chat>`).
 6. **Git:** `git add -A`, check with `git diff --cached` that no secret leaks, `git commit -m "progress: daily log"`. Do not push by default; run `git push` only if the user turned on push at install. If another session is writing to the vault at the same time, do not break its half-written files.
-7. **Dashboard:** optional dashboard: not included in v1.
+7. **Dashboard:** if the dashboard has been published (`{{PY}} -I _system/dashboard_check.py url` prints an address) and the Artifact tools are available here, update it with the `dashboard` skill; otherwise skip this step and say so in the report.
 
 ## Strict rules
 - **Limits of the nightly task (vault CLAUDE.md §7.8):**

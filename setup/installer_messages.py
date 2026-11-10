@@ -118,10 +118,11 @@ MESSAGES = {
         "skills_title": "Skills and agents",
         "skills_what": "Skills are instruction packs Claude loads for a kind of work; agents are helpers with a fixed "
                        "role. They are copied to ~/.claude/skills/ and ~/.claude/agents/.",
-        "skills_no": "the vault still works, but Claude does not have the Mindgate skills and agents.",
+        "skills_no": "the vault still works, but Claude does not have the Mindgate skills and agents (the /dashboard skill is installed anyway).",
         "skills_list": "Skills ({count}): {names}",
         "agents_list": "Agents ({count}): {names}",
         "skills_question": "Install the skills?",
+        "dashboard_skill_kept": "  The /{name} skill is installed anyway: the dashboard comes with Mindgate.",
         "agents_question": "Install the agents?",
         "assist_title": "Other assistants (experimental)",
         "assist_what": "Mindgate can also guard another coding assistant: its shell commands, file writes and web pages "
@@ -182,7 +183,6 @@ MESSAGES = {
         "rules_no": "the rule stays off; you can turn it on later in _system/config.json.",
         "rule_item": "  #{number}: {title}",
         "rule_question": "Turn on rule #{number}?",
-        "rule_needs_dashboard": "  #{number} needs the optional dashboard, which is not part of v1; it is not offered.",
         "rule_fingerprint": "A fingerprint of this computer's name is saved so that only this computer counts. The name "
                             "itself is not saved and the fingerprint is not shown.",
         "usage_5h_question": "Usage limit for the 5-hour allowance, in percent",
@@ -191,6 +191,9 @@ MESSAGES = {
 
         # Step 11: summary
         "summary_title": "Summary",
+        "summary_dashboard": "Dashboard: comes with Mindgate; nothing is published now. The first /{name} run in Claude "
+                             "Code (it needs claude.ai's Artifact tools) publishes it to your own claude.ai account; "
+                             "from then on the vault data it shows goes to claude.ai.",
         "summary_what": "This is everything that will be written. Nothing has been written yet.",
         "summary_nothing": "Nothing to write.",
         "summary_new": "  new      {path}",
@@ -230,6 +233,7 @@ MESSAGES = {
         "un_question": "Go ahead?",
         "un_settings_broken": "{path} is not valid JSON now; it is left as it is. Remove the Mindgate hooks by hand.",
         "un_done": "Done. Moved items are in {path}. You can delete that folder yourself if you no longer need it.",
+        "un_dashboard": "Your dashboard stays on claude.ai; remove it there if you no longer want it.",
         "un_partial": "Stopped with an error: {error}. What was done so far stays in {path}.",
     },
     "tr": {
@@ -325,10 +329,11 @@ MESSAGES = {
         "skills_title": "Beceriler ve ajanlar",
         "skills_what": "Beceriler (skills), Claude'un bir iş türü için yüklediği talimat paketleridir; ajanlar (agents) "
                        "rolü belli yardımcılardır. ~/.claude/skills/ ve ~/.claude/agents/ altına kopyalanırlar.",
-        "skills_no": "vault yine çalışır, ama Claude'da Mindgate becerileri ve ajanları olmaz.",
+        "skills_no": "vault yine çalışır, ama Claude'da Mindgate becerileri ve ajanları olmaz (/pano becerisi yine de kurulur).",
         "skills_list": "Beceriler ({count}): {names}",
         "agents_list": "Ajanlar ({count}): {names}",
         "skills_question": "Beceriler kurulsun mu?",
+        "dashboard_skill_kept": "  /{name} becerisi yine de kurulur: pano Mindgate'le birlikte gelir.",
         "agents_question": "Ajanlar kurulsun mu?",
         "assist_title": "Başka asistanlar (deneysel)",
         "assist_what": "Mindgate başka bir kod asistanını da koruyabilir: kabuk komutları, dosya yazmaları ve web sayfaları "
@@ -389,7 +394,6 @@ MESSAGES = {
         "rules_no": "kural kapalı kalır; sonra _sistem/config.json içinden açabilirsiniz.",
         "rule_item": "  #{number}: {title}",
         "rule_question": "#{number} kuralı açılsın mı?",
-        "rule_needs_dashboard": "  #{number} isteğe bağlı panoyu gerektirir; pano v1'de yok, bu yüzden sunulmuyor.",
         "rule_fingerprint": "Yalnızca bu bilgisayar sayılsın diye bilgisayar adının parmak izi kaydedilir. Adın kendisi "
                             "kaydedilmez, parmak izi gösterilmez.",
         "usage_5h_question": "5 saatlik hak için kullanım sınırı, yüzde olarak",
@@ -397,6 +401,9 @@ MESSAGES = {
         "percent_invalid": "Lütfen 1 ile 100 arasında bir tam sayı verin.",
 
         "summary_title": "Özet",
+        "summary_dashboard": "Pano: Mindgate'le birlikte gelir; şu an hiçbir şey yayımlanmaz. Claude Code'da ilk /{name} "
+                             "çalışması (claude.ai'nin Artifact araçlarını ister) panoyu kendi claude.ai hesabınızda "
+                             "yayımlar; ondan sonra panonun gösterdiği vault verisi claude.ai'ye gider.",
         "summary_what": "Yazılacak her şey bu. Henüz hiçbir şey yazılmadı.",
         "summary_nothing": "Yazılacak bir şey yok.",
         "summary_new": "  yeni      {path}",
@@ -435,6 +442,7 @@ MESSAGES = {
         "un_settings_broken": "{path} şu an geçerli bir JSON değil; olduğu gibi bırakıldı. Mindgate hook'larını elle "
                               "çıkarın.",
         "un_done": "Bitti. Taşınanlar {path} içinde. Artık gerekmiyorsa o klasörü kendiniz silebilirsiniz.",
+        "un_dashboard": "Panonuz claude.ai'de durur; artık istemiyorsanız oradan kaldırın.",
         "un_partial": "Bir hatayla durdu: {error}. O ana kadar yapılanlar {path} içinde.",
     },
 }
@@ -452,6 +460,8 @@ HOOK_DESCRIPTIONS = {
         "PreCompact:session_log save": "Before the context is compacted: writes the session record.",
         "PreCompact:context_check before": "Before compacting: adds what must be kept.",
         "Stop:context_check stop": "After each answer: measures how full the context is and reminds you in time.",
+        "Stop:dashboard_check check": "After each answer in a chat that wrote to the vault: reminds Claude to update "
+                                      "the dashboard (/dashboard).",
         "SessionStart:session_log remind": "When a session starts: shows rule titles and the latest handoff cards.",
         "PostToolUse:site_guard after": "After a web page is read: scans the fetched content for hidden instructions.",
         "UserPromptSubmit:search --hook": "With each message: adds a few related vault notes as context.",
@@ -468,6 +478,8 @@ HOOK_DESCRIPTIONS = {
         "PreCompact:session_log save": "Bağlam sıkıştırılmadan önce: oturum kaydını yazar.",
         "PreCompact:context_check before": "Sıkıştırmadan önce: korunması gerekenleri ekler.",
         "Stop:context_check stop": "Her cevaptan sonra: bağlamın doluluğunu ölçer ve zamanında hatırlatır.",
+        "Stop:dashboard_check check": "Vault'a yazan sohbette her cevaptan sonra: Claude'a panoyu güncellemesini "
+                                      "hatırlatır (/pano).",
         "SessionStart:session_log remind": "Oturum başlarken: kural başlıklarını ve son devir kartlarını gösterir.",
         "PostToolUse:site_guard after": "Bir web sayfası okunduktan sonra: gelen içeriği gizli talimatlara karşı tarar.",
         "UserPromptSubmit:search --hook": "Her mesajda: ilgili birkaç vault notunu bağlam olarak ekler.",
@@ -483,6 +495,7 @@ HOOK_STATUS_TR = {
     "Agent gate: checking task-writing and model": "Ajan kapısı: görev yazma ve model denetleniyor",
     "Writing the session record to the second brain": "Oturum kaydı ikinci beyne yazılıyor",
     "Adding what to keep when compacting": "Sıkıştırmada korunacaklar ekleniyor",
+    "Checking whether the dashboard is up to date": "Panonun güncel olup olmadığına bakılıyor",
     "Measuring how full the context is": "Bağlamın doluluğu ölçülüyor",
     "Site guard is scanning the fetched content": "Site kapısı gelen içeriği tarıyor",
     "Saving the compaction summary to the vault": "Sıkıştırma özeti vault'a kaydediliyor",

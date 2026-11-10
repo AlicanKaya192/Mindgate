@@ -21,7 +21,7 @@ Purpose: to move what is in the user's head into the vault. The real gap is ofte
    - The user's sentence without changing its meaning; `source_type: stated` in the frontmatter
    - If new information conflicts with the old, do not delete the old; `invalid` + `replaced_by` (§5)
 6. **Stop condition:** the branches of the question tree are closed, the user says "enough", or the answers start to repeat. A question left unanswered goes to pending with `records.py pending add --type question`.
-7. **Closing:** a short summary to the user: what was learned, which notes were updated, the open question. Then the log (`profile` or `progress`, with `Evidence:` and `Learned:`), commit (push if a remote is set), optional dashboard: not in v1, the [[skills-registry]] counter.
+7. **Closing:** a short summary to the user: what was learned, which notes were updated, the open question. Then the log (`profile` or `progress`, with `Evidence:` and `Learned:`), commit (push if a remote is set), the dashboard (`/dashboard`), the [[skills-registry]] counter.
 
 ## Do not
 - Turn the interview into a lesson or a quiz (#15). Do not re-argue the user's decision; ask only what is missing and what conflicts.

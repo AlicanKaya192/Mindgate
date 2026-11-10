@@ -8,6 +8,7 @@ Claude Code skills. The source files are here (`_system/skills/<name>/SKILL.md`,
 |---|---|---|---|---|
 | `/keep-records` | Scan the session logs, review the conversation, write to the vault, log, commit | 0 | — | — |
 | `/new-project` | Project folder + main page, progress, rules, ADR; index, log, profile | 0 | — | — |
+| `/dashboard` | Publishes the dashboard to the user's claude.ai account on the first run, then uploads only the data sets that changed | 0 | — | — |
 | `/problem` | Problem/solution note (search first, add a repeat if it exists), project link, index, log | 0 | — | — |
 | `/idea` | Write the idea straight to the inbox: the user's own sentence + a short assessment + links | 0 | — | — |
 | `/interview` | Asks the user questions one at a time until the topic is finished, writes the answers into the related notes (searches the vault first; no sensitive information) | 0 | — | — |
@@ -63,4 +64,4 @@ Detailed method: the `skill-writing` skill (including adapting a skill from outs
 
 1. Write `_system/skills/<name>/SKILL.md`: frontmatter `name`, `description` (including when it is to be used); the body numbered steps; the vault path and the schema reference; strict rules.
 2. Open the `~/.claude/skills/<name>` link (on Windows: `cmd /c mklink /J "%USERPROFILE%\.claude\skills\<name>" "<vault>\_system\skills\<name>"`; elsewhere: `ln -s`).
-3. Add a row to this table; add an `install` entry to `log.md`. Optional dashboard: not in v1.
+3. Add a row to this table; add an `install` entry to `log.md`; the dashboard shows it after the next `/dashboard` run.

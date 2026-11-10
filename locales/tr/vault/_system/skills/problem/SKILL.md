@@ -16,7 +16,7 @@ Vault: `{{VAULT}}`. Şema: vault `CLAUDE.md` §7.3, şablon `_sablonlar/sorun.md
 4. Çözüm bir kavramı gerektiriyorsa ve `bilgi/`'de sayfası yoksa kısa bir kavram notu aç, link ver (sadece not; öğretme yok, #15).
 5. Projenin ana sayfasındaki içerik haritasının (MOC) "Sorunlar" satırına link ekle. `index.md` "Sorunlar" bölümüne tek satır ekle.
 6. Log: `{{PY}} -I _sistem/records.py log --operation sorun --title "<başlık>" --evidence "<commit/test>" --learned "…"`; gövdede hangi çözümün denendiği ve sonucu.
-7. Vault'ta commit (uzak depo tanımlıysa push). İsteğe bağlı pano: v1'de yok.
+7. Vault'ta commit (uzak depo tanımlıysa push), sonra panoyu güncelle (`/pano`).
 8. `_sistem/beceriler/beceriler.md` tablosunda kullanım sayısını 1 artır.
 
 Yazılmayacaklar: şifre, anahtar, token, IP/MAC, bilgisayar adı, kişisel veri (#18). Komutun kaynağı belirsizse yazma (§9).

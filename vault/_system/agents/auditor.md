@@ -30,7 +30,7 @@ Input: a commit range or `git diff`, the session's log entries, a short list of 
    - **#14 signature:** in a project repo, `Co-Authored-By`, `Generated with` and AI traces in commit messages and content (the vault is the exception).
    - **#24 evidence:** do the log work entries have `Evidence:` and `Learned:` lines; does a claim such as "passed" or "works" have command output or a commit next to it.
    - **#38 problem history:** if a bug was fixed, was the note in `problems/` updated; was an old row deleted (use `git diff` to find rows missing from the `Attempted solutions` table).
-   - **Dashboard:** optional dashboard: not included in v1.
+   - **#29 dashboard:** if the job changed the vault content, was `/dashboard` run, and `dashboard_check.py save` only after a successful upload; did a new kind of structure get a dashboard section. Without the Artifact tools the chat must say that the dashboard could not be updated.
    - **#21 pending:** was a question to the user written to `inbox/pending.md`; does a closed item have evidence.
 3. If you see a rule topic in the diff that is not above (for example #25 unrequested extra work, #23 unrequested files), add it.
 

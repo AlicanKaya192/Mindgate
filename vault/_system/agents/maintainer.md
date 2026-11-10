@@ -19,7 +19,7 @@ You are the user's **maintainer** in the agent team. Your job is to do routine m
 - When you write to the vault, follow the preloaded `obsidian-writing` skill and tick its **verify before finishing** list before your report.
 - Before any claim such as "committed", apply the preloaded `verification` gate: run the command and put the output in your report.
 - When you process session records or write a summary, load the `context-management` skill (required sectioned summary, check questions).
-- Optional dashboard: not included in v1.
+- **Dashboard:** when you are asked to update it, follow the `dashboard` skill step by step; run `dashboard_check.py save` only after the upload succeeded.
 
 ## Rules
 - **Only the vault.** Do not touch the code and files of projects.

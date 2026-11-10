@@ -46,9 +46,9 @@ Kurulum programı (installer; bundan sonra "kurucu") da aynı fikirle yazıldı.
 
 Vault sabit bir klasör yapısıyla gelir (gelen kutusu, projeler, fikirler, sorunlar, bilgi, araştırmalar, kurallar, arşiv ve diğerleri). Yanında 16 not şablonu, bir dizin (index), yalnızca sona eklenen bir günlük (log), cevabınızı bekleyen her şeyin toplandığı bir bekleyenler listesi ve sonraki oturuma işin nerede kaldığını söyleyen devir kartları vardır. Şema [`locales/tr/vault/CLAUDE.md`](locales/tr/vault/CLAUDE.md) dosyasındadır.
 
-Claude Code'a 13 ajan, 39 beceri ve onu vault'a yönlendiren global bir talimat dosyası kurulur. Kural dosyasında numaralı 46 kural vardır; bunların üçü isteğe bağlıdır; kurucu bunları size önerir. Antigravity, Gemini CLI ve Codex CLI'ya da kapılar, talimatlar, beceriler ve ajanlar kurulabilir (deneysel, bkz. Başka asistanlar).
+Claude Code'a 13 ajan, 40 beceri ve onu vault'a yönlendiren global bir talimat dosyası kurulur. Kural dosyasında numaralı 46 kural vardır; bunların ikisi isteğe bağlıdır; kurucu bunları size önerir. Antigravity, Gemini CLI ve Codex CLI'ya da kapılar, talimatlar, beceriler ve ajanlar kurulabilir (deneysel, bkz. Başka asistanlar).
 
-Vault'ta 21 Python betiği (yalnızca standart kütüphane) ve 22 test dosyası bulunur. Betikler bekleyenler listesine ve log'a kilitli yazar, notlarda arama yapar, vault'un sağlığını denetler, sır ve gizli talimat taraması yapar, oturum kayıtlarını tutar. Hook'lar şunlardır:
+Vault'ta 24 Python betiği (yalnızca standart kütüphane) ve 25 test dosyası bulunur. Betikler bekleyenler listesine ve log'a kilitli yazar, notlarda arama yapar, vault'un sağlığını denetler, sır ve gizli talimat taraması yapar, oturum kayıtlarını tutar. Hook'lar şunlardır:
 
 | Hook | Ne zaman çalışır | Ne yapar |
 |---|---|---|
@@ -59,12 +59,15 @@ Vault'ta 21 Python betiği (yalnızca standart kütüphane) ve 22 test dosyası 
 | `session_log save` | oturum bitince ve sıkıştırmadan önce | ham oturum kaydını vault'un gelen kutusuna yazar |
 | `context_check before` | sıkıştırmadan önce | korunması gerekenleri ekler |
 | `context_check stop` | her cevaptan sonra | bağlamın doluluğunu ölçer, zamanında hatırlatır |
+| `dashboard_check` | her cevaptan sonra | vault'a yazan sohbette Claude'a panoyu güncellemesini hatırlatır |
 | `session_log remind` | oturum başlarken | kural başlıklarını ve son devir kartlarını gösterir |
 | `site_guard after` | bir web sayfası okunduktan sonra | gelen içeriği gizli talimatlara karşı tarar |
 | `search --hook` | her mesajda | ilgili birkaç vault notunu bağlam olarak ekler |
 | `context_check after` | sıkıştırmadan sonra | sıkıştırma özetini vault'a kaydeder |
 
-`session_log save` iki olaya bağlı olduğu için kurucu 12 hook girdisi listeler. Komutların tam hâli [`setup/hooks.template.json`](setup/hooks.template.json) dosyasındadır.
+`session_log save` iki olaya bağlı olduğu için kurucu 13 hook girdisi listeler. Komutların tam hâli [`setup/hooks.template.json`](setup/hooks.template.json) dosyasındadır.
+
+**Pano.** Mindgate bir panoyla gelir: kendi claude.ai hesabınızda vault'u gösteren bir Data artifact'i. Yedi sekmesi vardır: bugün (bekleyenler, devir kartları, son log, uyarılar), projeler ve ilerlemeleri, türüne göre iş akışı, ajanlar ve kurullar, bilgi, sistem (sağlık, kurallar, beceriler, araçlar, maliyet) ve log'un tamamı. Kurucu panoyu sormadan kurar ama o sırada hiçbir şey gönderilmez: Claude Code'daki ilk `/pano` çalışması panoyu yayımlar (claude.ai'nin Artifact araçlarını ister), sonraki çalışmalar yalnızca değişen veri setlerini yükler. `ben/`, `CLAUDE.md`, oturum kayıtları ve `privacy: private` işaretli notlar panoya hiç gitmez; her metin sır taramasından geçer. Arayüzü kurulum dilini izler.
 
 <p align="center">
   <img src="docs/media/session-flow.png" alt="Bir Claude Code oturumundaki kanca olaylarının zaman çizelgesi, SessionStart'tan SessionEnd'e ve günlük göreve" width="820">
@@ -102,10 +105,10 @@ macOS ve Linux'ta `py -3` yerine `python3` yazın. Kuru çalıştırma (dry run)
 4. **Vault.** Oluşturulup oluşturulmayacağı ve yeri (varsayılan `~/Documents/Mindgate-Vault`). İçinde başka dosyalar olan klasör reddedilir; aynı dilde kurulmuş bir Mindgate vault'u yeniden kullanılabilir.
 5. **Global talimatlar** (`~/.claude/CLAUDE.md`). Dosyanız varsa boyutunu, başlıklarını ve ilk satırlarını gösterir; sonra `import` (çekirdek `~/.claude/mindgate/CLAUDE.md` dosyasına yazılır, sizin dosyanıza işaretli tek bir içe aktarma satırı eklenir), `merge` (çekirdek, işaretli satırlar arasında dosyanızın sonuna eklenir) ya da `skip` seçeneklerini sunar. Dosyanız yoksa: `write` ya da `skip`.
 6. **Hook'lar** (`~/.claude/settings.json`). Her hook'u ne yaptığıyla birlikte listeler; `all`, `none` ya da `pick`. Kendi ayarlarınıza ve hook'larınıza dokunulmaz; zaten kurulu olan bir hook yeniden eklenmez.
-7. **Beceriler ve ajanlar.** `~/.claude/skills/` ve `~/.claude/agents/` altına kopyalanır. Aynı adda ama farklı içerikte bir beceri ya da ajan varsa `skip` ya da `rename` (`mindgate-<ad>` olarak kurulur) seçilir.
+7. **Beceriler ve ajanlar.** `~/.claude/skills/` ve `~/.claude/agents/` altına kopyalanır. Aynı adda ama farklı içerikte bir beceri ya da ajan varsa `skip` ya da `rename` (`mindgate-<ad>` olarak kurulur) seçilir. Becerileri istemezseniz de `/pano` becerisi kurulur: pano Mindgate'le birlikte gelir.
 8. **Başka asistanlar (deneysel).** Antigravity, Gemini CLI ve Codex CLI, her biri için bir soru (varsayılan hayır). Her birine kendi hook dosyasında kapılar, işaretli satırlar arasında talimatlar ve 7. adımda seçilen beceriler ve ajanlar kurulur; aşağıdaki Başka asistanlar bölümüne bakın.
 9. **Zamanlanmış görevler.** Günlük ve haftalık görev, her biri için bir soru. Ardından iki soru daha: görevler bütün projelerinizin oturumlarını okusun mu (varsayılan hayır), `git push` çalıştırsın mı (varsayılan hayır). Haftalık görev kurulursa bir soru daha: tek bir web sayfası (GitHub trending) okunsun mu (varsayılan hayır).
-10. **İsteğe bağlı kurallar.** #9 kullanım sınırı (iki yüzde değeri sorar) ve #17 yalnızca bu bilgisayar (bilgisayar adının kendisini değil, parmak izini kaydeder). #29 panoya bağlıdır; pano v1'de olmadığı için önerilmez.
+10. **İsteğe bağlı kurallar.** #9 kullanım sınırı (iki yüzde değeri sorar) ve #17 yalnızca bu bilgisayar (bilgisayar adının kendisini değil, parmak izini kaydeder). #29 (pano her değişikliği gösterir) panoyla birlikte gelir, sorulmaz.
 11. **Özet.** Yazılacak her dosya. Henüz hiçbir şey yazılmamıştır; onay sorusunun varsayılanı hayırdır.
 12. **Yazma.** Kurulanların ve yedeklerin listesi `~/.claude/mindgate/install-manifest.json` dosyasına yazılır.
 
@@ -120,7 +123,7 @@ py -3 setup/uninstall.py --dry-run
 py -3 setup/uninstall.py
 ```
 
-Kaldırıcı, kurulum kaydını (manifest) okur. `settings.json` ve `CLAUDE.md`, kurulumdan sonra değişmemişse yedeklerden geri yüklenir; değişmişse yalnızca Mindgate hook'ları, içe aktarma satırı ya da blok çıkarılır. Kurulan beceriler, ajanlar, zamanlanmış görevler ve `~/.claude/mindgate/` silinmez: `~/.claude/mindgate-removed-<zaman>/` klasörüne taşınır; o klasörü sonra kendiniz silebilirsiniz. Notlarınızı tuttuğu için vault'a hiç dokunulmaz. Başka asistanlar için yazılan dosyalar (`~/.gemini`, `~/.codex` ve `~/.agents` altında) aynı biçimde ele alınır: sizin dosyalarınız eski hâline döner, gerisi aynı klasöre taşınır.
+Kaldırıcı, kurulum kaydını (manifest) okur. `settings.json` ve `CLAUDE.md`, kurulumdan sonra değişmemişse yedeklerden geri yüklenir; değişmişse yalnızca Mindgate hook'ları, içe aktarma satırı ya da blok çıkarılır. Kurulan beceriler, ajanlar, zamanlanmış görevler ve `~/.claude/mindgate/` silinmez: `~/.claude/mindgate-removed-<zaman>/` klasörüne taşınır; o klasörü sonra kendiniz silebilirsiniz. Notlarınızı tuttuğu için vault'a hiç dokunulmaz. Başka asistanlar için yazılan dosyalar (`~/.gemini`, `~/.codex` ve `~/.agents` altında) aynı biçimde ele alınır: sizin dosyalarınız eski hâline döner, gerisi aynı klasöre taşınır. Panonuz claude.ai'de durur; artık istemiyorsanız oradan kaldırın.
 
 ## Başka asistanlar (deneysel)
 
@@ -208,6 +211,7 @@ Adıyla başlatılan iş akışı becerileri:
 | `/sorun` | bir hata çözüldüğünde; önce sorun kütüphanesinde arar, sonra notu ekler ya da günceller |
 | `/kayitlari-tut` | "kayıtları tut" dediğinizde ya da büyük bir iş bittiğinde |
 | `/yeni-proje` | yeni bir proje başladığında ya da var olan bir proje vault'a eklendiğinde |
+| `/pano` | ilk çalışmada panoyu claude.ai hesabınızda yayımlar; sonraki çalışmalar yalnızca değişeni yükler |
 | `/sorgula` | bir konu netleşene kadar size tek tek soru sorulmasını istediğinizde |
 | `/stil` | bir referans görselden animasyonlu anlatım videosu stili çıkarılmasını istediğinizde |
 
@@ -281,10 +285,11 @@ Her projede geçerli kırmızı çizgiler:
 - #1 ve #8 notlar ve cevaplar vault dilinde.
 - #30 temiz kod; projenin kendi kuralları ve linter'ı (kod denetleyici) önce gelir.
 - #36 paylaşılan bir dosyaya yazmadan hemen önce onu yeniden oku, kilitli araçla yaz.
-- #37 güvenlik ayarları varsayılan açık, veri gönderen ayarlar varsayılan kapalı.
+- #37 güvenlik ayarları varsayılan açık, veri gönderen ayarlar varsayılan kapalı. Tek istisna panodur: kurulu gelir ve ilk `/pano` çalışmanıza kadar hiçbir şey göndermez.
+- #29 pano her değişikliği gösterir; `/pano` onu aynı işte günceller.
 - #34 çiğnenen bir kural hemen kaydedilir ve bildirilir.
 
-Kurucunun önerdiği isteğe bağlı kurallar: #9 kullanım sınırı, #17 yalnızca bu bilgisayar, #29 pano (v1'de önerilmez).
+Kurucunun önerdiği isteğe bağlı kurallar: #9 kullanım sınırı, #17 yalnızca bu bilgisayar.
 
 ## Çalışma modları
 
@@ -320,7 +325,7 @@ Bir güvenlik sorunu mu buldunuz? Lütfen herkese açık bir issue yerine [`SECU
 
 - macOS ve Linux sınanmadı.
 - Antigravity, Gemini CLI ve Codex CLI deneyseldir: yalnızca belgelerindeki örnek hook verisiyle sınandı, gerçek programlarla denenmedi.
-- İsteğe bağlı pano v1'de yok; onu yayımlayacak ya da güncelleyecek adımlar çıkarıldı, #29 numaralı kural önerilmiyor.
+- Pano, artifact destekleyen bir claude.ai hesabı ve Artifact araçları olan Claude Code ister. Bunlar yoksa (onları taşımayan CLI ya da IDE terminali, öteki asistanlar) pano yayımlanamaz ve güncellenemez; Claude bunu söyler. Yayımlandıktan sonra panonun gösterdiği vault verisi claude.ai hesabınızda durur. v1.0.0'dan geçiş: kurucu var olan dosyaları değiştirmez; yeni bir vault'a yeniden kurun ya da pano dosyalarını elle ekleyin.
 - Kurucu vault'ta git deposu açmaz ve commit öncesi sır taramasını kurmaz. Yeni bir kurulumda `health.py`, commit öncesi sır taramasının kurulu olmadığını bildirir.
 - Türkçe kurulumda üretilen bazı metinler İngilizce kalır (bkz. Dil desteği).
 

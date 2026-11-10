@@ -83,6 +83,12 @@
             "command": "{{PY}} -I \"{{VAULT}}/_system/context_check.py\" stop",
             "timeout": 15,
             "statusMessage": "Measuring how full the context is"
+          },
+          {
+            "type": "command",
+            "command": "{{PY}} -I \"{{VAULT}}/_system/dashboard_check.py\" check",
+            "timeout": 15,
+            "statusMessage": "Checking whether the dashboard is up to date"
           }
         ]
       }

@@ -320,7 +320,14 @@ Claude şunları **kendiliğinden** yapar:
 
 ### 10.1 Pano (dashboard)
 
-İsteğe bağlı pano: v1'de yok.
+Pano, kullanıcının kendi claude.ai hesabında bir Data artifact'idir; kullanıcı paylaşmadıkça yalnızca ona görünür. Mindgate'le birlikte gelir: kurucu dosyalarını ve `/pano` becerisini sormadan kopyalar; ilk `/pano` çalışmasına kadar bilgisayardan hiçbir şey çıkmaz.
+
+- **Veri:** `_sistem/dashboard_data.py` vault'tan 18 veri seti üretir ve `_sistem/cikti/dashboard/` altına (git dışı) SHA-256 değerlerini tutan bir `manifest.json` ile yazar. Gizlilik süzgeci (#17, #18): `ben/`, kökteki `CLAUDE.md`, ham oturum kayıtları (yalnızca sayıları), `privacy: private` notlar ve adı hassas yollar panoya gitmez, onlara dokunan linkler de gitmez; her metin sır taramasından geçer. Boş veri seti tek bir yer tutucu satır alır (`_placeholder: true`), çünkü pano boş dosyayı hata sayar.
+- **Sayfa:** `_sistem/dashboard.html`. Arayüz metni İngilizce ve Türkçedir; dil `config.json`'dan gelir (`language`).
+- **Yayın:** Panoyu yalnızca Claude, claude.ai'nin Artifact araçlarıyla yayımlayabilir (`/pano`). İlk çalışma panoyu kullanıcının hesabındaki Data türünden açar, adresini `config.json`'a yazar (`dashboard.url`) ve her şeyi yükler; sonraki çalışmalar yalnızca SHA-256'sı değişen veri setlerini yükler. `dashboard_check.py save` yayını kaydeder, yalnızca başarılı yüklemeden sonra.
+- **Sohbet sonu kontrolü:** Stop hook'u `dashboard_check.py check`, vault'a yazan sohbete pano güncel değilse hatırlatır, her vault hâli için bir kez; ilk yayından önce yalnızca `/pano`'nun panoyu yayımladığını söyler. Kayıtsız sohbette sessizdir (#43).
+- **Artifact araçları yoksa** (onları taşımayan CLI ya da IDE terminali, öteki asistanlar): pano güncellenemez; Claude bunu tek satırla söyler ve `save` çalıştırmaz.
+- **Kural #29:** Yeni bir yapı türü, veri setini ve sayfa bölümünü aynı işte alır.
 
 ### 10.2 `_sistem/` ve beceriler
 

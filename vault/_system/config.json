@@ -1,5 +1,5 @@
 {
- "_about": "Settings for the vault tools. language: en | tr. names: English base name -> name in this install, as two tables (folders, files); empty in an English install, filled by the installer from locales/<lang>/names.json. context: the hook that adds related vault notes to each prompt (search.py --hook); mode: normal | economy | off. Change it here when the user asks to switch to economy mode or to turn automatic context off.",
+ "_about": "Settings for the vault tools. language: en | tr. names: English base name -> name in this install, as two tables (folders, files); empty in an English install, filled by the installer from locales/<lang>/names.json. context: the hook that adds related vault notes to each prompt (search.py --hook); mode: normal | economy | off. Change it here when the user asks to switch to economy mode or to turn automatic context off. dashboard.url: address of the user's claude.ai dashboard; empty until the first /dashboard run writes it (dashboard_check.py set-url).",
  "language": "en",
  "names": {
   "folders": {},
@@ -60,5 +60,8 @@
  },
  "weekly": {
   "trending": false
+ },
+ "dashboard": {
+  "url": ""
  }
 }

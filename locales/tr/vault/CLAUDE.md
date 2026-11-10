@@ -103,7 +103,7 @@ updated: YYYY-MM-DD             # güncelleme
   - Biçim `## [YYYY-MM-DD] <işlem> | <başlık>`. İşlemler (kod okur, İngilizce): setup (kurulum), idea (fikir), project (proje), progress (ilerleme), problem (sorun), decision (karar), experiment (deney), ingest, research (araştırma), query (soru), lint, rule (kural), profile (profil), release (sürüm), pending (bekleyen), done (tamam), learning (öğrenme), violation (ihlal).
   - İş girdilerinde `- Evidence:` (kanıt) ve `- Learned:` (öğrenilen) satırları olur.
 - **git:** Anlamlı her değişiklikten sonra Türkçe mesajla commit; uzak depo (remote) tanımlıysa push. Pre-commit sır taraması atlanmaz; örnek satır `secret-scan: allow` işareti alır.
-- İsteğe bağlı pano: v1'de yok.
+- **Pano (§10.1):** kullanıcının kendi claude.ai hesabında bir Data artifact'i; `/pano` ile yayımlanır ve güncellenir (veriyi `dashboard_data.py` üretir; `ben/`, `CLAUDE.md` ve oturum kayıtları panoya gitmez). Her içerik değişikliğinden sonra `/pano`; sohbet sonu hatırlatması (`dashboard_check.py`) bunu ister. Yeni bir yapı türü aynı işte panoda bölüm alır (#29). Artifact araçları yoksa panonun güncellenemediği söylenir.
 - **Beceriler (§10.2):** Kaynak `_sistem/beceriler/<ad>/SKILL.md`, `~/.claude/skills/`'e junction. Kullanım sayacı ve ekleme: [[beceriler]]. Üç kez elle tekrarlanan iş beceri olur.
 - **Talimatlar:** Global çekirdeğin asıl kopyası `_sistem/talimatlar/global-CLAUDE.md` (`install_instructions.py install`).
 

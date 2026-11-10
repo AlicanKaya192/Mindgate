@@ -35,7 +35,7 @@ Kullanıcının Obsidian ikinci beyin vault'unun haftalık bakımını yap. Vaul
 9. **Haftalık özet:** `arastirmalar/YYYY-MM-DD-haftalik-ozet.md` yaz (`type: research`, `tags: [haftalik-ozet]`). Bölümler: Bu hafta ne eklendi/değişti (log'dan, kısa) · İşlenen oturum kayıtları · Sağlık sonuçları ve düzeltilenler · Arşiv adayları · Yeni ders adayları (ders-adaylari.md'ye link) · Hafıza sınavı puanı ve bulunamayanlar · İşlenmeyi bekleyen kaynaklar · Kullanıcının dikkatine en fazla 3 madde. Kısa tut. Öğretme amaçlı içerik, quiz ya da ders yazma (kural #15).
 10. `index.md`'yi güncelle. `log.md`'nin sonuna `## [YYYY-MM-DD] lint | Haftalık bakım` girdisi ekle (sınav puanı dahil).
 11. **Git:** `git add -A`, `git diff --cached` ile sır sızmadığını kontrol et, `git commit -m "lint: haftalık bakım"`. Varsayılan olarak push yapma; `git push` yalnızca kullanıcı kurulumda push'u açtıysa.
-12. **Pano:** isteğe bağlı pano: v1'de yok.
+12. **Pano:** pano yayımlanmışsa (`{{PY}} -I _sistem/dashboard_check.py url` bir adres yazıyorsa) ve burada Artifact araçları varsa `pano` becerisiyle güncelle; yoksa bu adımı atla ve raporda söyle.
 13. **Gündemdeki projeler (kural #31):** Bu adım en sonda yapılır; izin beklerken önceki işler yarım kalmasın.
    - **Yalnızca açıksa:** Bu adımı yalnızca `_sistem/config.json` içindeki `weekly.trending` `true` ise yap (kurucu sorar; varsayılan `false`). `false` ise ya da alan yoksa adımı atla, hiçbir siteye girme ve özete "web adımı kapalı" yaz.
    - **Girilecek tek adres:** `https://github.com/trending?since=weekly`. Kural #32 gereği site kontrol kapısı her girişte onay penceresi açar. Kullanıcı onaylamazsa adımı atla, özete yaz.

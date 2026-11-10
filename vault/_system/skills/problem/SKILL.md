@@ -16,7 +16,7 @@ Vault: `{{VAULT}}`. Schema: vault `CLAUDE.md` §7.3, template `_templates/proble
 4. If the solution needs a concept and there is no page for it in `knowledge/`, open a short concept note and link it (just a note; no teaching, #15).
 5. Add a link to the "Problems" line of the content map (MOC) on the project's main page. Add one line to the "Problems" section of `index.md`.
 6. Log: `{{PY}} -I _system/records.py log --operation problem --title "<title>" --evidence "<commit/test>" --learned "…"`; in the body which solution was tried and the result.
-7. Commit in the vault (push if a remote is set). Optional dashboard: not in v1.
+7. Commit in the vault (push if a remote is set), then update the dashboard (`/dashboard`).
 8. In the `_system/skills/skills-registry.md` table, increase the usage count by 1.
 
 Not to be written: passwords, keys, tokens, IP/MAC, computer name, personal data (#18). If the source of a command is unclear, do not write it (§9).

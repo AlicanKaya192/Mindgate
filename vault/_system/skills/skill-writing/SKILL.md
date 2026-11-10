@@ -39,7 +39,7 @@ Method skill (not an agent). The steps for adding are on the [[skills-registry]]
 1. Open the link into the skills folder. On Windows: `cmd /c mklink /J "%USERPROFILE%\.claude\skills\<name>" "<vault>\_system\skills\<name>"`; on macOS/Linux: `ln -s "<vault>/_system/skills/<name>" "{{HOME}}/.claude/skills/<name>"`.
 2. If it will be preloaded for an agent, add it to the `skills:` list of the agent definition. If the agent will load it on demand, mention its name in the agent body.
 3. Agent definitions are reloaded only in a new session.
-4. Add a row to the [[skills-registry]] table and write an `install` entry to `log.md`. Optional dashboard: not in v1.
+4. Add a row to the [[skills-registry]] table and write an `install` entry to `log.md`; the dashboard shows it after the next `/dashboard` run.
 
 ## Idea sources
 - obra/superpowers `writing-skills` (MIT, Jesse Vincent).

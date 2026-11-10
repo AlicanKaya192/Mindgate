@@ -13,7 +13,7 @@ Vault: `{{VAULT}}`. Schema: vault `CLAUDE.md` §2 (project folder layout), §3 (
 6. Add it to the "Projects" section of `index.md`; the Bases table in `projects/projects.md` shows it automatically. Add it to the "Projects" list in `me/profile.md`.
 7. At the end of `log.md` add the entry `## [YYYY-MM-DD] project | <Project> added`.
 8. If the project folder has a `CLAUDE.md`, add a short "Second brain" section at its end (the vault path, this project's vault pages, that progress/problems/decisions are also recorded in the vault). **Do not put an AI signature** in commits (#14); commit to the project repository only if the user asks.
-9. Commit in the vault (push if a remote is set). Optional dashboard: not in v1.
+9. Commit in the vault (push if a remote is set), then update the dashboard (`/dashboard`).
 10. In the `_system/skills/skills-registry.md` table, increase the usage count by 1.
 
 Strict rules: sensitive information and computer codes are not written (#3, #18); no AI trace is left in the project (#14).

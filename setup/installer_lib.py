@@ -330,7 +330,6 @@ def config_path(vault: Path, language: str) -> Path:
 class OptionalRule:
     number: int
     title: str
-    offered: bool       # False when the rule needs something that is not part of v1
 
 
 def optional_rules(rules_text: str) -> list:
@@ -341,7 +340,7 @@ def optional_rules(rules_text: str) -> list:
     found = []
     for m in RULE_ROW.finditer(section):
         title = m.group(2).strip().rstrip(":.").strip()
-        found.append(OptionalRule(int(m.group(1)), title, "v1" not in m.group(3)))
+        found.append(OptionalRule(int(m.group(1)), title))
     return found
 
 

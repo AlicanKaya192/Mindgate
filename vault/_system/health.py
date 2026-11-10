@@ -7,7 +7,7 @@ Modes (from the vault root):
   health.py --save-baseline   lowers the monotonic baseline to today's counts (never raises it)
 
 Exit code: 1 when any check has the status "error". Apart from `--save-baseline` nothing is changed; the script only
-reads and reports. Optional dashboard: not included in v1.
+reads and reports. The dashboard reminder (`dashboard_check.py`) is one of the expected hooks.
 
 Folder and file names come from `common.name()` / `vault_path()`; paths are built from `VAULT` at call time, so the
 tests can point the checks at a temporary folder.
@@ -54,6 +54,7 @@ EXPECTED_HOOKS = [
     ("SessionStart", "session_log.py"), ("SessionEnd", "session_log.py"), ("PreCompact", "session_log.py"),
     ("UserPromptSubmit", "search.py"),
     ("Stop", "context_check.py"), ("PreCompact", "context_check.py"), ("PostCompact", "context_check.py"),
+    ("Stop", "dashboard_check.py"),
 ]
 RULE_START = "2026-10-14"            # the Learned line and the closing evidence are required in entries after this date
 PENDING_OLD_DAYS = 14

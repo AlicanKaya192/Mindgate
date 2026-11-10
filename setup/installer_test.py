@@ -144,7 +144,7 @@ class InstallUninstallTest(unittest.TestCase):
         settings_before = (run.claude / "settings.json").read_bytes()
         code, out = run.install(base_answers())
         self.assertEqual(code, 0, out)
-        self.assertEqual(len(run.commands()), 3 + 12)
+        self.assertEqual(len(run.commands()), 3 + 13)
         self.assertTrue((run.claude / "CLAUDE.md").read_bytes().startswith(USER_CLAUDE))
         self.assertIn(lib.IMPORT_LINE, (run.claude / "CLAUDE.md").read_text(encoding="utf-8"))
         self.assertTrue((run.claude / "mindgate" / "CLAUDE.md").is_file())
@@ -165,6 +165,27 @@ class InstallUninstallTest(unittest.TestCase):
         self.assertFalse((run.claude / "skills" / "idea").exists())
         self.assertTrue((run.vault / "rules" / "general-rules.md").is_file(), "the vault must not be touched")
         self.assertIn(str(run.vault), out)
+        self.assertNotIn(msg.text("en", "un_dashboard"), out, "no dashboard was published from this vault")
+
+    def test_uninstall_mentions_a_published_dashboard(self):
+        run = Run()
+        self.assertEqual(run.install(base_answers())[0], 0)
+        config = run.vault / "_system" / "config.json"
+        data = json.loads(config.read_text(encoding="utf-8"))
+        data["dashboard"]["url"] = "https://claude.ai/artifact/AbC123xyz"
+        config.write_text(json.dumps(data), encoding="utf-8")
+        code, out = run.uninstall()
+        self.assertEqual(code, 0, out)
+        self.assertIn(msg.text("en", "un_dashboard"), out)
+
+    def test_declined_skills_still_get_the_dashboard_skill(self):
+        run = Run()
+        code, out = run.install(base_answers(install_skills=False))
+        self.assertEqual(code, 0, out)
+        self.assertTrue((run.claude / "skills" / "dashboard" / "SKILL.md").is_file())
+        self.assertFalse((run.claude / "skills" / "idea").exists())
+        self.assertIn(msg.text("en", "dashboard_skill_kept", name="dashboard").strip(), out)
+        self.assertIn(msg.text("en", "summary_dashboard", name="dashboard"), out)
 
     def test_uninstall_keeps_changes_made_after_the_install(self):
         run = Run()
@@ -237,7 +258,7 @@ class InstallUninstallTest(unittest.TestCase):
         pairs = [(event, h["command"]) for event, groups in run.settings()["hooks"].items() for g in groups
                  for h in g["hooks"]]
         self.assertEqual(len(pairs), len(set(pairs)), "a hook was added twice")
-        self.assertEqual(len(pairs), 15)
+        self.assertEqual(len(pairs), 16)
         self.assertEqual((run.claude / "CLAUDE.md").read_text(encoding="utf-8").count(lib.IMPORT_TARGET), 1)
         self.assertEqual(files_under(run.claude / "mindgate" / "backups").__len__(), 2)
         code, out = run.uninstall()
@@ -312,10 +333,14 @@ class LanguageTest(unittest.TestCase):
         self.assertTrue((run.vault / "_sistem" / "beceriler" / "fikir" / "SKILL.md").is_file())
         skill = (run.claude / "skills" / "fikir" / "SKILL.md").read_text(encoding="utf-8")
         self.assertRegex(skill, r"(?m)^name: fikir$")
+        dashboard = (run.claude / "skills" / "pano" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertRegex(dashboard, r"(?m)^name: pano$")
+        self.assertIn("_sistem/dashboard_check.py", dashboard)
         self.assertTrue((run.claude / "agents" / "kasif.md").is_file())
         self.assertTrue((run.claude / "scheduled-tasks" / "gunluk" / "SKILL.md").is_file())
         commands = run.commands()
-        self.assertEqual(len(commands), 12)
+        self.assertEqual(len(commands), 13)
+        self.assertTrue(any("/_sistem/dashboard_check.py" in c for c in commands))
         self.assertTrue(all("/_sistem/" in c and "/_system/" not in c for c in commands))
         config = json.loads((run.vault / "_sistem" / "config.json").read_text(encoding="utf-8"))
         self.assertEqual(config["language"], "tr")
@@ -561,7 +586,7 @@ class ConsoleTest(unittest.TestCase):
         self.assertEqual(code, 0, out)
         self.assertTrue((run.home / "Documents" / "Mindgate-Vault" / "gelen" / "bekleyenler.md").is_file())
         self.assertTrue((run.claude / "skills" / "fikir" / "SKILL.md").is_file())
-        self.assertEqual(len(run.commands()), 12)
+        self.assertEqual(len(run.commands()), 13)
 
 
 USER_AGY_HOOKS = {"my-linter": {"PostToolUse": [{"matcher": "run_command", "hooks": [{"command": "./lint.sh"}]}]}}

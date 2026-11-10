@@ -58,7 +58,7 @@
 | New fact about the user; a topic in their field | `me/`; concept note in `knowledge/` linked to the project (no teaching) | #4, #6 |
 | Lasting knowledge learned at work (#31) | Search, add if missing (`self-learning`); end with "Added to the second brain: …" | #31 |
 | Question, approval, work for the user, notice (#21) | `records.py pending add` at once; close with evidence when answered (any chat); check first whether it was answered | schema §7.10 |
-| You wrote to the vault | `records.py log` (`Evidence:`, `Learned:`), index, commit; push if a remote is set | schema §10 |
+| You wrote to the vault | `records.py log` (`Evidence:`, `Learned:`), index, commit; push if a remote is set; `/dashboard` | schema §10 |
 | Site, link, web search | #32 notice and permission; site guard | schema §7.6 |
 | Writing code | `test-writing`, then `clean-code`; project rules first | — |
 | Publishing a web app or API | `expert-security` pre-release list; findings with evidence, fixes with approval | `expert-security` |
@@ -83,4 +83,4 @@
 - **Log:** each run goes into the Log table on the agent's page (`knowledge/agents-log/agent-<name>.md`).
 
 ## App, CLI and IDE terminal
-All three use the same `~/.claude`; rules do not loosen. For vault work, open the CLI in the vault. Fallbacks: no `get_session` → folder name as chat title; no browser → WebFetch or Chrome (#32 applies). Scheduled tasks run only while the desktop app is open. Optional dashboard: not in v1.
+All three use the same `~/.claude`; rules do not loosen. For vault work, open the CLI in the vault. Fallbacks: no `get_session` → folder name as chat title; no browser → WebFetch or Chrome (#32 applies). Scheduled tasks run only while the desktop app is open. No Artifact tools → say that the dashboard could not be updated (do not run `dashboard_check.py save`).

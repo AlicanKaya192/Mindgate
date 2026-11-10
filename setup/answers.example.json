@@ -34,6 +34,7 @@
     "PreCompact:session_log save",
     "PreCompact:context_check before",
     "Stop:context_check stop",
+    "Stop:dashboard_check check",
     "SessionStart:session_log remind",
     "PostToolUse:site_guard after",
     "UserPromptSubmit:search --hook",
@@ -62,7 +63,7 @@
   "_weekly_trending": "Step 9. Asked only when the weekly task is installed. true = the last step of the weekly task reads one web page (https://github.com/trending?since=weekly), still only after the site guard asks you; false = the step is skipped (config.json weekly.trending).",
   "weekly_trending": false,
 
-  "_optional_rules": "Step 10. Numbers of the optional rules to turn on (rules/general-rules.md, 'Optional rules'): 9 usage limit, 17 only this computer (saves a fingerprint of the computer name). Rule 29 needs the dashboard, which is not part of v1.",
+  "_optional_rules": "Step 10. Numbers of the optional rules to turn on (rules/general-rules.md, 'Optional rules'): 9 usage limit, 17 only this computer (saves a fingerprint of the computer name). Rule 29 (the dashboard shows every change) is not optional any more: it comes with the dashboard.",
   "optional_rules": [],
   "_usage_limit_5h": "Step 10. Asked only with rule 9: percent of the 5-hour allowance.",
   "usage_limit_5h": 93,

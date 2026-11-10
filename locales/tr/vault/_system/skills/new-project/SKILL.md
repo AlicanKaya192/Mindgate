@@ -13,7 +13,7 @@ Vault: `{{VAULT}}`. Şema: vault `CLAUDE.md` §2 (proje klasörü düzeni), §3 
 6. `index.md` → "Projeler" bölümüne ekle; `projeler/projeler.md` Bases tablosu otomatik gösterir. `ben/profil.md` → "Projeler" listesine ekle.
 7. `log.md` sonuna `## [YYYY-MM-DD] proje | <Proje> eklendi` girdisi.
 8. Proje klasöründe `CLAUDE.md` varsa sonuna kısa bir "İkinci beyin" bölümü ekle (vault yolu, bu projenin vault sayfaları, ilerleme/sorun/kararın vault'a da işleneceği). Commit'e **AI imzası koyma** (#14); proje reposuna sadece kullanıcı isterse commit at.
-9. Vault'ta commit (uzak depo tanımlıysa push). İsteğe bağlı pano: v1'de yok.
+9. Vault'ta commit (uzak depo tanımlıysa push), sonra panoyu güncelle (`/pano`).
 10. `_sistem/beceriler/beceriler.md` tablosunda kullanım sayısını 1 artır.
 
 Kesin kurallar: hassas bilgi ve bilgisayar kodları yazılmaz (#3, #18); projede AI izi bırakılmaz (#14).

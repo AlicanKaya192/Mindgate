@@ -320,7 +320,14 @@ Claude does these **on its own**:
 
 ### 10.1 Dashboard
 
-Optional dashboard: not included in v1.
+The dashboard is a claude.ai Data artifact in the user's own account; it is private until the user shares it. It comes with Mindgate: the installer copies its files and the `/dashboard` skill without asking, and nothing leaves the computer before the first `/dashboard` run.
+
+- **Data:** `_system/dashboard_data.py` builds 18 data sets from the vault into `_system/output/dashboard/` (outside git), with a `manifest.json` of their SHA-256 values. Privacy filter (#17, #18): `me/`, the root `CLAUDE.md`, raw session records (only their number), notes with `privacy: private` and paths with a sensitive name never go, nor do links that touch them; every text passes the secret scan. An empty data set gets one placeholder row (`_placeholder: true`), because the dashboard counts an empty file as an error.
+- **Page:** `_system/dashboard.html`. Its interface text is in English and Turkish; the language comes from `config.json` (`language`).
+- **Publishing:** only Claude can publish, with the claude.ai Artifact tools (`/dashboard`). The first run creates the dashboard from the Data type of the user's account, writes its address to `config.json` (`dashboard.url`) and uploads everything; later runs upload only the data sets whose SHA-256 changed. `dashboard_check.py save` records the publish, and only after a successful upload.
+- **End-of-chat check:** the Stop hook `dashboard_check.py check` reminds a chat that wrote to the vault when the dashboard is out of date, once per vault state; before the first publish it only says that `/dashboard` publishes it. It is silent in an unrecorded chat (#43).
+- **Without the Artifact tools** (CLI or IDE terminal without them, other assistants): the dashboard cannot be updated; Claude says so in one line and does not run `save`.
+- **Rule #29:** a new kind of structure gets its data set and its page section in the same job.
 
 ### 10.2 `_system/` and skills
 

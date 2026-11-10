@@ -10,6 +10,6 @@ Vault: `{{VAULT}}`. Şema: vault `CLAUDE.md` §7.1, şablon `_sablonlar/fikir.md
 3. Kısa değerlendirme: ne işe yarar / kime; ilk adım ne; hangi mevcut proje, fikir ya da kavramla ilişkili (`[[...]]` linkleri). Açık sorular varsa listele. Toplam 10 satırı geçmesin.
 4. Aynı ya da çok benzer bir fikir `gelen/` veya `fikirler/`'de varsa yeni not açma; mevcut nota tarihli ekleme yap ve bunu kullanıcıya tek cümleyle söyle.
 5. `index.md` "Fikirler" bölümüne tek satır; `log.md` sonuna `## [YYYY-MM-DD] fikir | <başlık>`.
-6. Vault'ta commit (uzak depo tanımlıysa push). İsteğe bağlı pano: v1'de yok.
+6. Vault'ta commit (uzak depo tanımlıysa push), sonra panoyu güncelle (`/pano`).
 7. `_sistem/beceriler/beceriler.md` tablosunda kullanım sayısını 1 artır.
 8. Kullanıcıya tek satır: "Kaydettim → [[dosya-adi]]". Fikri tartışmaya ya da öğretmeye girişme (#15); kullanıcı isterse konuşulur.

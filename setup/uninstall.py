@@ -12,6 +12,7 @@ Usage:
 from __future__ import annotations  # lets an old Python reach the version check
 
 import argparse
+import json
 import os
 import sys
 from dataclasses import dataclass, field
@@ -85,6 +86,8 @@ class Uninstaller:
             self.say("un_partial", error=error, path=target)
             return 1
         self.say("un_done", path=target)
+        if any(dashboard_published(Path(vault), self.language) for vault in plan.vaults):
+            self.say("un_dashboard")
         for vault in plan.vaults:
             self.say("un_vault", path=vault)
         return 0
@@ -207,6 +210,15 @@ class Uninstaller:
                 lib.write_new(item.path, item.final)
         for path in plan.moves:
             self.move(path, target)
+
+
+def dashboard_published(vault: Path, language: str) -> bool:
+    """Was a dashboard published from this vault (dashboard.url in its config.json)? Then it still stays on claude.ai."""
+    config = vault / lib.local_name("_system", lib.load_names(language)) / "config.json"
+    try:
+        return bool((json.loads(config.read_text(encoding="utf-8")).get("dashboard") or {}).get("url"))
+    except (OSError, ValueError, AttributeError):
+        return False
 
 
 def parse_args(argv: list | None) -> argparse.Namespace:

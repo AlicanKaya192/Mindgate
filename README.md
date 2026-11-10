@@ -46,9 +46,9 @@ The installer follows the same idea. It asks before every step, explains what ha
 
 The vault comes with a fixed folder structure (inbox, projects, ideas, problems, knowledge, research, rules, archive and more), 16 note templates, an index, an append-only log, a pending list for everything that waits for your answer, and handoff cards that tell the next session where the work stopped. The schema is in [`vault/CLAUDE.md`](vault/CLAUDE.md).
 
-Claude Code gets 13 agents, 39 skills and a global instruction file that points it to the vault. The rules file has 46 numbered rules; three of them are optional and offered by the installer. Antigravity, Gemini CLI and Codex CLI can get the guards, instructions, skills and agents too (experimental, see Other assistants).
+Claude Code gets 13 agents, 40 skills and a global instruction file that points it to the vault. The rules file has 46 numbered rules; two of them are optional and offered by the installer. Antigravity, Gemini CLI and Codex CLI can get the guards, instructions, skills and agents too (experimental, see Other assistants).
 
-The vault has 21 Python scripts (standard library only) with 22 test files. They write the pending list and the log under a lock, search the notes, check the vault's health, scan for secrets and hidden instructions, and keep session records. The hooks are:
+The vault has 24 Python scripts (standard library only) with 25 test files. They write the pending list and the log under a lock, search the notes, check the vault's health, scan for secrets and hidden instructions, and keep session records. The hooks are:
 
 | Hook | When it runs | What it does |
 |---|---|---|
@@ -59,12 +59,15 @@ The vault has 21 Python scripts (standard library only) with 22 test files. They
 | `session_log save` | when a session ends, before compaction | writes a raw session record into the vault inbox |
 | `context_check before` | before compaction | adds what must be kept |
 | `context_check stop` | after each answer | measures how full the context is and reminds in time |
+| `dashboard_check` | after each answer | in a chat that wrote to the vault, reminds Claude to update the dashboard |
 | `session_log remind` | when a session starts | shows rule titles and the latest handoff cards |
 | `site_guard after` | after a web page is read | scans the fetched content for hidden instructions |
 | `search --hook` | with each message | adds a few related vault notes as context |
 | `context_check after` | after compaction | saves the compaction summary to the vault |
 
-`session_log save` is registered for two events, so the installer lists 12 hook entries. The exact commands are in [`setup/hooks.template.json`](setup/hooks.template.json).
+`session_log save` is registered for two events, so the installer lists 13 hook entries. The exact commands are in [`setup/hooks.template.json`](setup/hooks.template.json).
+
+**Dashboard.** Mindgate comes with a dashboard: a claude.ai Data artifact in your own claude.ai account that shows the vault. It has seven tabs: today (pending items, handoff cards, recent log, warnings), projects and their progress, a flow of work by kind, agents and councils, knowledge, system (health, rules, skills, tools, cost) and the full log. The installer sets it up without asking, but nothing is sent then: the first `/dashboard` run in Claude Code publishes it (it needs claude.ai's Artifact tools), and later runs upload only the data sets that changed. `me/`, `CLAUDE.md`, session records and notes marked `privacy: private` never go to it, and every text passes the secret scan. Its interface follows the install language.
 
 <p align="center">
   <img src="docs/media/session-flow.png" alt="Timeline of the hook events in a Claude Code session, from SessionStart to SessionEnd and the daily task" width="820">
@@ -102,10 +105,10 @@ On macOS and Linux use `python3` instead of `py -3`. The dry run asks the same q
 4. **Vault.** Whether to create it and where (default `~/Documents/Mindgate-Vault`). A folder that already holds other files is refused; an existing Mindgate vault in the same language can be reused.
 5. **Global instructions** (`~/.claude/CLAUDE.md`). If you have the file, it shows its size, headings and first lines, then offers `import` (the core goes to `~/.claude/mindgate/CLAUDE.md` and one marked import line is added to your file), `merge` (the core goes to the end of your file between marked lines) or `skip`. If you do not have it: `write` or `skip`.
 6. **Hooks** (`~/.claude/settings.json`). Lists each hook with what it does; `all`, `none` or `pick`. Your own settings and hooks are not touched, and a hook that is already there is not added again.
-7. **Skills and agents.** Copied to `~/.claude/skills/` and `~/.claude/agents/`. If a different skill or agent with the same name exists, you choose `skip` or `rename` (installed as `mindgate-<name>`).
+7. **Skills and agents.** Copied to `~/.claude/skills/` and `~/.claude/agents/`. If a different skill or agent with the same name exists, you choose `skip` or `rename` (installed as `mindgate-<name>`). If you decline the skills, the `/dashboard` skill is still installed: the dashboard comes with Mindgate.
 8. **Other assistants (experimental).** Antigravity, Gemini CLI and Codex CLI, one question each (default no). Each one gets the guards in its own hooks file, the instructions between marked lines and the skills and agents chosen in step 7; see Other assistants below.
 9. **Scheduled tasks.** The daily and the weekly task, one question each. Then two more: should the tasks read the sessions of all your projects (default no), and should they run `git push` (default no). With the weekly task, one more: may it read one web page, GitHub trending (default no).
-10. **Optional rules.** #9 usage limit (asks two percentages) and #17 only this computer (saves a fingerprint of the computer name, not the name). #29 needs the dashboard, which is not in v1, so it is not offered.
+10. **Optional rules.** #9 usage limit (asks two percentages) and #17 only this computer (saves a fingerprint of the computer name, not the name). #29 (the dashboard shows every change) comes with the dashboard and is not asked.
 11. **Summary.** Every file that will be written. Nothing has been written yet; the confirmation defaults to no.
 12. **Writing.** The list of what was installed, with the backups, goes to `~/.claude/mindgate/install-manifest.json`.
 
@@ -120,7 +123,7 @@ py -3 setup/uninstall.py --dry-run
 py -3 setup/uninstall.py
 ```
 
-The uninstaller reads the install manifest. `settings.json` and `CLAUDE.md` are put back from the backups when they have not changed since the install; when they have changed, only the Mindgate hooks, import line or block are taken out. Installed skills, agents, scheduled tasks and `~/.claude/mindgate/` are not deleted: they are moved into `~/.claude/mindgate-removed-<time>/`, which you can delete yourself later. The vault is never touched, because it holds your notes. Files written for other assistants (under `~/.gemini`, `~/.codex` and `~/.agents`) are handled the same way: your own files come back as they were, the rest is moved into the same removed folder.
+The uninstaller reads the install manifest. `settings.json` and `CLAUDE.md` are put back from the backups when they have not changed since the install; when they have changed, only the Mindgate hooks, import line or block are taken out. Installed skills, agents, scheduled tasks and `~/.claude/mindgate/` are not deleted: they are moved into `~/.claude/mindgate-removed-<time>/`, which you can delete yourself later. The vault is never touched, because it holds your notes. Files written for other assistants (under `~/.gemini`, `~/.codex` and `~/.agents`) are handled the same way: your own files come back as they were, the rest is moved into the same removed folder. Your dashboard stays on claude.ai; remove it there if you no longer want it.
 
 ## Other assistants (experimental)
 
@@ -206,6 +209,7 @@ Workflow skills, started by name:
 | `/problem` | a bug is solved; it searches the problem library first, then adds or updates a note |
 | `/keep-records` | you say "keep records" or a big piece of work ends |
 | `/new-project` | a new project starts or an existing one joins the vault |
+| `/dashboard` | the first run publishes the dashboard to your claude.ai account; later runs upload only what changed |
 | `/interview` | you want to be asked questions one at a time until a topic is clear |
 | `/style` | you want an animated explainer video style taken from a reference image |
 
@@ -279,10 +283,11 @@ Working principles:
 - #1 and #8 notes and answers in the vault language.
 - #30 clean code; the project's own rules and linter come first.
 - #36 re-read a shared file right before writing it, through the locking tool.
-- #37 security settings on by default, data-sending settings off by default.
+- #37 security settings on by default, data-sending settings off by default. The one exception is the dashboard: it comes installed, and it sends nothing before your first `/dashboard` run.
+- #29 the dashboard shows every change; `/dashboard` updates it in the same job.
 - #34 a broken rule is recorded at once and reported.
 
-Optional, offered by the installer: #9 usage limit, #17 only this computer, #29 dashboard (not offered in v1).
+Optional, offered by the installer: #9 usage limit, #17 only this computer.
 
 ## Working modes
 
@@ -318,7 +323,7 @@ Found a security problem? Please report it privately as described in [`SECURITY.
 
 - macOS and Linux are not tested.
 - Antigravity, Gemini CLI and Codex CLI are experimental: tried only with sample hook data from their documents, not with the real programs.
-- The optional dashboard is not part of v1; steps that would publish or update it are left out, and rule #29 is not offered.
+- The dashboard needs a claude.ai account with artifacts and Claude Code with the Artifact tools. Without them (a CLI or IDE terminal that lacks them, the other assistants) it cannot be published or updated; Claude says so. Once published, the vault data the dashboard shows lives in your claude.ai account. Coming from v1.0.0: the installer does not change files that are already there, so install again into a new vault or add the dashboard files by hand.
 - The installer does not create a git repository in the vault or install the pre-commit secret scan. On a fresh install `health.py` notes that the pre-commit secret scan is not installed.
 - Some generated texts stay English in a Turkish install (see Languages).
 

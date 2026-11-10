@@ -31,7 +31,7 @@ Kullanıcının Obsidian ikinci beyin vault'u için günlük kaydı yap. Vault: 
 4. Dokunulan notların `updated` alanını bugünün tarihiyle güncelle. `index.md`'ye yeni sayfaları ekle. Yeni notların yetim kalmamasına dikkat et.
 5. **Log:** `log.md`'nin sonuna `## [YYYY-MM-DD] progress | Günlük kayıt` girdisi ekle: işlenen kayıt sayısı, eklenen/kapanan bekleyenler, hangi notlar eklendi/güncellendi (kısa). İşlenecek bir şey yoksa kısa bir "değişiklik yok" girdisi yaz. Girdiye dünün kullanımını ekle: `{{PY}} -I _sistem/cost.py --days 2` çıktısından dünün API eşdeğeri toplamı ve en pahalı sohbet (`- Maliyet (dün): $… · en pahalı: <sohbet>`).
 6. **Git:** `git add -A`, `git diff --cached` ile sır sızmadığını kontrol et, `git commit -m "ilerleme: günlük kayıt"`. Varsayılan olarak push yapma; `git push` yalnızca kullanıcı kurulumda push'u açtıysa. Başka bir oturum aynı anda vault'a yazıyorsa onun yarım dosyalarını bozma.
-7. **Pano:** isteğe bağlı pano: v1'de yok.
+7. **Pano:** pano yayımlanmışsa (`{{PY}} -I _sistem/dashboard_check.py url` bir adres yazıyorsa) ve burada Artifact araçları varsa `pano` becerisiyle güncelle; yoksa bu adımı atla ve raporda söyle.
 
 ## Kesin kurallar
 - **Gece görevinin sınırları (vault CLAUDE.md §7.8):**

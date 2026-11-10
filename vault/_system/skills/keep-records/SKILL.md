@@ -18,7 +18,7 @@ Vault: `{{VAULT}}`. Schema: vault `CLAUDE.md` (§7.8 session logs, §10 git). Wr
 3. Set the `updated` field of the notes you touched to today; add new pages to `index.md`; leave no orphan note.
 4. **Do not delete** the processed records, move them to the archive: `{{PY}} -I _system/session_log.py process <record.md> ...` (rule #22: no deletion without permission). Add a `## [YYYY-MM-DD] progress | Records kept` entry at the end of `log.md` (short: how many records, which notes).
 5. `git add -A`; check with `git diff --cached` that no secret leaked; commit (message in the vault language); push if a remote is set. If another session is writing to the vault at the same time, do not break its half-written files.
-6. Optional dashboard: not in v1.
+6. Update the dashboard (`/dashboard`).
 7. In the `_system/skills/skills-registry.md` table, increase this skill's "usage" count by 1 and write the "last used" date; if there was an error, write one line to the "last error" column.
 8. A 2–4 line summary to the user.
 

@@ -28,7 +28,7 @@ Never leave a real absolute path, user name, machine name, e-mail or URL that id
 - Project names, course names, people, dates of personal events, dashboard IDs: removed. If an example is needed, write a neutral one ("in one project a build script deleted …").
 - **Rules (`rules/general-rules.md`):** keep number, title and rule text; rewrite the "why" column as a general reason anyone would accept; drop the source quote and personal dates. Rules that only make sense for one person or one machine (shared account fingerprint, usage limits, specific apps) are moved to an "Optional rules" section the installer can offer.
 - **Lessons (`## Lessons` / `## Dersler` in skills):** keep a lesson only if it is a general, reusable lesson; rewrite it without project names and dates (`— {project} —` part removed). Otherwise drop it. An empty Lessons section keeps its comment line.
-- Dashboard (claude.ai artifact) is not part of v1: remove steps that publish or update it; keep a one-line note "optional dashboard: not included in v1".
+- Dashboard (claude.ai artifact): its steps stay, written for the user's own dashboard (`/dashboard`, Turkish `/pano`); the dashboard ID of the source vault is never copied. Its interface text lives in `STRINGS` in `vault/_system/dashboard.html`, one table per language.
 - The daily task must not push by default and must scan only sessions that belong to the vault unless the user opted in (installer asks).
 
 ## 4. Style

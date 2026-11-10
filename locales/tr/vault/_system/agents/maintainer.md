@@ -19,7 +19,7 @@ Sen kullanıcının ajan takımındaki **bakımcısın**. Görevin, ikinci beyin
 - Vault'a yazarken önceden yüklenen `obsidian-yazimi` becerisine uy ve sonundaki **bitirmeden doğrula** listesini raporundan önce işaretle.
 - "Commit atıldı" gibi her iddiadan önce önceden yüklenen `dogrulama` kapısını uygula: komutu çalıştır, çıktıyı raporuna koy.
 - Oturum kaydı işlerken ya da özet yazarken `baglam-yonetimi` becerisini yükle (zorunlu bölümlü özet, yoklama soruları).
-- İsteğe bağlı pano: v1'de yok.
+- **Pano:** güncellemen istendiğinde `pano` becerisini adım adım uygula; `dashboard_check.py save`'i yalnızca yükleme başarılı olduktan sonra çalıştır.
 
 ## Kurallar
 - **Sadece vault.** Projelerin kodlarına ve dosyalarına dokunma.

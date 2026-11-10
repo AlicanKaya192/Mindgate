@@ -27,6 +27,7 @@ import installer_messages as msg  # noqa: E402
 
 TOTAL_STEPS = 12
 ASSISTANTS = ("antigravity", "gemini", "codex")   # other assistants the installer can set up (experimental)
+DASHBOARD_SKILL = "dashboard"                      # installed even when the skills are declined (the dashboard comes with Mindgate)
 
 
 @dataclass
@@ -283,6 +284,13 @@ class Installer:
         if self.asker.yes_no("install_skills", self.t("skills_question"), True):
             self.choices.want_skills = True
             self.choices.skills = self.resolve_names(skills, self.claude() / "skills", "skill")
+        else:
+            # The dashboard comes with Mindgate whatever the answer (the user's decision for v1.1); its skill is kept
+            dashboard = lib.mapped(self.names(), "skills", DASHBOARD_SKILL)
+            kept = [b for b in skills if b.name == dashboard]
+            if kept:
+                self.say("dashboard_skill_kept", name=dashboard)
+                self.choices.skills = self.resolve_names(kept, self.claude() / "skills", "skill")
         if self.asker.yes_no("install_agents", self.t("agents_question"), True):
             self.choices.want_agents = True
             self.choices.agents = self.resolve_names(agents, self.claude() / "agents", "agent")
@@ -417,13 +425,9 @@ class Installer:
         self.say("if_no", result=self.t("rules_no"))
         rules_file = next(f for f in self.vault_files() if f.source == ("rules", "general-rules.md"))
         rules = lib.optional_rules(rules_file.data.decode("utf-8"))
-        offered = [r for r in rules if r.offered]
         for rule in rules:
-            if rule.offered:
-                self.say("rule_item", number=rule.number, title=rule.title)
-            else:
-                self.say("rule_needs_dashboard", number=rule.number)
-        chosen = self.asker.pick("optional_rules", [r.number for r in offered],
+            self.say("rule_item", number=rule.number, title=rule.title)
+        chosen = self.asker.pick("optional_rules", [r.number for r in rules],
                                  lambda n: self.t("rule_question", number=n), default=False)
         config = self.choices.config or self.config_choices()
         config.optional_rules = chosen
@@ -609,6 +613,8 @@ class Installer:
             self.show_vault_writes(vault, vault_writes)
         in_vault = {id(a) for a in vault_writes}
         self.show_other_actions([a for a in plan.actions if id(a) not in in_vault])
+        if vault:
+            self.say("summary_dashboard", name=lib.mapped(self.names(), "skills", DASHBOARD_SKILL))
 
     def show_vault_writes(self, vault: Path, writes: list) -> None:
         self.say("summary_vault", count=len(writes), path=vault)
