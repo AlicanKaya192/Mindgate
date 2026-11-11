@@ -30,15 +30,34 @@ PROJECTS = Path.home() / ".claude" / "projects"
 WRITE_5MIN, WRITE_1HOUR = 1.25, 2.0          # cache write multipliers (relative to the input price)
 MILLION = 1_000_000
 SESSION, AGENT = "session", "agent"
+NOT_ALPHANUMERIC = re.compile(r"[^A-Za-z0-9]")
+OTHER_HOME = re.compile(r"^(?:[A-Za-z]--Users|-Users|-home)-[^-]+(?:-|$)")
+DESKTOP = re.compile(r"^Desktop-")
+HOME_FOLDER = "~"
 
 
 def read_prices(config: Path = CONFIG_FILE) -> dict:
     return json.loads(config.read_text(encoding="utf-8")).get("prices", {}).get("models", {})
 
 
-def folder_name(transcript_folder: str) -> str:
-    """'C--Users-name-Desktop-My-Project' -> 'My-Project': the full path on the computer is never shown."""
-    return re.sub(r"^[A-Za-z]--Users-[^-]+-(?:Desktop-)?", "", transcript_folder) or transcript_folder
+def encoded_path(path: Path) -> str:
+    """The folder name Claude Code gives a working folder: every character other than a letter or digit becomes '-'."""
+    return NOT_ALPHANUMERIC.sub("-", str(path))
+
+
+def folder_name(transcript_folder: str, home: Path | None = None) -> str:
+    """'C--Users-john-doe-Desktop-My-Project' -> 'My-Project': the user name and the full path are never shown.
+
+    The prefix is the encoded home folder, so a user name with a dash is cut off whole. A folder of another home on
+    the same computer (Windows, macOS or Linux form) loses its first name segment; the home folder itself is '~'."""
+    home_prefix = encoded_path(Path.home() if home is None else home)
+    if transcript_folder.lower() == home_prefix.lower():
+        return HOME_FOLDER
+    if transcript_folder.lower().startswith(home_prefix.lower() + "-"):
+        rest = transcript_folder[len(home_prefix) + 1:]
+    else:
+        rest = OTHER_HOME.sub("", transcript_folder)
+    return DESKTOP.sub("", rest) or HOME_FOLDER
 
 
 def local_date(stamp: str) -> str:

@@ -2,7 +2,8 @@
 
 The file holds a small stand-in for the Data artifact runtime (`dash.data`, `dash.onData`, `dash.setLink`). A data set
 whose JSON file is missing or unreadable reports the status `missing`. Open the file with `?gradual` to make the data
-sets arrive one by one, 40 ms apart, as they do when published; `?tab=<id>` opens that tab.
+sets arrive one by one, 40 ms apart, as they do when published; `?tab=<id>` opens that tab and `&sub=<id>` its inner
+tab (Knowledge, System and its Analysis, the Flow views).
 The output stays under `_system/output/` (outside git).
 
 Run (from the vault root):  python -I _system/dashboard_preview.py [--page PATH] [--data DIR] [--out PATH]

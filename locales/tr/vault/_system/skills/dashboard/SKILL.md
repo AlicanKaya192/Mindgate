@@ -36,14 +36,17 @@ Vault: `{{VAULT}}`. Kural #29. Pano bir claude.ai Data artifact'idir: sayfası (
 | notes | Notlar |
 | log | Log |
 | links | Notlar arası bağlantılar |
+| versions | Proje sürümleri |
 | tasks | Görevler |
 | counts | Sayaçlar |
 | progress | Proje ilerlemesi |
+| weekly | Haftalık özet |
 | pending | Bekleyenler |
 | agents | Ajanlar |
 | agent_runs | Ajan çalıştırmaları |
 | expertise | Uzmanlık paketleri |
 | skills | Beceriler |
+| discoveries | Gündemdeki projeler ve öneriler |
 | rules | Kurallar |
 | councils | Kurullar |
 | handoff | Devir kartları |

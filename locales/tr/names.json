@@ -10,6 +10,7 @@
     "knowledge": "bilgi",
     "agents-log": "ajanlar",
     "research": "arastirmalar",
+    "trending": "gundem",
     "me": "ben",
     "rules": "kurallar",
     "drafts": "taslaklar",
@@ -30,6 +31,7 @@
   },
   "files": {
     "pending": "bekleyenler",
+    "trending-projects": "gundemdeki-projeler",
     "handoff": "devir",
     "general-rules": "genel-kurallar",
     "rule-violations": "kural-ihlalleri",

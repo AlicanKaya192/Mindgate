@@ -33,14 +33,17 @@ Vault: `{{VAULT}}`. Rule #29. The dashboard is a claude.ai Data artifact: its pa
 | notes | Notes |
 | log | Log |
 | links | Links between notes |
+| versions | Project versions |
 | tasks | Tasks |
 | counts | Counters |
 | progress | Project progress |
+| weekly | Weekly summary |
 | pending | Pending items |
 | agents | Agents |
 | agent_runs | Agent runs |
 | expertise | Expertise packs |
 | skills | Skills |
+| discoveries | Trending projects and proposals |
 | rules | Rules |
 | councils | Councils |
 | handoff | Handoff cards |

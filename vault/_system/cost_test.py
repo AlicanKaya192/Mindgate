@@ -110,5 +110,24 @@ class CostTest(unittest.TestCase):
         self.assertEqual(cost.PROJECTS, Path.home() / ".claude" / "projects")
 
 
+class FolderNameTest(unittest.TestCase):
+    """The transcript folder name starts with the encoded home folder; the user name must never stay in it."""
+
+    def test_linux_home(self):
+        self.assertEqual(cost.folder_name("-home-alice-notes", home=Path("/home/alice")), "notes")
+
+    def test_macos_home_and_desktop(self):
+        self.assertEqual(cost.folder_name("-Users-alice-Desktop-proj", home=Path("/Users/alice")), "proj")
+
+    def test_windows_user_name_with_a_dash(self):
+        self.assertEqual(cost.folder_name("C--Users-john-doe-Desktop-proj", home=Path("C:/Users/john-doe")), "proj")
+
+    def test_the_home_folder_itself(self):
+        self.assertEqual(cost.folder_name("C--Users-john-doe", home=Path("C:/Users/john-doe")), "~")
+
+    def test_another_home_on_the_same_computer(self):
+        self.assertEqual(cost.folder_name("-home-bob-Desktop-proj", home=Path("/home/alice")), "proj")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)
