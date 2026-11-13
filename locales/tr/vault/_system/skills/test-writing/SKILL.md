@@ -24,6 +24,8 @@ Testten önce kod yazdıysan: o kodu **silme** (#22). Kenara al ve testi ona bak
 - Hazırla → çalıştır → doğrula. Test başına tek kavram.
 - Sınır durumları ayrı testlerde: boş, tek eleman, çok büyük, geçersiz girdi, hata yolu.
 - **Test kazara geçemesin:** Önemli bir test için kodu bilerek boz ve testin kaldığını gör. Hep geçen test, hiç test olmamasından kötüdür.
+- **Bozmanın uygulandığını kanıtla:** Kırmızıyı kodu ya da test verisini bozarak elde ettiysen, bozmanın gerçekten yerine geçtiğini temiz kopyayla karşılaştırarak (`diff`) göster. Uygulanmamış bir bozma, testin kalmasını bekleyeceğin yerde onu boşuna geçirir.
+- **Test sınırını önerirken:** Hangi arayüzden (modül, fonksiyon, komut satırı) test edeceğini yazarken her sınır için tek satır ekle: neyi yakalar, neyi kaçırır. Kaçırdığı şey başka bir testin işidir ya da bilerek bırakılmıştır; bunu söyle.
 
 ## Hata düzeltmede regresyon testi
 Önce hatayı yeniden üreten test (kırmızı) gelir, sonra düzeltme (yeşil) yapılır. Doğrulama sırası: düzeltmeyi geri al, test kalmalı; düzeltmeyi geri koy, test geçmeli (`dogrulama`).
@@ -45,8 +47,9 @@ Atılacak deneme kodu, üretilmiş kod ve yapılandırma dosyaları. Emin değil
 ## Fikir kaynakları
 - obra/superpowers `test-driven-development` (MIT, Jesse Vincent).
 - anthropics/skills `webapp-testing` (Apache-2.0).
+- mattpocock/skills `diagnosing-bugs` (bozmanın `diff` ile kanıtı) ve `tdd` (sınır başına "ne yakalar, ne kaçırır") (MIT).
 
-İkisi de indirilen kopyalardan okundu; resmî depolarla eşleşmeleri doğrulanmadı.
+İkisi de indirilen kopyalardan okundu; resmî depolarla eşleşmeleri doğrulanmadı. mattpocock/skills kaynağı da indirilen kopyadan okundu; resmî depoyla eşleşmesi doğrulanmadı.
 
 ## Dersler
 <!-- Merkezî ajan doğrulanmış dersleri ekler: genel, yeniden kullanılabilir; proje adı ve tarih olmadan. -->

@@ -9,6 +9,7 @@ Expertise pack (not an agent). Related rules: #14, #24, #44. AI-trace list: `exp
 1. **Who is the reader, where will they see the text, what do we want them to do?** Write it in one sentence.
 2. **Voice profile:** If the project has a voice and tone note, read it (target reader, tone, words not to use, own examples). If not, use the tone in the task text; do not carry personal examples outside the vault.
 3. **Facts:** Names, numbers, dates and claims only from the given sources. If missing, `[EVIDENCE NEEDED: …]`.
+4. **When writing together, the user says the correction, you make it:** With the draft of the first section, tell the user not to fix the text themselves but to write what should change ("remove item X, it is already in Y", "shorten the third paragraph"). You make the change and carry these preferences into the next sections; this way the user's style is not explained again from scratch in each section. When you see a correction the user made themselves, also work out the reason and write the same place that way from the start in later sections.
 
 ## By type
 **Interface text (UX writing)**
@@ -36,7 +37,7 @@ Expertise pack (not an agent). Related rules: #14, #24, #44. AI-trace list: `exp
 
 ## Idea sources
 - anthropics/knowledge-work-plugins `design/skills/ux-copy` (repository Apache-2.0): a button that starts with a verb, a three-part error message, a suggestion-and-reason output.
-- anthropics/skills `doc-coauthoring` (repository Apache-2.0): gathering context, a draft section by section, the reader-without-context test.
+- anthropics/skills `doc-coauthoring` (repository Apache-2.0): gathering context, a draft section by section, the reader-without-context test; the principle "the user says the correction, Claude makes it" was added from a downloaded copy.
 - alexconner-79/ill-communication (MIT, per the repository page): a voice profile template, a separate microcopy reference.
 - Game narrative section: no open-source skill was found (search of 6 November 2026); written with general narrative design knowledge, not measured.
 

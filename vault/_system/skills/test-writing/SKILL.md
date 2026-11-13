@@ -24,6 +24,8 @@ If you wrote the code before the test: **do not delete** that code (#22). Set it
 - Arrange → act → assert. One concept per test.
 - Boundary cases in separate tests: empty, a single element, very large, invalid input, the error path.
 - **A test must not pass by accident:** For an important test, break the code on purpose and see the test fail. A test that always passes is worse than no test.
+- **Prove the break was applied:** If you got the red by breaking the code or the test data, show that the break really took effect by comparing with the clean copy (`diff`). A break that was not applied makes the test pass for nothing where you expected it to fail.
+- **When proposing a test boundary:** When you write which interface (module, function, command line) you will test through, add one line for each boundary: what it catches, what it misses. What it misses is the job of another test or was left out on purpose; say which.
 
 ## A regression test in a bug fix
 First comes the test that reproduces the bug (red), then the fix (green). The order of verification: undo the fix, the test must fail; put the fix back, the test must pass (`verification`).
@@ -45,8 +47,9 @@ Throwaway trial code, generated code and configuration files. If you are not sur
 ## Idea sources
 - obra/superpowers `test-driven-development` (MIT, Jesse Vincent).
 - anthropics/skills `webapp-testing` (Apache-2.0).
+- mattpocock/skills `diagnosing-bugs` (proof of the break by `diff`) and `tdd` ("what it catches, what it misses" per boundary) (MIT).
 
-Both were read from downloaded copies; their match with the official repositories was not verified.
+Both were read from downloaded copies; their match with the official repositories was not verified. The mattpocock/skills source was also read from a downloaded copy; its match with the official repository was not verified.
 
 ## Lessons
 <!-- The central agent adds verified lessons here: general and reusable, without project names or dates. -->

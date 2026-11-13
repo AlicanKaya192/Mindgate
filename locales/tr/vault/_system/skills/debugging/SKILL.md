@@ -28,7 +28,7 @@ Yöntem becerisi (ajan değil). Kural #24 (önce doğrula) ve vault `CLAUDE.md` 
 - Anlamıyorsan "X'i anlamıyorum" de (#24). Bilmiyormuş gibi yapma.
 
 ## 4. Düzeltme
-- Önce hatayı yakalayan **başarısız bir test** ya da küçük bir yeniden üretim betiği yaz (`test-yazma`). Testin kırmızı olduğunu gör.
+- Önce hatayı yakalayan **başarısız bir test** ya da küçük bir yeniden üretim betiği yaz (`test-yazma`). Testin kırmızı olduğunu gör. Kırmızıyı kodu bozarak elde ettiysen bozmanın uygulandığını `diff` ile göster (`test-yazma`).
 - Kök nedene **tek** düzeltme. "Hazır buradayken" iyileştirme ya da toplu refactor yok (#23, #25).
 - Doğrula (`dogrulama`): test yeşil, diğer testler bozulmadı, asıl belirti gerçekten gitti.
 

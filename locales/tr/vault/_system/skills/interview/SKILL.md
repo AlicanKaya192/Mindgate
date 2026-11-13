@@ -14,6 +14,7 @@ Amaç: kullanıcının kafasındakini vault'a aktarmak. Asıl eksik çoğu zaman
 4. **Tek seferde bir soru** (en çok 3 kısa soru). Her soruda:
    - Neden sorduğunu yarım cümleyle söyle.
    - Seçenekler belliyse `AskUserQuestion` kullan; önerin varsa ilk seçenek olsun ve "(Önerilen)" yazsın.
+   - Açık uçlu sorarken soruyu, "evet" cevabı önerini kabul edecek biçimde kur: "X'i öneriyorum, çünkü Y; böyle mi yapalım?" Kullanıcı tek kelimeyle ilerleyebilir, itiraz etmek isterse önerin önündedir (fikir: mattpocock/skills `grilling`, MIT).
    - Önerin bir tahminse öyle de: "bilmiyorum, tahminim şu".
 5. **Cevabı hemen yaz.** Sohbet bitmeden kaybolmasın:
    - Kişisel tercih ve hedef → `ben/profil.md` (hassas bilgi yok)

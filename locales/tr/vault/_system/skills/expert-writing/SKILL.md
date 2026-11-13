@@ -9,6 +9,7 @@ Uzmanlık paketi (ajan değil). Bağlı kurallar: #14, #24, #44. Yapay zekâ izi
 1. **Okur kim, metni nerede görecek, ne yapmasını istiyoruz?** Tek cümleyle yaz.
 2. **Ses profili:** Projenin ses ve ton notu varsa oku (hedef okur, ton, kullanılmayacak kelimeler, kendi örnekleri). Yoksa görev metnindeki tonu kullan; kişisel örnekleri vault dışına taşıma.
 3. **Olgular:** İsim, sayı, tarih ve iddia yalnızca verilen kaynaklardan. Eksikse `[KANIT GEREK: …]`.
+4. **Birlikte yazarken düzeltmeyi kullanıcı söyler, sen yaparsın:** İlk bölümün taslağıyla birlikte kullanıcıya şunu söyle: metni kendisi düzeltmesin, neyin değişeceğini yazsın ("X maddesini çıkar, Y'de zaten var", "üçüncü paragrafı kısalt"). Değişikliği sen yap ve bu tercihleri sonraki bölümlere taşı; böylece kullanıcının üslubu her bölümde baştan anlatılmaz. Kullanıcının kendi yaptığı düzeltmeyi gördüğünde de nedenini çıkar ve aynı yeri sonraki bölümlerde baştan öyle yaz.
 
 ## Türe göre
 **Arayüz metni (UX yazımı)**
@@ -36,7 +37,7 @@ Uzmanlık paketi (ajan değil). Bağlı kurallar: #14, #24, #44. Yapay zekâ izi
 
 ## Fikir kaynakları
 - anthropics/knowledge-work-plugins `design/skills/ux-copy` (depo Apache-2.0): fiille başlayan düğme, üç parçalı hata mesajı, öneri ve gerekçe çıktısı.
-- anthropics/skills `doc-coauthoring` (depo Apache-2.0): bağlam toplama, bölüm bölüm taslak, bağlamsız okur testi.
+- anthropics/skills `doc-coauthoring` (depo Apache-2.0): bağlam toplama, bölüm bölüm taslak, bağlamsız okur testi; indirilen kopyadan "kullanıcı düzeltmeyi söyler, Claude yapar" ilkesi eklendi.
 - alexconner-79/ill-communication (MIT, depo sayfasına göre): ses profili şablonu, ayrı mikro metin başvurusu.
 - Oyun anlatısı bölümü: açık kaynak bir beceri bulunamadı (6 Kasım 2026 taraması); genel anlatı tasarımı bilgisiyle yazıldı, ölçülmedi.
 

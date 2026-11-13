@@ -28,7 +28,7 @@ Search `problems/` for the error message and for similar meaning (`grep`, `searc
 - If you do not understand, say "I don't understand X" (#24). Do not pretend.
 
 ## 4. The fix
-- First write a **failing test** that catches the error, or a small reproduction script (`test-writing`). See the test fail.
+- First write a **failing test** that catches the error, or a small reproduction script (`test-writing`). See the test fail. If you got the red by breaking the code, show with `diff` that the break was applied (`test-writing`).
 - **One** fix for the root cause. No "while I'm here" improvement or bulk refactor (#23, #25).
 - Verify (`verification`): the test is green, other tests are not broken, the original symptom is really gone.
 

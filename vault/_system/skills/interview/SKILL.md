@@ -14,6 +14,7 @@ Purpose: to move what is in the user's head into the vault. The real gap is ofte
 4. **One question at a time** (at most 3 short questions). In each question:
    - Say in half a sentence why you ask.
    - If the options are clear, use `AskUserQuestion`; if you have a recommendation, make it the first option and write "(Recommended)".
+   - When asking an open question, build it so that a "yes" accepts your recommendation: "I recommend X, because Y; shall we do it this way?" The user can move on with one word, and if they want to object your recommendation is in front of them (idea: mattpocock/skills `grilling`, MIT).
    - If your recommendation is a guess, say so: "I don't know, my guess is this".
 5. **Write the answer at once.** Do not let it get lost before the chat ends:
    - Personal preference and goal → `me/profile.md` (no sensitive information)

@@ -34,6 +34,7 @@ Yöntem becerisi (ajan değil). Ekleme adımları [[beceriler]] sayfasında ("Ye
 1. Gerçekçi 2–3 görev seç.
 2. Bunları beceriyle ve becerisiz dene (`degerlendirme-yontemi` §6). Becerisiz hâlde modelin hangi hatayı yaptığını gör; beceri tam o hatayı kapatmalı.
 3. Becerinin tetiklendiğini doğrula: Görev metni açıklamadaki durumlardan birine uyunca beceri yükleniyor mu?
+4. **Tetikleme ölçümü** (yeni beceride ve `description` değişince): 10–20 örnek istek yaz. Yarısı bu beceriyi tetiklemeli, yarısı tetiklememeli; tetiklememesi gerekenler arasına başka bir becerimize ait yakın istekleri koy (ör. `uzman-icerik` ile `uzman-yazarlik`). Her isteği açıklamaya karşı oku; karar veremediklerini salt okur bir kâşife (Haiku) "bu istek hangi beceriyi yükletir, neden" diye sor. Sonucu "n/N doğru" diye ve yanlış giden istekleriyle [[beceriler]] satırına yaz. Betik çalıştırılmaz, iç içe `claude` başlatılmaz, hiçbir koruma değişkeni kapatılmaz.
 
 ## Bağlama
 1. Beceri klasörüne bağı aç. Windows'ta: `cmd /c mklink /J "%USERPROFILE%\.claude\skills\<ad>" "<vault>\_sistem\beceriler\<ad>"`; macOS/Linux'ta: `ln -s "<vault>/_sistem/beceriler/<ad>" "{{HOME}}/.claude/skills/<ad>"`.
@@ -43,7 +44,7 @@ Yöntem becerisi (ajan değil). Ekleme adımları [[beceriler]] sayfasında ("Ye
 
 ## Fikir kaynakları
 - obra/superpowers `writing-skills` (MIT, Jesse Vincent).
-- anthropics/skills `skill-creator` (Apache-2.0).
+- anthropics/skills `skill-creator` (Apache-2.0); tetikleme ölçümü fikri eklendi, betikleri alınmadı (iç içe çalışmak için koruma değişkenini siliyor).
 - massgen/MassGen `skill-organizer` (envanter, çakışan becerileri birleştirme).
 
 Hepsi indirilen kopyalardan okundu; resmî depolarla eşleşmeleri doğrulanmadı.
