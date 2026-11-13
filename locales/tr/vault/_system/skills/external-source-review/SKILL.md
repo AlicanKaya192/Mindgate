@@ -106,3 +106,4 @@ Kural önerileri ayrı bir bekleyen maddesi olur (#23).
 - "Kendi kendine öğrenen beyin" iddiası incelendiğinde belgeler otomatik öğrenme olmadığını söylüyordu. İddiayı her zaman projenin kendi belgesinde ve kodunda ara; tanıtım cümlesine güvenme.
 - Büyük depoda `du` ile envanter 2 dakikayı aştı ve zaman aşımına düştü; `find | wc` ve Glob yeterli.
 - Kaşife bizim beceri listemizi vermezsek "bizde var mı" sütunu boş kalır; görev metnine her zaman listeyi koy.
+- Uyarlanan yöntem metni kaynağı yakından izliyorsa "kendi cümlelerimizle" denmez. Kaynağın lisans bildirimi eklenir; beceri, README ve NOTICE aynı beyanı taşır ("yöntem metni yakından uyarlandı, kod alınmadı").

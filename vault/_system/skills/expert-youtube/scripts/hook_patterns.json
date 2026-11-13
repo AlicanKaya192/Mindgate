@@ -1,0 +1,324 @@
+{
+  "note": "Hook patterns for spoken YouTube openings. Patterns are regular expressions applied to the lowercased line (Turkish lowercasing for tr). A pattern match is a judgement about the words, never a claim about why a video worked. When two patterns match the same number of times, the one that matches earlier in the line wins. Gaps inside a pattern are bounded ([^.?!]{0,80}) so a long line cannot stall the check.",
+  "patterns": [
+    {
+      "id": "figure",
+      "name": {
+        "tr": "Çarpıcı sayı",
+        "en": "Striking figure"
+      },
+      "shape": {
+        "tr": "İzleyicinin bilmediği bir sayıyı düz söyle, ardından ne anlama geldiğini.",
+        "en": "State a figure the viewer did not know, flatly, then what it means for them."
+      },
+      "risk": {
+        "tr": "Sayının kaynağını söyleyemiyorsan kullanma.",
+        "en": "Do not use it if you cannot say where the number comes from."
+      },
+      "match": {
+        "tr": [
+          "%\\s?\\d",
+          "\\d+\\s?%",
+          "\\d+\\s?(kişiden|kişinin|kanaldan|videodan)\\s?\\d*",
+          "\\d{1,3}(\\.\\d{3})+"
+        ],
+        "en": [
+          "\\d+(\\.\\d+)?\\s?%",
+          "\\d+\\s(out of|in)\\s\\d+",
+          "\\d{1,3}(,\\d{3})+"
+        ]
+      }
+    },
+    {
+      "id": "result",
+      "name": {
+        "tr": "Sonuç kanıtı",
+        "en": "Proven result"
+      },
+      "shape": {
+        "tr": "Birinin ya da senin elde ettiğin sonucu söyle, sonra nasıl olduğunu göstereceğini.",
+        "en": "Name an outcome someone reached, then promise to show the mechanism."
+      },
+      "risk": {
+        "tr": "Sonuç gösterilemiyorsa izleyici erken gider.",
+        "en": "If the result cannot be shown, viewers leave early."
+      },
+      "match": {
+        "tr": [
+          "\\d+[^.?!]{0,80}\\d+[^.?!]{0,80}\\b(oldu|çıktı|çıkardı|ulaştı|geçti)\\b",
+          "\\d+\\s\\w*(den|dan|ten|tan)\\s\\d+",
+          "\\d+\\s?(ayda|haftada|günde|yılda)"
+        ],
+        "en": [
+          "went from [^.?!]{0,80} to",
+          "\\bin (a|one|two|three|\\d+) (week|month|year)s?\\b",
+          "\\bgrew\\b|\\bhit \\d"
+        ]
+      }
+    },
+    {
+      "id": "mistake",
+      "name": {
+        "tr": "Hata uyarısı",
+        "en": "Mistake warning"
+      },
+      "shape": {
+        "tr": "İzleyicinin şu an büyük ihtimalle yaptığı hatayı adıyla söyle.",
+        "en": "Name the mistake the viewer is probably making right now."
+      },
+      "risk": {
+        "tr": "Hata yaygın değilse ya da izleyici kendinde hemen göremiyorsa tutmaz.",
+        "en": "Fails if the mistake is rare or the viewer cannot spot it in themselves at once."
+      },
+      "match": {
+        "tr": [
+          "yanlış \\w*(ıyor|iyor|uyor|üyor)",
+          "hata(yı|sı)? (yapıyor|yapma)",
+          "(bırak|bırakın|sakın)\\b",
+          "herkesin yaptığı"
+        ],
+        "en": [
+          "you('re| are) (probably |still )?(doing|making|using)",
+          "\\bthe (mistake|reason) (everyone|most people)",
+          "\\bstop\\b"
+        ]
+      }
+    },
+    {
+      "id": "contrarian",
+      "name": {
+        "tr": "Ters köşe",
+        "en": "Contrarian turn"
+      },
+      "shape": {
+        "tr": "Herkesin bildiği öğüdü söyle, sonra neden yanlış olduğunu.",
+        "en": "State the advice everyone repeats, then reject it."
+      },
+      "risk": {
+        "tr": "Sonraki 15 saniyede kanıt gelmezse sırf karşı çıkmak için karşı çıkmak gibi durur.",
+        "en": "Without evidence in the next fifteen seconds it reads as contrarian for its own sake."
+      },
+      "match": {
+        "tr": [
+          "herkes [^.?!]{0,80}(der|diyor|söyler|söylüyor)",
+          "(öyle|bu) değil",
+          "tam tersi",
+          "sanıldığı(nın)? gibi değil"
+        ],
+        "en": [
+          "everyone (says|tells|thinks)",
+          "\\bis wrong\\b",
+          "\\bthe opposite\\b",
+          "\\bnot what you think\\b"
+        ]
+      }
+    },
+    {
+      "id": "question",
+      "name": {
+        "tr": "Açık soru",
+        "en": "Open question"
+      },
+      "shape": {
+        "tr": "İzleyicinin kendi başına cevaplayamayacağı tek bir soru sor.",
+        "en": "Ask one question the viewer cannot answer on their own."
+      },
+      "risk": {
+        "tr": "Cevabı açıksa ya da evet/hayırsa merak oluşmaz.",
+        "en": "A yes/no or obvious question opens no gap."
+      },
+      "match": {
+        "tr": [
+          "^(neden|niye|nasıl|ne|hangi)\\b",
+          "\\?$",
+          "\\bmı(sın)?\\b|\\bmi(sin)?\\b"
+        ],
+        "en": [
+          "^(why|how|what|which)\\b",
+          "\\?$"
+        ]
+      }
+    },
+    {
+      "id": "experiment",
+      "name": {
+        "tr": "Denedim",
+        "en": "I tried it"
+      },
+      "shape": {
+        "tr": "Bir şeyi belli bir süre denediğini söyle; sonucu hemen verme.",
+        "en": "Say you tried something for a set time; hold the result back."
+      },
+      "risk": {
+        "tr": "Deneme gerçekten yapılmadıysa bu kalıbı kullanma.",
+        "en": "Do not use this pattern unless the experiment really happened."
+      },
+      "match": {
+        "tr": [
+          "\\d+\\s?(gün|hafta|ay)\\s?(boyunca)?[^.?!]{0,80}(denedim|kullandım|yaptım|yükledim|paylaştım)",
+          "\\b(denedim|test ettim)\\b"
+        ],
+        "en": [
+          "\\bi (tried|tested|used)\\b",
+          "for \\d+ (days|weeks|months)"
+        ]
+      }
+    },
+    {
+      "id": "clock",
+      "name": {
+        "tr": "Saat işliyor",
+        "en": "Clock is running"
+      },
+      "shape": {
+        "tr": "Videonun bir sürede ne vereceğini ya da izleyicinin ne zaman geç kalacağını söyle.",
+        "en": "Say what the video delivers within a time, or when the viewer will be too late."
+      },
+      "risk": {
+        "tr": "Söylenen sürede verilmezse güven gider.",
+        "en": "Trust goes if the promise is not kept in that time."
+      },
+      "match": {
+        "tr": [
+          "\\d+\\s?(saniye|dakika|sn|dk)(de|da|te|ta|içinde)",
+          "geç kalmadan",
+          "son (gün|tarih|fırsat)"
+        ],
+        "en": [
+          "in (under )?\\d+ (seconds|minutes)",
+          "before it'?s too late",
+          "\\bdeadline\\b"
+        ]
+      }
+    },
+    {
+      "id": "comparison",
+      "name": {
+        "tr": "Karşılaştırma",
+        "en": "Comparison"
+      },
+      "shape": {
+        "tr": "İki seçeneği yan yana koy; hangisinin kazandığını hemen söyleme.",
+        "en": "Put two options side by side; do not say which wins yet."
+      },
+      "risk": {
+        "tr": "Kazanan baştan belliyse merak kalmaz.",
+        "en": "If the winner is obvious there is no gap."
+      },
+      "match": {
+        "tr": [
+          "\\b(vs|karşı|ile)\\b[^.?!]{0,80}\\b(hangisi|kazandı|kazanır)",
+          "\\bmı [^.?!]{0,80}\\bmı\\b",
+          "\\bmi [^.?!]{0,80}\\bmi\\b"
+        ],
+        "en": [
+          "\\bvs\\.?\\b",
+          "\\bor\\b[^.?!]{0,80}\\?$",
+          "which (one )?(wins|is better)"
+        ]
+      }
+    },
+    {
+      "id": "behind",
+      "name": {
+        "tr": "Perde arkası",
+        "en": "Behind the scenes"
+      },
+      "shape": {
+        "tr": "Genelde anlatılmayan bir işleyişi göstereceğini söyle.",
+        "en": "Promise to show a workings that is usually left out."
+      },
+      "risk": {
+        "tr": "Gösterilen şey zaten biliniyorsa izleyici kandırılmış hisseder.",
+        "en": "If what you show is common knowledge the viewer feels cheated."
+      },
+      "match": {
+        "tr": [
+          "kimse(nin)? (söylemediği|anlatmadığı|bilmediği)",
+          "perde arkası",
+          "aslında nasıl"
+        ],
+        "en": [
+          "nobody (tells|talks about|explains)",
+          "behind the scenes",
+          "how it actually works"
+        ]
+      }
+    },
+    {
+      "id": "list",
+      "name": {
+        "tr": "Sayılı liste",
+        "en": "Numbered list"
+      },
+      "shape": {
+        "tr": "Kaç madde olduğunu söyle; en güçlüsünü sona bırakacağını belli et.",
+        "en": "Say how many items there are and signal the best one comes last."
+      },
+      "risk": {
+        "tr": "Maddeler zayıfsa liste izleyiciyi ortada kaybeder.",
+        "en": "Weak items lose viewers in the middle."
+      },
+      "match": {
+        "tr": [
+          "\\d+\\s(yol|adım|şey|hata|neden|araç|ipucu|yöntem)"
+        ],
+        "en": [
+          "\\d+ (ways|steps|things|mistakes|reasons|tools|tips)"
+        ]
+      }
+    },
+    {
+      "id": "story",
+      "name": {
+        "tr": "Hikâye açılışı",
+        "en": "Story opening"
+      },
+      "shape": {
+        "tr": "Belli bir anla başla: zaman, yer, ne oldu.",
+        "en": "Open on a specific moment: when, where, what happened."
+      },
+      "risk": {
+        "tr": "Hikâye başlığın vaadine 15 saniyede bağlanmazsa izleyici gider.",
+        "en": "If the story does not meet the title's promise within fifteen seconds, viewers leave."
+      },
+      "match": {
+        "tr": [
+          "^(\\w+\\s)?(yıl|ay|hafta|gün) önce",
+          "^geçen (hafta|ay|yıl)",
+          "^bir gün"
+        ],
+        "en": [
+          "^(\\w+ )?(years|months|weeks|days) ago",
+          "^last (week|month|year)",
+          "^one day"
+        ]
+      }
+    },
+    {
+      "id": "direct",
+      "name": {
+        "tr": "Doğrudan hitap",
+        "en": "Direct address"
+      },
+      "shape": {
+        "tr": "İzleyicinin durumunu tek cümlede tarif et: 'eğer ... -san'.",
+        "en": "Describe the viewer's situation in one line: 'if you ...'."
+      },
+      "risk": {
+        "tr": "Durum çok genelse kimse kendini tanımaz.",
+        "en": "Too general a situation and nobody recognises themselves."
+      },
+      "match": {
+        "tr": [
+          "^eğer\\b",
+          "(ıyorsan|iyorsan|uyorsan|üyorsan|ıyorsanız|iyorsanız)\\b"
+        ],
+        "en": [
+          "^if you\\b",
+          "\\bif you('re| are| have)\\b"
+        ]
+      }
+    }
+  ]
+}

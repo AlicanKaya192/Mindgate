@@ -32,6 +32,7 @@ Loaded by themselves (when the work touches that field). Specialization builds u
 | `expert-language` | Turkish and English spelling, punctuation, context; removing AI traces from text; `references/tdk.md`, `references/ai-traces.md` | 0 | — |
 | `expert-writing` | Game narrative, character, dialogue, story, interface text, technical documents, design briefs | 0 | — |
 | `expert-geodata` | Public live geographic data (aircraft, ships, satellite passes, earthquakes, maps) and OSINT-style event and infrastructure research | 0 | — |
+| `expert-youtube` | YouTube scripts and hooks, title and thumbnail, edit decision list, Shorts, chapters, search text, comments, weekly plan, channel audit (Turkish and English); four offline tools in `scripts/` | 0 | — |
 
 ### Method skills
 Preloaded for an agent at its start through the `skills:` field of the agent definition. The main chat can load the same skill when doing the same job.

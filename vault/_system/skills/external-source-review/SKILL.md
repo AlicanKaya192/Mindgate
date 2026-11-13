@@ -106,3 +106,4 @@ Rule proposals become a separate pending item (#23).
 - When a "self-learning brain" claim was reviewed, the documents said there was no automatic learning. Always look for a claim in the project's own documents and code; do not trust the promotional sentence.
 - An inventory with `du` on a big repository went past 2 minutes and timed out; `find | wc` and Glob are enough.
 - If the scout is not given our skill list, the "do we have it" column stays empty; always put the list into the task text.
+- If an adapted method text follows its source closely, do not call it "our own words". Add the source's license notice, and make the skill, the README and NOTICE say the same thing ("method text adapted closely, no code taken").

@@ -52,3 +52,4 @@ Hepsi indirilen kopyalardan okundu; resmî depolarla eşleşmeleri doğrulanmad�
 <!-- Merkezî ajan doğrulanmış dersleri ekler: genel, yeniden kullanılabilir; proje adı ve tarih olmadan. -->
 - `description:` tırnakla başlarsa (`"Bitti", ...`) YAML onu tırnaklı dize sanıyor ve açıklama okunamıyor. Açıklamayı tırnakla başlatma; yazdıktan sonra beceri listesinde doğru göründüğünü kontrol et.
 - Yeni beceri, bağ açılınca çoğunlukla aynı oturumda görünür; yeni eklenen ajan türleri ise bir süre Agent aracında "not found" verip sonra kendiliğinden yüklenebilir. Hemen gerekiyorsa genel amaçlı ajana tanım dosyasını okutup salt okuma kısıtını görev metnine yaz; acele yoksa biraz sonra yeniden dene; yine görünmezse yeni oturum gerekir.
+- Betikli beceride her araç, kendi modülünü içe aktarmadan önce `sys.dont_write_bytecode = True` koyar. `python -I` ortam değişkenlerini (PYTHONDONTWRITEBYTECODE) yok saydığı için "dosya yazmaz" iddiası ancak böyle doğru olur.

@@ -46,7 +46,7 @@ Kurulum programı (installer; bundan sonra "kurucu") da aynı fikirle yazıldı.
 
 Vault sabit bir klasör yapısıyla gelir (gelen kutusu, projeler, fikirler, sorunlar, bilgi, araştırmalar, kurallar, arşiv ve diğerleri). Yanında 16 not şablonu, bir dizin (index), yalnızca sona eklenen bir günlük (log), cevabınızı bekleyen her şeyin toplandığı bir bekleyenler listesi ve sonraki oturuma işin nerede kaldığını söyleyen devir kartları vardır. Şema [`locales/tr/vault/CLAUDE.md`](locales/tr/vault/CLAUDE.md) dosyasındadır.
 
-Claude Code'a 13 ajan, 40 beceri ve onu vault'a yönlendiren global bir talimat dosyası kurulur. Kural dosyasında numaralı 46 kural vardır; bunların ikisi isteğe bağlıdır; kurucu bunları size önerir. Antigravity, Gemini CLI ve Codex CLI'ya da kapılar, talimatlar, beceriler ve ajanlar kurulabilir (deneysel, bkz. Başka asistanlar).
+Claude Code'a 13 ajan, 41 beceri ve onu vault'a yönlendiren global bir talimat dosyası kurulur. Kural dosyasında numaralı 46 kural vardır; bunların ikisi isteğe bağlıdır; kurucu bunları size önerir. Antigravity, Gemini CLI ve Codex CLI'ya da kapılar, talimatlar, beceriler ve ajanlar kurulabilir (deneysel, bkz. Başka asistanlar).
 
 Vault'ta 24 Python betiği (yalnızca standart kütüphane) ve 25 test dosyası bulunur. Betikler bekleyenler listesine ve log'a kilitli yazar, notlarda arama yapar, vault'un sağlığını denetler, sır ve gizli talimat taraması yapar, oturum kayıtlarını tutar. Hook'lar şunlardır:
 
@@ -257,6 +257,7 @@ Ajanlara önceden yüklenen ya da ana sohbetin yüklediği yöntem becerileri:
 | `uzman-dil` | Türkçe ve İngilizce yazım, yapay zekâ izini ayıklama |
 | `uzman-yazarlik` | anlatı, diyalog, arayüz metni, teknik belge |
 | `uzman-cografi-veri` | kamuya açık canlı coğrafi veri ve açık kaynak istihbaratı (OSINT) tarzı araştırma |
+| `uzman-youtube` | YouTube senaryosu, kanca, başlık ve küçük resim, bölümler, kurgu listesi (Türkçe ve İngilizce) |
 
 ## Kurallar
 
@@ -335,4 +336,4 @@ MIT. Bkz. [`LICENSE`](LICENSE).
 
 ## Atıflar
 
-Bazı beceri ve ajanlar açık kaynak projelerden fikir aldı. Metin ya da kod kopyalanmadı; fikirler projenin kendi cümleleriyle yeniden yazıldı. Lisanslarıyla birlikte liste [`NOTICE.md`](NOTICE.md) dosyasındadır.
+Bazı beceri ve ajanlar açık kaynak projelerden fikir aldı. Kod kopyalanmadı ve fikirler projenin kendi cümleleriyle yeniden yazıldı; tek istisna `uzman-youtube` becerisinin yöntem metinleri: MIT lisanslı bir projeden yakından uyarlandı, lisans bildirimi NOTICE dosyasında. Lisanslarıyla birlikte liste [`NOTICE.md`](NOTICE.md) dosyasındadır.

@@ -52,3 +52,4 @@ Both were read from downloaded copies; their match with the official repositorie
 <!-- The central agent adds verified lessons here: general and reusable, without project names or dates. -->
 - When a new file path constant (for example an archive directory) is added to the code, redirect it to a temporary directory in every test class that uses it, and put the new test in the class that redirects the paths. After the tests check with `git status` that no file was written to the real data folder (fake lines were written twice to the real archive).
 - Tests of a gate that must not touch the network run without a network by forbidding socket creation; this way the claim "no network before approval" is tested too.
+- When the tests always call a tool with `-B`, a side effect of the documented command without `-B` (writing `__pycache__`) stays hidden. Run the documented command exactly as written in at least one test, on a temporary copy.

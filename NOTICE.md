@@ -2,7 +2,7 @@
 
 Mindgate is released under the MIT License (see [`LICENSE`](LICENSE)).
 
-Several skills and agents took ideas from the sources below. No text or code was copied from them: the ideas were adapted and written in our own words, under the vault's rules. Licenses are given as the skill files record them; "per the repository page" means the license was read from the repository page, not from its LICENSE file. Where no license is given, the skill file does not record one.
+Several skills and agents took ideas from the sources below. No code was copied from them, and the ideas were adapted and written in our own words, under the vault's rules; the exception is noted under License notices. Licenses are given as the skill files record them; "per the repository page" means the license was read from the repository page, not from its LICENSE file. Where no license is given, the skill file does not record one. Where a skill's method text follows a source closely, that source's license notice is reproduced under [License notices](#license-notices) at the end.
 
 Each skill and agent keeps its own list in an "Idea sources" section (`Fikir kaynakları` in the Turkish files).
 
@@ -59,6 +59,7 @@ Each skill and agent keeps its own list in an "Idea sources" section (`Fikir kay
 | ui-ux-pro-max (taken as an idea; not installed) | not recorded | `expert-design` |
 | Hallmark skill: the idea of a measuring audit and a preservation counter, from its output records (the skill itself was not read) | not recorded | `expert-design` |
 | bilawalsidhu/gods-eye-view | code MIT; data and 3D models licensed separately | `expert-geodata` |
+| Jake Schincariol, `youtube-agent-skill` 1.0.0 (read from a downloaded copy; match with the official repository not verified). Its method texts are adapted closely, so its license notice is reproduced below | MIT | `expert-youtube` |
 | A public `/stil` skill text (address given with the text: `smokich.gosem.dev/stil`; the site was not opened, owner and license not verified) | not verified | `style` |
 
 Several skill files note that a source was read from a downloaded copy and that its match with the official repository was not verified.
@@ -81,3 +82,32 @@ Several skill files note that a source was read from a downloaded copy and that 
 ## Our own design
 
 The skill files mark these as our own design, with no outside source: the two-ended structure of `advisor-method` (judging at the start and at the end), the off-by-default bridge of `external-agent`, and the council of `orchestration` run through the central agent with a blind first round and at most two rounds.
+
+## License notices
+
+### youtube-agent-skill (used in `expert-youtube`)
+The workflow ideas and method texts of `expert-youtube` are adapted from this project. The code, word lists and hook patterns were written anew; the numeric hook score was dropped.
+
+```
+MIT License
+
+Copyright (c) 2026 Jake Schincariol
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

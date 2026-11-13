@@ -119,6 +119,7 @@
     "expert-server": "uzman-sunucu",
     "expert-design": "uzman-tasarim",
     "expert-writing": "uzman-yazarlik",
+    "expert-youtube": "uzman-youtube",
     "new-project": "yeni-proje",
     "dashboard": "pano",
     "advisor-method": "yorum-yontemi"
@@ -139,7 +140,14 @@
     "audit_test": "denetim_test",
     "page_audit": "sayfa_denetle",
     "page_measure": "sayfa_olc",
-    "browser": "tarayici"
+    "browser": "tarayici",
+    "script": "senaryo",
+    "packaging": "paket",
+    "editing": "kurgu",
+    "chapters-search": "bolumler-arama",
+    "channel": "kanal",
+    "thresholds": "esikler",
+    "voice-profile": "ses-profili"
   },
   "tasks": {
     "daily": "gunluk",

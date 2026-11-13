@@ -1,0 +1,71 @@
+1
+00:00:00,000 --> 00:00:06,000
+Başlık izleyicinin ilk gördüğü şeydir.
+
+2
+00:00:06,300 --> 00:00:12,300
+Başlık kısa ve somut olmalı.
+
+3
+00:00:12,600 --> 00:00:18,600
+İyi bir başlıkta sayı ya da ad olur.
+
+4
+00:00:18,900 --> 00:00:24,900
+Başlık küçük resimle aynı şeyi söylememeli.
+
+5
+00:00:25,200 --> 00:00:31,200
+Başlığı yazarken aramayı düşün.
+
+6
+00:00:31,500 --> 00:00:37,500
+Başlık vaat verir, video o vaadi tutar.
+
+7
+00:00:40,800 --> 00:00:46,800
+Şimdi küçük resme geçelim.
+
+8
+00:00:47,100 --> 00:00:53,100
+Küçük resimde en çok üç kelime olur.
+
+9
+00:00:53,400 --> 00:00:59,400
+Küçük resim akış boyutunda okunmalı.
+
+10
+00:00:59,700 --> 00:01:05,700
+Yüz ifadesi küçük resimde dikkat çeker.
+
+11
+00:01:06,000 --> 00:01:12,000
+Arka plan küçük resimde sade kalmalı.
+
+12
+00:01:12,300 --> 00:01:18,300
+Küçük resim rengi başlıktan ayrışmalı.
+
+13
+00:01:21,600 --> 00:01:27,600
+Son konu izlenme tutma.
+
+14
+00:01:27,900 --> 00:01:33,900
+İzlenme tutma grafiği nerede kaybettiğini gösterir.
+
+15
+00:01:34,200 --> 00:01:40,200
+İlk otuz saniyedeki kayıp kancadan gelir.
+
+16
+00:01:40,500 --> 00:01:46,500
+Ortadaki düzenli kayıp tempo sorunudur.
+
+17
+00:01:46,800 --> 00:01:52,800
+Uçurumlar konu geçişlerinde görülür.
+
+18
+00:01:53,100 --> 00:01:59,100
+İzlenme tutma verisini Studio'dan indir.

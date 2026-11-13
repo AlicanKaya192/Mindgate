@@ -52,3 +52,4 @@ Atılacak deneme kodu, üretilmiş kod ve yapılandırma dosyaları. Emin değil
 <!-- Merkezî ajan doğrulanmış dersleri ekler: genel, yeniden kullanılabilir; proje adı ve tarih olmadan. -->
 - Koda yeni bir dosya yolu sabiti (ör. arşiv dizini) eklenince onu kullanan bütün test sınıflarında geçici dizine yönlendir ve yeni testi yolları yönlendiren sınıfa koy. Testten sonra `git status` ile gerçek veri klasörüne dosya yazılmadığını kontrol et (iki kez gerçek arşive sahte satır yazıldı).
 - Ağa dokunmaması gereken bir kapının testleri soket açmayı yasaklayarak ağsız çalışır; böylece "onaydan önce ağ yok" iddiası da test edilir.
+- Testler aracı hep `-B` ile çağırınca belgedeki `-B`'siz komutun yan etkisi (`__pycache__` yazımı) görünmez. Belgede yazan komutu en az bir testte aynen ve geçici bir kopyada çalıştır.

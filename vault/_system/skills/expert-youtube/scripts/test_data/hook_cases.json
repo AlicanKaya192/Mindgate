@@ -1,0 +1,265 @@
+{
+  "note": "Regression cases written by the pack author. They protect behaviour from silently changing; they are not evidence that the heuristic is right. Levels: 0 missing, 1 weak, 2 present. Only the listed features are checked.",
+  "cases": [
+    {
+      "lang": "tr",
+      "text": "Sen de bu hatayı yapıyorsun ve kanalın bu yüzden büyümüyor.",
+      "expect": {
+        "address": 2
+      },
+      "pattern": "mistake"
+    },
+    {
+      "lang": "tr",
+      "text": "Kanalını yanlış yönetiyorsun ve bunu henüz bilmiyorsun.",
+      "expect": {
+        "address": 2
+      },
+      "pattern": "mistake"
+    },
+    {
+      "lang": "tr",
+      "text": "Yarın kadın girişimciler için büyük bir toplantı var.",
+      "expect": {
+        "address": 0
+      }
+    },
+    {
+      "lang": "tr",
+      "text": "Bu yöntemi herkes biliyor ve kimse kullanmıyor, peki neden?",
+      "expect": {
+        "address": 0,
+        "curiosity": 2
+      },
+      "pattern": "question"
+    },
+    {
+      "lang": "tr",
+      "text": "Yeni kanal açanların %97'si 30. videodan önce bırakıyor.",
+      "expect": {
+        "specificity": 2,
+        "stakes": 2
+      },
+      "pattern": "figure"
+    },
+    {
+      "lang": "tr",
+      "text": "Bu kanal 400 aboneden 200.000 aboneye yedi ayda çıktı.",
+      "expect": {
+        "specificity": 2
+      },
+      "pattern": "result"
+    },
+    {
+      "lang": "tr",
+      "text": "İnanılmaz efsane bir yöntemle çılgın sonuçlar alacaksın.",
+      "expect": {
+        "specificity": 0
+      }
+    },
+    {
+      "lang": "tr",
+      "text": "Herkes her gün video yükle der, ama ben haftada bir yükledim.",
+      "expect": {
+        "curiosity": 2
+      },
+      "pattern": "contrarian"
+    },
+    {
+      "lang": "tr",
+      "text": "30 gün boyunca her gün Shorts yükledim, sonuç şaşırttı.",
+      "expect": {
+        "specificity": 2
+      },
+      "pattern": "experiment"
+    },
+    {
+      "lang": "tr",
+      "text": "60 saniyede başlığını nasıl düzelteceğini göstereceğim.",
+      "expect": {
+        "specificity": 2,
+        "curiosity": 2
+      },
+      "pattern": "clock"
+    },
+    {
+      "lang": "tr",
+      "text": "Kimsenin anlatmadığı şey: algoritma aslında nasıl seçiyor?",
+      "expect": {
+        "curiosity": 2
+      },
+      "pattern": "behind"
+    },
+    {
+      "lang": "tr",
+      "text": "Küçük kanalları öldüren 5 hata var ve sonuncusu seni şaşırtacak.",
+      "expect": {
+        "address": 1,
+        "stakes": 2
+      },
+      "pattern": "list"
+    },
+    {
+      "lang": "tr",
+      "text": "İki yıl önce ilk videomu yükledim ve tam 12 kişi izledi.",
+      "expect": {
+        "specificity": 2
+      },
+      "pattern": "story"
+    },
+    {
+      "lang": "tr",
+      "text": "Eğer videoların 500 izlenmeyi geçmiyorsa bu video senin için.",
+      "expect": {
+        "address": 1
+      },
+      "pattern": "direct"
+    },
+    {
+      "lang": "tr",
+      "text": "Neden izleyiciler 8. saniyede gidiyor, çünkü kanca zayıf.",
+      "expect": {
+        "curiosity": 1
+      }
+    },
+    {
+      "lang": "tr",
+      "text": "Merhaba arkadaşlar kanalıma hoş geldiniz bugün video var.",
+      "expect": {
+        "specificity": 0,
+        "address": 2
+      }
+    },
+    {
+      "lang": "tr",
+      "text": "Video.",
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "lang": "tr",
+      "text": "Bak, bu üç ayarı değiştirmeden bir video daha yükleme.",
+      "expect": {
+        "address": 2
+      }
+    },
+    {
+      "lang": "tr",
+      "text": "MrBeast'in ekibi küçük resmi neden 20 kez değiştiriyor?",
+      "expect": {
+        "specificity": 2,
+        "curiosity": 2
+      },
+      "pattern": "question"
+    },
+    {
+      "lang": "tr",
+      "text": "Mersin'de çekilen bu video beklenenden çok izlendi.",
+      "expect": {
+        "address": 0
+      }
+    },
+    {
+      "lang": "en",
+      "text": "You're probably making this mistake in your first 30 seconds.",
+      "expect": {
+        "address": 2,
+        "stakes": 2,
+        "specificity": 2
+      },
+      "pattern": "mistake"
+    },
+    {
+      "lang": "en",
+      "text": "97% of people who start a channel quit before video 30.",
+      "expect": {
+        "specificity": 2,
+        "stakes": 2
+      },
+      "pattern": "figure"
+    },
+    {
+      "lang": "en",
+      "text": "This incredible insane trick is the ultimate game-changer.",
+      "expect": {
+        "specificity": 0
+      }
+    },
+    {
+      "lang": "en",
+      "text": "Everyone says post daily, but I posted once a week for a year.",
+      "expect": {
+        "curiosity": 2
+      },
+      "pattern": "contrarian"
+    },
+    {
+      "lang": "en",
+      "text": "Why do viewers leave at second eight? Because the hook is weak.",
+      "expect": {
+        "curiosity": 1
+      }
+    },
+    {
+      "lang": "en",
+      "text": "If you have under 1,000 subscribers, watch this before your next upload.",
+      "expect": {
+        "address": 2,
+        "specificity": 2
+      },
+      "pattern": "direct"
+    },
+    {
+      "lang": "en",
+      "text": "Hey guys welcome back to the channel today we have a video.",
+      "expect": {
+        "specificity": 0
+      }
+    },
+    {
+      "lang": "en",
+      "text": "I tried posting Shorts every day for 30 days and the result surprised me.",
+      "expect": {
+        "specificity": 2
+      },
+      "pattern": "experiment"
+    },
+    {
+      "lang": "tr",
+      "text": "Biliyorsun, öğrenciler 5 yılda ne kaybediyor?",
+      "expect": {
+        "stakes": 2
+      }
+    },
+    {
+      "lang": "tr",
+      "text": "Bu yöntemi seçerseniz para kaybedersiniz.",
+      "expect": {
+        "stakes": 1
+      }
+    },
+    {
+      "lang": "tr",
+      "text": "Kontrol listesi olmadan 40 bin lirayı batırdım.",
+      "expect": {
+        "address": 0
+      }
+    },
+    {
+      "lang": "tr",
+      "text": "Hayal kırıklığı yaşadım ve kanalı kapattım.",
+      "expect": {
+        "address": 0
+      }
+    },
+    {
+      "lang": "tr",
+      "text": "Bunu denemeyin, yoksa 3 yıl kaybedersiniz.",
+      "expect": {
+        "address": 2,
+        "stakes": 2
+      }
+    }
+  ]
+}

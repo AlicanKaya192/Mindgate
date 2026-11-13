@@ -32,6 +32,7 @@ Kendiliğinden yüklenir (iş o alana dokununca). Uzmanlaşma her paketin **Ders
 | `uzman-dil` | TDK ve İngilizce yazım, noktalama, bağlam; metinden yapay zekâ izi ayıklama; `references/tdk.md`, `references/yapay-zeka-izi.md` | 0 | — |
 | `uzman-yazarlik` | Oyun anlatısı, karakter, diyalog, hikâye, arayüz metni, teknik belge, tasarım brief'i | 0 | — |
 | `uzman-cografi-veri` | Kamuya açık canlı coğrafi veri (uçak, gemi, uydu geçişi, deprem, harita) ve açık kaynak istihbaratı (OSINT) tarzı olay ve altyapı araştırması | 0 | — |
+| `uzman-youtube` | YouTube senaryosu ve kanca, başlık ve küçük resim, kurgu karar listesi, Shorts, bölümler, arama metni, yorumlar, haftalık plan, kanal denetimi (Türkçe ve İngilizce); `scripts/` içinde çevrimdışı dört araç | 0 | — |
 
 ### Yöntem becerileri
 Ajan tanımındaki `skills:` alanıyla o ajana başlarken önceden yüklenir. Ana sohbet de aynı işi yaparken yükleyebilir.
