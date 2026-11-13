@@ -169,6 +169,22 @@ BACKTICK_REASON = (
     "metin değişir. İçeriği Write ile dosyaya yazıp çalıştır ya da heredoc'u <<'EOF' ile tırnakla. Bilerek "
     "kullanılıyorsa onayla. Parça: `{part}`")
 
+# Python in a heredoc and a sed expression turn `\b`, `\n` and the like into a control character or a real newline
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)([A-Za-z_]\w*)\1[^\n]*\n(.*?)\n[ \t]*\2\b", re.S)
+PYTHON_COMMAND = re.compile(r"(?i)(?<![\w.-])(?:py|python3?)(?:\.exe)?(?![\w.-])")   # script.py is not a command
+SED_SUBSTITUTION = re.compile(r"(?<![\w-])sed\b[^|;&\n]*?(?<![\w-])s([^\w\s\\])((?:\\.|(?!\1)[^\n])*)\1((?:\\.|(?!\1)[^\n])*)\1")
+BACKSLASH_ESCAPE = re.compile(r"\\[A-Za-z0-9\\]")
+HEREDOC_BACKSLASH_REASON = (
+    "Python in a heredoc mangles text with backslashes: write the content with Write as a .py script and use a raw "
+    "string. Part: `{part}`",
+    "Heredoc'taki Python ters bölülü metni bozar: içeriği Write ile .py betiği olarak yaz, r-dize (raw string) "
+    "kullan. Parça: `{part}`")
+SED_BACKSLASH_REASON = (
+    "A backslash escape in a sed expression mangles the text: write the change with Write as a .py script and use a "
+    "raw string. Part: `{part}`",
+    "sed ifadesindeki ters bölü kaçışı metni bozar: değişikliği Write ile .py betiği olarak yaz, r-dize (raw string) "
+    "kullan. Parça: `{part}`")
+
 DESTRUCTIVE = [  # deny in every case: (pattern, (English, Turkish))
     (r"(?i)(?<![\w-])(?:diskpart|format-volume|clear-disk|initialize-disk|remove-partition|mkfs\.?\w*|dd\s+if=)\b",
      ("disk formatting / partition operation", "disk biçimlendirme / bölüm işlemi")),
@@ -473,7 +489,28 @@ def backtick_part(text: str) -> str:
     return ""
 
 
-BLOCKLIST = vault_path("knowledge", "security", "blocked-sites.md")
+def heredoc_python_escape(text: str) -> str:
+    """The line of a Python heredoc body that holds a backslash escape, or empty text."""
+    for m in HEREDOC.finditer(text):
+        line_start = text.rfind("\n", 0, m.start()) + 1
+        if not PYTHON_COMMAND.search(text[line_start:m.start(3)]):
+            continue
+        escape = BACKSLASH_ESCAPE.search(m.group(3))
+        if escape:
+            position = m.start(3) + escape.start()
+            return part_of(text, text.rfind("\n", 0, position) + 1)
+    return ""
+
+
+def sed_escape(text: str) -> str:
+    """The part of an unquoted sed `s/…/…/` expression that holds a backslash escape, or empty text."""
+    for m in SED_SUBSTITUTION.finditer(text):
+        if not inside_quotes(text, m.start()) and BACKSLASH_ESCAPE.search(m.group(2) + m.group(3)):
+            return part_of(text, m.start())
+    return ""
+
+
+BLOCKLIST =vault_path("knowledge", "security", "blocked-sites.md")
 
 
 def blocklist_label() -> str:
@@ -587,6 +624,16 @@ def check(command: str, cwd: str, sid: str = "") -> None:
     backtick = backtick_part(text)
     if backtick:
         decide("ask", localized(BACKTICK_REASON).format(part=backtick))
+        return
+
+    heredoc_escape = heredoc_python_escape(text)
+    if heredoc_escape:
+        decide("ask", localized(HEREDOC_BACKSLASH_REASON).format(part=heredoc_escape))
+        return
+
+    sed_part = sed_escape(text)
+    if sed_part:
+        decide("ask", localized(SED_BACKSLASH_REASON).format(part=sed_part))
 
 
 def main() -> None:

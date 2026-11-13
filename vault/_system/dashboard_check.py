@@ -12,11 +12,15 @@ Commands:
                  needs no git: it compares file sizes and change times, so it ends well within the hook time limit.
                  It never breaks the session: every error is swallowed and written to the hook error log.
   save           The last step of /dashboard, only after the upload succeeded: records the vault state as published.
+                 Optional: `save --uploaded name=sha256[,name=sha256…]` (the flag may repeat). If an uploaded data
+                 set's sha256 differs from the local manifest.json (the data was built again between the upload and
+                 this call), nothing is recorded and the exit code is 1.
   url            Prints the dashboard address, or nothing while it has not been published.
   set-url <url>  The first /dashboard run writes the address of the new dashboard to config.json.
 
 Run (from the vault root):  python -I _system/dashboard_check.py save
 """
+import argparse
 import hashlib
 import json
 import os
@@ -204,15 +208,54 @@ def reminder(sid: str, transcript: str, config: dict) -> str:
     return MESSAGES[language]["out_of_date" if dashboard_url() else "not_published"]
 
 
-def save() -> None:
+def parse_uploaded(values: list[str]) -> dict:
+    """The --uploaded values ('name=sha256[,name=sha256…]', the flag may repeat) as {name: sha}."""
+    uploaded = {}
+    for value in values:
+        for pair in filter(None, (item.strip() for item in value.split(","))):
+            data_set, separator, sha = pair.partition("=")
+            if not separator or not data_set.strip() or not sha.strip():
+                raise ValueError(f"--uploaded must look like 'name=sha256', got: {pair!r}")
+            uploaded[data_set.strip()] = sha.strip().lower()
+    return uploaded
+
+
+def mismatches(uploaded: dict, manifest: dict) -> list[str]:
+    """The uploaded data sets whose sha256 is not the one in the local manifest (or that the manifest does not know)."""
+    return [data_set for data_set, sha in uploaded.items() if not manifest.get(data_set) or manifest[data_set] != sha]
+
+
+def save(uploaded: dict | None = None) -> int:
+    """Records the publish. When `uploaded` is given and differs from the local manifest (the data was built again
+    between the upload and this call), nothing is recorded and 1 is returned."""
+    different = mismatches(uploaded or {}, read_json(vault_path("_system", "output", "dashboard", "manifest.json")))
+    if different:
+        print("ERROR: the uploaded data differs from the local data (it may have been built again between the upload "
+              "and this call); nothing was recorded. Data sets that differ: " + ", ".join(different), file=sys.stderr)
+        return 1
     with common.locked("dashboard", wait_s=LOCK_WAIT_S):
         state = read_json(state_file())
         state.update(published=vault_signature(), published_at=datetime.now().isoformat(timespec="seconds"))
         write_state(state)
+    print("dashboard publish recorded")
+    return 0
+
+
+def save_command(args: list[str]) -> int:
+    parser = argparse.ArgumentParser(prog="dashboard_check.py save")
+    parser.add_argument("--uploaded", action="append", default=[], metavar="NAME=SHA256[,NAME=SHA256…]",
+                        help="sha256 of the uploaded data sets; nothing is recorded if they differ from the local manifest")
+    options = parser.parse_args(args)
+    try:
+        uploaded = parse_uploaded(options.uploaded)
+    except ValueError as error:
+        parser.error(str(error))
+    return save(uploaded)
 
 
 def main(argv: list[str]) -> int:
-    sys.stdout.reconfigure(encoding="utf-8")
+    for stream in (sys.stdout, sys.stderr):   # an error message is UTF-8 too; a Windows console uses its own code page
+        stream.reconfigure(encoding="utf-8")
     command = argv[0] if argv else ""
     if command == "check":
         try:
@@ -222,9 +265,7 @@ def main(argv: list[str]) -> int:
             common.log_error("dashboard_check check", error)
         return 0
     if command == "save":
-        save()
-        print("dashboard publish recorded")
-        return 0
+        return save_command(argv[1:])
     if command == "url":
         print(dashboard_url())
         return 0

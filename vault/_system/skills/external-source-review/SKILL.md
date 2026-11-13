@@ -12,6 +12,7 @@ Method skill (not an agent). Rules:
 This job was done by hand three times and turned into this skill (work done by hand three times becomes a skill, vault `CLAUDE.md` §10.2).
 
 ## 1. Inventory (yourself, 1–2 commands)
+- **Previous review first:** search `research/` with `grep` for the repository and owner name. If one exists, look only at the difference: version and CHANGELOG, new or removed skills. Read the LICENSE files again; a license can change (a skill pack may move from a closed license to an open one, or the other way). Do not delete the old note; add a dated update line.
 - Number of folders and files, extension distribution, number of skills and agents per repository. Do not use `du`; it times out on big repositories. `find | wc` or Glob is enough for counting.
 - Read README, LICENSE and VERSION: owner, license, version, what it claims.
 - If the copy cannot be verified as identical to the official repository (no `.git`, no web permission), note this at the start.

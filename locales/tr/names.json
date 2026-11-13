@@ -46,7 +46,8 @@
     "task": "gorev",
     "decision": "karar",
     "report": "rapor",
-    "research-notes": "arastirmalar"
+    "research-notes": "arastirmalar",
+    "triggers": "tetikleme"
   },
   "templates": {
     "research": "arastirma",

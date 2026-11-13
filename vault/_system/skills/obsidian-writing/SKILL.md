@@ -43,6 +43,7 @@ Method skill (not an agent). The real source of rules is the vault `CLAUDE.md` (
 - File names are lowercase, ASCII, hyphens (for Turkish: ç→c, ğ→g, ı→i, ö→o, ş→s, ü→u). Dated notes have a `YYYY-MM-DD-` prefix.
 - Every note starts from a template (`_templates/`) and links to at least one place; there are no orphan notes.
 - In a changed note the `updated` field is updated.
+- Write the date, not "now": a sentence about code or a tool carries a date (and, for a claim about code, a commit id); "currently" is never written without a date; when things change, a new dated line is added and the old one is marked invalid (schema §5).
 - `log.md` is append-only: `## [YYYY-MM-DD] <operation> | <title>`.
 - An `index.md` line: `- [[file]] — one-line summary`.
 - Sensitive information, secrets and computer codes are not written (#17, #18). No deletion, move to the archive (#22).

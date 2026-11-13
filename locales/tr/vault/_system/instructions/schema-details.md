@@ -105,6 +105,11 @@ updated: 2026-01-15           # güncelleme
 - **Kaynağın biçimi (kaynak notları):** `source_format: article | paper | video | book | documentation | course` (makale, paper, video, kitap, doküman, kurs). `source_type` ile karıştırılmaz; şablonlar `kaynak` ve `kaynak-paper` bunu kullanır.
 - **Gizlilik (isteğe bağlı):** `privacy: private` (gizlilik: özel) olan not otomatik bağlama (`search.py --hook`) ve ajan görev metinlerine girmez. Adında şifre, parola, gizli, kasa, private, secret geçen klasörler de dışlanır (ek güvenlik ağı; sır zaten yazılmaz, #18).
 - **Zamansal geçerlilik (isteğe bağlı):** Bir bilgi artık geçerli değilse not silinmez; frontmatter'a `invalid: YYYY-MM-DD` ve `replaced_by: "[[yeni-not]]"` (yerini alan) eklenir, gövdeye `> [!warning] Yerini aldı` callout'u konur. Lint çelişki bulunca da silmek yerine bunu doldurur (ADR'lerde "superseded" ile aynı mantık).
+- **Tarihi yaz, şimdiyi değil:** Vault bir tarih kaydıdır; kodun bugünkü hâlini anlatamaz, çünkü kod değişir. Bu yüzden:
+  - Koda, sürüme, araç davranışına ya da bir sayıya dair her cümle tarih taşır. Kod iddiasında depo ve commit kimliği de yazılır: "YYYY-MM-DD, `commit-kimliği`: `expert-youtube` dört araçla geliyor."
+  - "Şu an", "artık", "güncel olarak", "hâlâ" gibi kelimeler tarihsiz kullanılmaz.
+  - Durum değişince eski cümle düzeltilmez. Yeni tarihli cümle eklenir; eskisi tablo ya da liste içindeyse `~~…~~ (yerini aldı: YYYY-MM-DD)`, bütün not eskidiyse frontmatter'da `invalid` ile işaretlenir.
+  - Kapsam: ilerleme, ADR, sorun, araştırma ve bilgi notları. Profil ve kural notları kendi tarih sütunlarını kullanır.
 
 ## 6. Bağlantı (linking) kuralları
 

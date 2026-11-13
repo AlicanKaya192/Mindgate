@@ -145,6 +145,33 @@ BACKTICK_CASES = [
 ]
 CASES += BACKTICK_CASES
 
+
+def lines(*line: str) -> str:
+    return "\n".join(line)
+
+
+# Python in a heredoc and a sed expression mangle backslash escapes (`\b` becomes a control character, `\n` a real newline)
+PY_REGEX_HEREDOC = lines("py -3.14 - <<'EOF'", "import re", r'r = "\\bword\\b"', "print(r)", "EOF")
+SED_ESCAPE = r"sed -i 's/\bfoo\b/bar/' a.txt"
+BACKSLASH_CASES = [
+    (PY_REGEX_HEREDOC, "Bash", "ask"),
+    (lines("python3 <<EOF", r'print("a\nb")', "EOF"), "Bash", "ask"),                     # unquoted delimiter
+    (lines('cd x && py -3.14 -I - <<"END"', r"path = 'C:\Users\a'", "END"), "Bash", "ask"),
+    (lines("py - <<-X", "\t" + r"x = '\d'", "\tX"), "Bash", "ask"),                       # <<- : tab-indented end line
+    (lines("cat <<'EOF' | py -3.14 -", r"print('\x41')", "EOF"), "Bash", "ask"),          # heredoc piped into Python
+    (lines("cat > x.json <<'EOF'", r'{"r": "\\bword\\b"}', "EOF"), "Bash", ""),           # no Python
+    (lines("cat > script.py <<'EOF'", r'r = "\bx"', "EOF"), "Bash", ""),                  # script.py is a file name, not a command
+    (lines("py - <<'EOF'", "print('hello')", "EOF"), "Bash", ""),                         # no backslash
+    (lines("py - <<'EOF'", r"print('\'')", r'print("a\ b")', "EOF"), "Bash", ""),         # limit: no letter, digit or backslash after it
+    (SED_ESCAPE, "Bash", "ask"),
+    (r'sed -e "s|C:\\Users|D:|" paths.txt', "Bash", "ask"),                               # another delimiter
+    ("sed -i 's/foo/bar/g' a.txt", "Bash", ""),
+    (r"sed 's/a\/b/c/' a.txt", "Bash", ""),                                               # limit: escaped delimiter
+    (r"grep -n 'sed s/\d/x/' notes.md", "Bash", ""),                                      # sed inside quotes is text
+    ("py -3.14 -I - <<'EOF'\nprint(1)\nEOF\nrm -rf /", "Bash", "deny"),                   # deny checks come first
+]
+CASES += BACKSLASH_CASES
+
 VAULT_CASES = [
     (f"echo x >> {ARCHIVE}/log/2026-10.md", "Bash", "ask"),
     (f"echo x >> {ARCHIVE}/handoff/card.md", "Bash", ""),
@@ -165,6 +192,9 @@ REASON_CASES = [
     (LONG_PREFIX + "rm -rf old_copy", "Bash", "rm -rf old_copy"),
     (LONG_PREFIX + "rm temp.txt", "Bash", "rm temp.txt"),
     (LONG_PREFIX + "py -c \"import os; os.remove('a.txt')\"", "Bash", "os.remove('a.txt')"),
+    (PY_REGEX_HEREDOC, "Bash", "raw string"),
+    (PY_REGEX_HEREDOC, "Bash", r'r = "\\bword\\b"'),   # the reason shows the line with the backslash
+    (SED_ESCAPE, "Bash", "raw string"),
 ]
 
 PROJECT_CWD = str(VAULT.parent.parent / "other-project")

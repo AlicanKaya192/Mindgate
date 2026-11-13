@@ -43,6 +43,7 @@ Yöntem becerisi (ajan değil). Asıl kural kaynağı vault `CLAUDE.md` (§3 adl
 - Dosya adı küçük harf, ASCII, tire (ç→c, ğ→g, ı→i, ö→o, ş→s, ü→u). Tarihli notlar `YYYY-MM-DD-` önekli.
 - Her not şablondan (`_sablonlar/`) başlar ve en az bir yere bağlanır; yetim not olmaz.
 - Değişen notta `updated` alanı güncellenir.
+- Tarihi yaz, şimdiyi değil: koda ya da araca dair cümle tarih (ve kod iddiasında commit kimliği) taşır; "şu an" tarihsiz yazılmaz; değişince yeni tarihli satır eklenir, eskisi geçersiz işaretlenir (şema §5).
 - `log.md` yalnızca sona eklenir: `## [YYYY-MM-DD] <işlem> | <başlık>`.
 - `index.md` satırı: `- [[dosya]] — tek satır özet`.
 - Hassas bilgi, sır ve bilgisayar kodu yazılmaz (#17, #18). Silme yok, arşive taşınır (#22).

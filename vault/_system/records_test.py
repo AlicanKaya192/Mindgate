@@ -1,5 +1,6 @@
 """records.py and common.py tests. They never touch real vault files: temporary copies under _system/output/test_records/."""
 import importlib
+import subprocess
 import sys
 import threading
 import unittest
@@ -318,6 +319,31 @@ class IndexTest(unittest.TestCase):
         self.assertIn("  - [[p-adr-001]] — first decision\n  - [[p-adr-002]] — second decision\n", text)
         with self.assertRaises(records.RecordError):
             records.add_index("Projects", "- [[p-adr-001]] — again")   # counts as present even without indent
+
+
+class ConsoleEncodingTest(unittest.TestCase):
+    """A Windows console used its own code page, so a non-ASCII character in an error message came out garbled:
+    stdout and stderr must be UTF-8 before the first output. The child runs with -I (PYTHONUTF8 and the like are
+    ignored), so it falls back to the local code page."""
+    COMMAND_FOLDER = Path(__file__).resolve().parent
+
+    def run_python(self, *arguments) -> subprocess.CompletedProcess:
+        return subprocess.run([sys.executable, "-I", "-B", *arguments], capture_output=True, timeout=60)
+
+    def test_error_message_comes_out_as_utf8_on_stderr(self):
+        # an invalid source name is refused before the lock and the file: nothing is written to the vault
+        result = self.run_python(str(self.COMMAND_FOLDER / "records.py"), "pending", "add", "--type", "approval",
+                                 "--text", "t", "--source", "a…b", "--chat", "c")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("a…b", result.stderr.decode("utf-8"))
+
+    def test_normal_output_comes_out_as_utf8_on_stdout(self):
+        code = ("import sys; sys.path.insert(0, sys.argv[1]); import records; "
+                "records.build_parser = lambda: type('P', (), {'parse_args': lambda self: None})(); "
+                "records.run = lambda args: 'output: ğüşiöç'; sys.exit(records.main())")
+        result = self.run_python("-c", code, str(self.COMMAND_FOLDER))
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout.decode("utf-8").strip(), "output: ğüşiöç")
 
 
 class LockTest(unittest.TestCase):

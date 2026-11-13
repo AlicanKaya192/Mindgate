@@ -105,6 +105,11 @@ updated: 2026-01-15
 - **Format of the source (source notes):** `source_format: article | paper | video | book | documentation | course`. Not to be mixed up with `source_type`; the templates `source` and `source-paper` use it.
 - **Privacy (optional):** a note with `privacy: private` stays out of automatic context (`search.py --hook`) and agent task texts. Folders whose names contain words like password, secret or private are excluded too (an extra safety net; secrets are not written anyway, #18).
 - **Validity in time (optional):** If a piece of information is no longer valid, the note is not deleted; `invalid: YYYY-MM-DD` and `replaced_by: "[[new-note]]"` are added to the frontmatter and a `> [!warning] Superseded` callout goes into the body. When lint finds a conflict, it fills these in instead of deleting (the same logic as "superseded" in ADRs).
+- **Write the date, not "now":** The vault is a dated record; it cannot describe the present state of code, because code changes. So:
+  - Every sentence about code, a version, a tool's behaviour or a number carries a date. A claim about code also gives the repository and the commit id: "YYYY-MM-DD, `commit-id`: `expert-youtube` ships with four tools."
+  - Words such as "now", "no longer", "currently", "still" are never used without a date.
+  - When the state changes, the old sentence is not corrected. A new dated sentence is added; if the old one sits in a table or list it is marked `~~…~~ (superseded: YYYY-MM-DD)`, and if the whole note is out of date it is marked with `invalid` in the frontmatter.
+  - Scope: progress, ADR, problem, research and knowledge notes. Profile and rule notes use their own date columns.
 
 ## 6. Linking rules
 

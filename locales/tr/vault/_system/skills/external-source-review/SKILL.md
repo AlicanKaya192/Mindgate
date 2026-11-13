@@ -12,6 +12,7 @@ Yöntem becerisi (ajan değil). Kurallar:
 Bu iş elle üç kez yapıldı ve beceriye dönüştü (elle üç kez yapılan iş beceri olur, vault `CLAUDE.md` §10.2).
 
 ## 1. Envanter (kendin, 1–2 komut)
+- **Önce önceki inceleme:** `arastirmalar/`'da depo ve sahip adını `grep` ile ara. Varsa yalnızca farka bak: sürüm ve CHANGELOG, yeni ya da kaldırılan beceriler. LICENSE dosyalarını yeniden oku, lisans değişebilir (bir beceri paketi kapalı lisanstan açığa ya da tersine geçebilir). Eski notu silme, tarihli güncelleme satırı ekle.
 - Klasör ve dosya sayısı, uzantı dağılımı, depo başına beceri ve ajan sayısı. `du` kullanma; büyük depolarda zaman aşımına düşüyor. Sayım için `find | wc` ya da Glob yeterli.
 - README, LICENSE ve VERSION'ı oku: sahip, lisans, sürüm, ne iddia ediyor.
 - Kopyanın resmî depoyla aynı olduğu doğrulanamıyorsa (`.git` yok, web izni yok) bunu baştan not et.

@@ -58,6 +58,7 @@ updated: YYYY-MM-DD             # güncelleme
   - `source_format: article | paper | video | book | documentation | course` (kaynak biçimi: makale, paper, video, kitap, doküman, kurs; kaynak notları; `source_type` ile karışmasın diye ayrıldı)
   - `privacy: private` (gizlilik: özel; otomatik bağlama ve ajan görevine girmez)
   - `invalid: YYYY-MM-DD` + `replaced_by` ya da `invalid_reason` (geçersiz, yerini alan, geçersizlik nedeni): bilgi silinmez, geçersiz işaretlenir
+- **Tarihi yaz, şimdiyi değil:** koda ya da araca dair cümle tarih (ve commit kimliği) taşır; ayrıntı: `sema-ayrinti.md` §5.
 
 ## 6. Bağlantılar
 `[[dosya-adi]]` wikilink. Yetim not olmaz: her not en az bir yerden link alır. Link yalnızca anlamlı ilişki için. Proje ana sayfası projenin MOC'udur.

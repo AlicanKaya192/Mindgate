@@ -59,6 +59,22 @@ CASES = [
     ("Write", {"file_path": None}, ""),
 ]
 
+# Invisible control character: an escape sequence was mangled (`\b` became U+0008 and went into a JSON file)
+CONTROL_CHARACTER_CASES = [
+    ("Write", {"file_path": str(OUTSIDE / "data.json"), "content": '{"r": "\x08word"}'}, "ask"),
+    ("Edit", {"file_path": str(OUTSIDE / "script.py"), "old_string": "a", "new_string": "x = 1\x0b"}, "ask"),
+    ("Write", {"file_path": str(OUTSIDE / "NOTE.MD"), "content": "\x1f"}, "ask"),                      # upper-case extension
+    ("Write", {"file_path": str(OUTSIDE / "a.txt"), "content": "end\x7f"}, "ask"),
+    ("Write", {"file_path": str(OUTSIDE / "a.srt"), "content": "\x00"}, "ask"),
+    ("Write", {"file_path": str(OUTSIDE / "a.yaml"), "content": "\x0e"}, "ask"),
+    ("Write", {"file_path": str(OUTSIDE / "note.md"), "content": "a\tb\r\nc\n"}, ""),                  # tab and line ends are fine
+    ("Write", {"file_path": str(OUTSIDE / "data.json"), "content": '{"r": "\\\\word"}'}, ""),           # escape kept as text
+    ("Write", {"file_path": str(OUTSIDE / "image.svg"), "content": "\x08"}, ""),                       # extension not in the list
+    ("Edit", {"file_path": str(OUTSIDE / "script.py"), "old_string": "\x08", "new_string": "\\b"}, ""),  # an edit that repairs it
+    ("Write", {"file_path": str(VAULT / "log.md"), "content": "\x08"}, "deny"),                        # deny comes first
+]
+CASES += CONTROL_CHARACTER_CASES
+
 
 MODE_FILE = TEST_DIR / "session_mode.json"
 MEMORY = Path.home() / ".claude" / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(VAULT)) / "memory" / "x.md"

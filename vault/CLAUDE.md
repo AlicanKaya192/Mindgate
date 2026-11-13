@@ -58,6 +58,7 @@ updated: YYYY-MM-DD
   - `source_format: article | paper | video | book | documentation | course` (source notes; kept apart from `source_type` so the two are not mixed up)
   - `privacy: private` (stays out of automatic context and agent tasks)
   - `invalid: YYYY-MM-DD` + `replaced_by` or `invalid_reason`: information is not deleted, it is marked invalid
+- **Write the date, not "now":** claims about code or tools carry a date (and a commit id); details: `schema-details.md` §5.
 
 ## 6. Links
 `[[file-name]]` wikilinks. No orphan notes: every note gets a link from at least one place. Link only for a meaningful relation. The project main page is the project's MOC.

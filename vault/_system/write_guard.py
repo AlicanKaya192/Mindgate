@@ -9,6 +9,7 @@ Decisions (Write, Edit, MultiEdit, NotebookEdit):
              (#43; project files outside the vault are allowed)
   deny     — changing an EXISTING file under the vault's `sources/` (adding a new source file is allowed)
   deny     — writing to or editing the vault's `log.md` directly (to append: `records.py log`, locked, #36)
+  ask      — text that goes into a text file (.json, .py, .md …) holds an invisible control character (Claude only)
   (silent) — everything else
   ask      — if the guard cannot parse the input (when unsure, ask)
 
@@ -39,6 +40,10 @@ DRIVE = re.compile(r"^[a-zA-Z]:")
 SOURCES = vault_path("sources")
 LOG = vault_path("log.md")
 ARCHIVES = (vault_path("archive", "log"), vault_path("archive", "pending"))   # monthly rotation archives
+# A mangled escape sequence (`\b` became U+0008) went into a text file as an invisible character
+CONTROL_CHARACTER = re.compile(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]")   # tab, line feed and carriage return are fine
+TEXT_EXTENSIONS = {".json", ".py", ".md", ".txt", ".yaml", ".yml", ".csv", ".srt", ".vtt"}
+CONTENT_FIELDS = ("content", "new_string")
 
 
 def localized(en: str, tr: str) -> str:
@@ -147,15 +152,32 @@ def check_hook_file(path: Path) -> bool:
     return True
 
 
-def check_call(call: hook_io.Call) -> None:
-    """Every target path of the call (a Codex patch can hold several); stops at the first denial."""
+def check_control_characters(path: Path, tool_input: dict) -> None:
+    """Asks when the text to be written to a text file holds an invisible control character."""
+    if path.suffix.lower() not in TEXT_EXTENSIONS:
+        return
+    for field in CONTENT_FIELDS:
+        content = tool_input.get(field)
+        found = CONTROL_CHARACTER.search(content) if isinstance(content, str) else None
+        if found:
+            decide("ask", localized(
+                r"The text to be written holds an invisible control character (e.g. \x08): most likely an escape sequence "
+                f"was mangled; check the content. Found: U+{ord(found.group()):04X} ({field}).",
+                r"Yazılacak metinde görünmez kontrol karakteri var (ör. \x08): büyük olasılıkla kaçış dizisi bozuldu; "
+                f"içeriği kontrol et. Bulunan: U+{ord(found.group()):04X} ({field})."))
+            return
+
+
+def check_call(call: hook_io.Call) -> bool:
+    """Every target path of the call (a Codex patch can hold several); stops at the first denial, and returns True then."""
     for raw in call.paths:
         raw = DEVICE_PREFIX.sub("", raw.strip())
         if check_stream(raw):
-            return
+            return True
         path = resolve(raw, call.cwd)
         if check_recording_mode(path, call.session_id) or check_hook_file(path) or check(path):
-            return
+            return True
+    return False
 
 
 def main() -> None:
@@ -164,9 +186,11 @@ def main() -> None:
         sys.stdout.reconfigure(encoding="utf-8")
         sys.stdin.reconfigure(encoding="utf-8")
         CLIENT = hook_io.client_from_args(sys.argv[1:])
-        call = hook_io.read_call(CLIENT, json.loads(sys.stdin.read() or "{}"), hook_io.WRITE)
-        if call is not None:
-            check_call(call)
+        data = json.loads(sys.stdin.read() or "{}")
+        call = hook_io.read_call(CLIENT, data, hook_io.WRITE)
+        # Only Claude's Write/Edit payload carries the text; the other clients' answers have no "ask" for this
+        if call is not None and not check_call(call) and CLIENT == "claude" and call.paths:
+            check_control_characters(resolve(call.paths[0], call.cwd), data.get("tool_input") or {})
     except Exception as error:  # the guard must never crash; Claude asks, the other clients deny (hook_io.FAIL)
         decide(hook_io.FAIL, localized(f"The write guard could not parse the input ({type(error).__name__}); the user should approve.",
                                 f"Yazma kapısı girdiyi çözümleyemedi ({type(error).__name__}); kullanıcı onaylasın."))

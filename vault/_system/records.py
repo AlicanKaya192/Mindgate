@@ -416,7 +416,8 @@ def run(args) -> str:
 
 
 def main() -> int:
-    sys.stdout.reconfigure(encoding="utf-8")
+    for stream in (sys.stdout, sys.stderr):   # an error message is UTF-8 too; a Windows console uses its own code page
+        stream.reconfigure(encoding="utf-8")
     try:
         print(run(build_parser().parse_args()))
     except (RecordError, LockUnavailable, OSError) as error:

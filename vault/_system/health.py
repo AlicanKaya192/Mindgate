@@ -476,6 +476,37 @@ def file_sizes(notes: dict) -> Result:
                   first(large), "split the note (with links); log.md is rotated by records.py at the next log write" if large else "")
 
 
+CONTROL_EXTENSIONS = {".json", ".py", ".md"}
+CONTROL_CHARACTER = re.compile(rb"[\x00-\x08\x0b\x0c\x0e-\x1f]")   # tab, line feed and carriage return are fine
+NOT_SCANNED_FOLDERS = {name("output"), "__pycache__", ".git"}
+
+
+def trigger_set() -> Result:
+    """Information only: the skills that have no trigger measurement file (never a warning or an error)."""
+    folder = system_dir() / name("skills")
+    skills = [d for d in sorted(folder.iterdir()) if d.is_dir() and d.name != "__pycache__"] if folder.is_dir() else []
+    missing = [d.name for d in skills if not (d / name("triggers.md")).is_file()]
+    return Result("triggers", "Trigger set (information)", "info" if missing else "ok",
+                  f"{len(missing)}/{len(skills)} skills have no {name('triggers.md')}", ", ".join(missing),
+                  "measure the trigger once and save it (skill-writing, Test step 4)" if missing else "", count=len(missing))
+
+
+def control_characters() -> Result:
+    """Control characters other than tab and line ends in the .json, .py and .md files under _system/ (file:line)."""
+    root = system_dir()
+    found = []
+    for path in sorted(root.rglob("*")):
+        relative = path.relative_to(root)
+        if path.suffix not in CONTROL_EXTENSIONS or not path.is_file() or set(relative.parts) & NOT_SCANNED_FOLDERS:
+            continue
+        lines = path.read_bytes().split(b"\n")   # as bytes: splitlines() also splits at a form feed and the numbers would slip
+        found += [f"{relative.as_posix()}:{number}" for number, line in enumerate(lines, 1) if CONTROL_CHARACTER.search(line)]
+    if found:
+        return Result("control_characters", "Control characters", "warning", f"{len(found)} lines with a control character",
+                      first(found, 10), "open the file and remove the invisible character, or find where it came from", count=len(found))
+    return Result("control_characters", "Control characters", "ok", "no control characters", count=0)
+
+
 def instructions() -> Result:
     """Is the installed global instructions file the same as the master copy in the vault."""
     state = install_instructions.status()
@@ -566,7 +597,7 @@ def checks(full: bool = False) -> list[Result]:
     broken, orphans = link_checks(notes)
     results = [hooks(), compact_threshold(), links(), precommit(), settings(), fields(notes), problem_history(notes),
                broken, orphans, index_missing(notes), pending(), log_check(), handoff(), hook_errors(), leftover_files(),
-               instructions(), file_sizes(notes)]
+               instructions(), file_sizes(notes), trigger_set(), control_characters()]
     results.append(baseline_check(results))
     results += [session_records(), tasks(), remind_size(), git_state(), regression_markers(notes)]
     if full:

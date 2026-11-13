@@ -7,7 +7,7 @@ import sys
 import tempfile
 import time
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest import mock
 
@@ -129,6 +129,66 @@ class UrlTest(CheckCase):
             with self.assertRaises(ValueError, msg=bad):
                 dc.set_url(bad)
         self.assertEqual(dc.dashboard_url(), "")
+
+
+class SaveTest(CheckCase):
+    """`save --uploaded name=sha`: nothing is recorded when the uploaded data differs from the local manifest."""
+    SHA_A, SHA_B = "a" * 64, "b" * 64
+
+    def setUp(self):
+        super().setUp()
+        folder = self.vault / "_system" / "output" / "dashboard"
+        folder.mkdir(parents=True)
+        (folder / "manifest.json").write_text(json.dumps({"rules": self.SHA_A, "health": self.SHA_B}), encoding="utf-8")
+
+    def save(self, *args: str) -> tuple[int, str, str]:
+        out, err = (io.TextIOWrapper(io.BytesIO(), encoding="utf-8") for _ in range(2))   # main() reconfigures them
+        with redirect_stdout(out), redirect_stderr(err):
+            try:
+                code = dc.main(["save", *args])
+            except SystemExit as stop:   # argparse refuses a wrong format with exit code 2
+                code = stop.code
+        for stream in (out, err):
+            stream.flush()
+        return code, out.buffer.getvalue().decode("utf-8"), err.buffer.getvalue().decode("utf-8")
+
+    def published(self):
+        return dc.read_json(dc.state_file()).get("published")
+
+    def test_without_the_option_the_publish_is_recorded_as_before(self):
+        code, out, _ = self.save()
+        self.assertEqual((code, self.published() is not None), (0, True))
+        self.assertIn("recorded", out)
+
+    def test_matching_hashes_are_recorded(self):
+        code, _, _ = self.save("--uploaded", f"rules={self.SHA_A},health={self.SHA_B}")
+        self.assertEqual((code, self.published() is not None), (0, True))
+
+    def test_a_repeated_option_and_upper_case_hashes_work(self):
+        code, _, _ = self.save("--uploaded", f"rules={self.SHA_A.upper()}", "--uploaded", f"health={self.SHA_B}")
+        self.assertEqual(code, 0)
+
+    def test_a_different_hash_records_nothing_and_names_the_data_set(self):
+        code, out, err = self.save("--uploaded", f"rules={self.SHA_A},health={self.SHA_A}")
+        self.assertEqual((code, self.published(), out), (1, None, ""))
+        self.assertIn("health", err)
+        self.assertNotIn("rules", err)
+
+    def test_a_data_set_missing_from_the_manifest_records_nothing(self):
+        code, _, err = self.save("--uploaded", f"unknown={self.SHA_A}")
+        self.assertEqual((code, self.published()), (1, None))
+        self.assertIn("unknown", err)
+
+    def test_a_missing_manifest_records_nothing(self):
+        (self.vault / "_system" / "output" / "dashboard" / "manifest.json").unlink()
+        code, _, _ = self.save("--uploaded", f"rules={self.SHA_A}")
+        self.assertEqual((code, self.published()), (1, None))
+
+    def test_a_wrong_format_is_refused(self):
+        for bad in ("rules", "=abc", "rules="):
+            code, _, err = self.save("--uploaded", bad)
+            self.assertEqual((code, self.published()), (2, None), bad)
+            self.assertIn("name=sha256", err)
 
 
 class ShellWriteTest(CheckCase):

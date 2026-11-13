@@ -206,6 +206,59 @@ class HealthTest(unittest.TestCase):
         self.assertEqual(health.handoff().status, "warning")
         self.assertEqual(health.index_missing({}).status, "ok")
 
+    def put(self, relative: str, content: str | bytes) -> None:
+        """Writes under the vault with the folder names of the active install (a Turkish install renames them)."""
+        target = self.root.joinpath(*(name(segment) for segment in relative.split("/")))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(content if isinstance(content, bytes) else content.encode("utf-8"))
+
+    def test_skills_without_a_trigger_file_are_counted_as_info(self):
+        self.put("_system/skills/present/SKILL.md", "x")
+        self.put("_system/skills/present/triggers.md", "x")
+        self.put("_system/skills/missing-1/SKILL.md", "x")
+        self.put("_system/skills/missing-2/SKILL.md", "x")
+        self.put("_system/skills/skills-registry.md", "a file, not a skill")
+        result = health.trigger_set()
+        self.assertEqual((result.status, result.count), ("info", 2))
+        self.assertIn("2/3", result.summary)
+        self.assertIn("missing-1", result.details)
+        self.assertIn("missing-2", result.details)
+        self.assertNotIn("present", result.details)
+
+    def test_every_skill_with_a_trigger_file_is_zero(self):
+        self.put("_system/skills/a/triggers.md", "x")
+        result = health.trigger_set()
+        self.assertEqual((result.status, result.count), ("ok", 0))
+
+    def test_a_missing_skills_folder_does_not_crash(self):
+        self.assertEqual((health.trigger_set().status, health.trigger_set().count), ("ok", 0))
+
+    def test_control_characters_are_listed_by_file_and_line(self):
+        self.put("_system/clean.py", "a\tb\r\nc\n")                       # tab, CR and LF are fine
+        self.put("_system/broken.py", b"a\r\nb\n\x0c\n")           # line 3: form feed
+        self.put("_system/sub/broken.json", b'{"a": "\x00"}\n')    # line 1: NUL
+        self.put("_system/note.md", b"ok\n\x1fx\n")                # line 2: U+001F
+        result = health.control_characters()
+        self.assertEqual((result.status, result.count), ("warning", 3))
+        for expected in ("broken.py:3", "broken.json:1", "note.md:2"):
+            self.assertIn(expected, result.details)
+        self.assertNotIn("clean.py", result.details)
+
+    def test_output_pycache_git_and_other_extensions_are_not_scanned(self):
+        for relative in ("_system/output/a.json", "_system/__pycache__/a.py", "_system/.git/a.md", "_system/a.txt"):
+            self.put(relative, b"\x00\n")
+        self.put("knowledge/a.md", b"\x00\n")   # outside _system
+        result = health.control_characters()
+        self.assertEqual(result.status, "ok", result.details)
+
+    def test_clean_files_are_ok(self):
+        self.put("_system/a.py", "print('ğüşiöç')\n")
+        self.assertEqual(health.control_characters().status, "ok")
+
+    def test_both_checks_are_in_the_list(self):
+        keys = {result.key for result in health.checks()}
+        self.assertTrue({"triggers", "control_characters"} <= keys)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=1)
