@@ -4,7 +4,7 @@ status: active
 tags: [sema, talimat]
 aliases: [şema ayrıntısı]
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-13
 ---
 
 > [!info] Şemanın ayrıntılı başvuru metni
@@ -258,7 +258,7 @@ Claude bir kaydı işlerken:
   - `degerlendirici` (Sonnet, salt okur): beklentilere göre puanlama, kör A/B karşılaştırma, kazanma nedeni analizi. Beceri, prompt ve ajan değişikliğini ölçer. Kör karşılaştırmada etiketleri merkezî ajan karıştırır ve sırayı değiştirip iki kez çağırır.
 
   - Üç modlu sistem: `yorumcu` (Sonnet, dengeli yorum), `hater` (Opus, karşı görüş), `haber` (Sonnet, izinli alan adlarıyla web), `dil-kurumu` (Sonnet, yazım ve yapay zekâ izi), `yazar` (Sonnet, yalnızca verilen dosyaya yazar), `yazilimci` (Opus, `isolation: worktree`).
-  - Diğerleri: `planlayici` (Sonnet, bağımsız ikinci plan), `denetci` (Sonnet; kural modu commit ve devir öncesi, yayın modu push öncesi), `kirmizi-takim` (Opus, savunmaları zararsız girdiyle sınar; önce sor). `kasif` en çok 3 paralel; `degerlendirici` büyük denemeden önce sorar. Model her ajanın tanımındaki `model:` alanındadır.
+  - Diğerleri: `planlayici` (Sonnet, bağımsız ikinci plan), `denetci` (Sonnet; kural modu commit ve devir öncesi, yayın modu push öncesi), `kirmizi-takim` (Opus, savunmaları zararsız girdiyle sınar; önce sor). `kasif` sayısı işe göre (#10); `degerlendirici` büyük denemeden önce sorar. Model her ajanın tanımındaki `model:` alanındadır.
 
   Merkezî ajan ana sohbettir; kurul yöntemi `orkestrasyon` becerisinde.
 - **Kurul kaydı:** Kurullu her iş `kurullar/YYYY-MM-DD-<iş>.md` ince notunu alır (şablon `kurul`; mod, ajanlar, çatışanlar ve kullanıcının kararı, kabul ölçütleri, maliyet, karar notuna link). Karar gövdesi işin kendi notundadır (proje ADR'si ya da ilerlemesi; vault'un kendi işiyse araştırma notu), kopyalanmaz. Haber ajanının raporu `arastirmalar/` (`tags: [haber]`), yazar ajanının metni `taslaklar/` ya da `projeler/<proje>/`. Ham raporlar `_sistem/cikti/council/` altında git dışında yerinde kalır.
@@ -268,7 +268,7 @@ Claude bir kaydı işlerken:
   |---|---|---|---|
   | 1 · Tek başına | Soru, tek düzeltme, not ve bakım | Merkez; gerekirse kâşif, denetçi, bakımcı | — |
   | 2 · Çekirdek kurul | Orta iş | Yorumcu + Hater, iki tur ve kapanış | Mod satırı (kullanıcı değiştirebilir) |
-  | 3 · Tam kurul | Büyük iş | Mod 2 + haber, yazar, dil kurumu, planlayıcı, yazılımcı, inceleyici | Mod satırı; paralel yazım ayrıca onay (#10) |
+  | 3 · Tam kurul | Büyük iş | Mod 2 + haber, yazar, dil kurumu, planlayıcı, yazılımcı, inceleyici | Mod satırı (ajan sayısı dahil); paralel yazım ayrı worktree ve ayrı dosyalarla (#10) |
   | — | Agent teams, dış ajan | — | Varsayılan kapalı; her seferinde sorulur |
 - **Ölçüm, her ajanın kendi günlüğü:** Her ajan çalıştırması **o ajanın sayfasındaki** "Günlük" tablosuna tek satır yazılır (`bilgi/ajanlar/ajan-<ad>.md`). Satır: `| tarih | mod | model | iş | sonuç | sohbet | proje |`. Haftalık bakım günlükleri özetler.
 - **Güvenlik:** Hook'lar (`command_guard`, `site_guard`) ve CLAUDE.md alt ajanlarda da geçerli (resmî dokümanla doğrulandı). İç içe ajan başlatma kapalı (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1`, `~/.claude/settings.json`).

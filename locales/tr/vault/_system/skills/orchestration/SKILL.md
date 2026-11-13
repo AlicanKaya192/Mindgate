@@ -12,15 +12,16 @@ Yöntem becerisi (ajan değil). Bağlı kurallar: #9, #10, #22, #23, #24, #28, #
 | **2 · Çekirdek kurul** | Orta iş: yeni özellik, ödev, karar, plan, birkaç dosyalık değişiklik | `yorumcu` + `hater` (başta iki tur, sonda kapanış) |
 | **3 · Tam kurul** | Büyük iş: yeni proje, oyun, hikâye, büyük sürüm, mimari değişiklik | Mod 2 + işe göre `haber`, `yazar`, `planlayici`, `yazilimci`, `inceleyici`, `dil-kurumu` |
 
-- Emin değilsen bir alt modu seç. Kullanıcı modu söylediyse ona uy.
-- Başlamadan tek satır yaz: `Mod 2 · yorumcu + hater · ~4 çağrı (2 Opus) · web yok · dış ajan yok`. Kullanıcı değiştirebilir.
+- Modu ve ajanları ilk adımda **kendin seç**; kullanıcının "uygun modu seç" demesini bekleme (#28). Büyük bir işe tek ajanla başlama. Kullanıcı modu söylediyse ona uy.
+- **Sayı sabit değil (#10):** iş daha doğru, daha hızlı ya da daha kararlı olacaksa aynı türden birden çok ajan çalıştır. Örnekler: farklı açılardan iki `hater` (biri güvenlik, biri ürün), dosya sahipliği ayrılabilen işte dört `yazilimci`, büyük okumada birkaç `kasif`. Sayıyı işin bölünebilirliği ve kullanım sınırı (#9, etkinse) belirler; gereksiz kopya ajan açma.
+- Başlamadan tek satır yaz: `Mod 3 · yorumcu + 2 hater + planlayici → 4 yazilimci · ~12 çağrı (7 Opus) · web yok · dış ajan yok`. Kullanıcı değiştirebilir.
 - Maliyet sıkışıksa (#9, etkinse) **hafif mod**: `yorumcu` tek çağrıda iki bölüm yazar (dengeli yorum ve karşı görüş). Hafif mod olduğunu satırda yaz.
 
 ## 2. Mod 3'te kurul üyeleri
 | İş | Başta | Üretim | İnceleme |
 |---|---|---|---|
-| Yazılım, beceri, masaüstü | `haber` (konu), `yorumcu`, `hater` | `planlayici` → `yazilimci` (1–3) | `inceleyici`, `dil-kurumu` (arayüz metni), `hater` |
-| Oyun | `haber`, `yorumcu`, `hater` (`yazar` ikinci aşamada; #10 en çok 3) | `planlayici` → `yazilimci`, `yazar` | `inceleyici`, `dil-kurumu`, `hater` |
+| Yazılım, beceri, masaüstü | `haber` (konu), `yorumcu`, `hater` (gerekirse ikinci bir `hater`) | `planlayici` → `yazilimci` (işe göre birden çok) | `inceleyici`, `dil-kurumu` (arayüz metni), `hater` |
+| Oyun | `haber`, `yorumcu`, `hater`, `yazar` | `planlayici` → `yazilimci`, `yazar` | `inceleyici`, `dil-kurumu`, `hater` |
 | Hikâye, belge, gönderi | `yorumcu`, `hater` (+`haber` konu gerekiyorsa) | `yazar` | `dil-kurumu`, `hater`, `yorumcu` |
 | Görsel tasarım | `yorumcu`, `hater` | `yazar` (brief), merkez `uzman-tasarim` ile | `inceleyici` (erişilebilirlik) |
 | Haber isteği | — | `haber` | `dil-kurumu` (isteğe bağlı) |
@@ -33,12 +34,12 @@ Her işin sonunda: `yorumcu` + `hater` kapanış, commit öncesi `denetci`, sond
 Merkez ajan raporlarını bağlamına almaz; dosyaya yazar, yalnızca `karar.md` özetini taşır.
 
 ## 4. Turlar
-1. **Tur 1 (kör):** Başlangıç ajanlarını **aynı mesajda paralel** başlat (okuyan ajan en çok 3, #10). Görev metninde `gorev.md` yolu var; öteki ajanların raporu yok.
+1. **Tur 1 (kör):** Başlangıç ajanlarını **aynı mesajda paralel** başlat (#10). Görev metninde `gorev.md` yolu var; öteki ajanların raporu yok.
 2. **Tur 2:** Her ajana ötekinin Tur 1 raporunun yolunu ver, cevap iste. Ajan arka planda bekliyorsa `SendMessage` ile aynı ajana sor (bağlamı korunur); değilse yeni çağrıda raporu görev metnine ekle.
 3. **En çok iki tur.** İkinci turdan sonra uzlaşmayanı `karar.md`'ye "çatışan" diye yaz, **kanıt eksiği** (hangi kontrol çözer: merkez o kontrolü yapar) ya da **yargı kararı** diye etiketle; yargı kararlarını kullanıcıya sor, merkez kendi başına çözmez (#23). Çoğunluk görüşü doğruluk kanıtı değildir.
    - Tur 1'de herkes hemen hemfikirse `hater`'a bir kez "neyi kaçırıyoruz" diye ayrıca sor; aynı model ailesi aynı yanılgıyı paylaşabilir.
 4. Uzlaşılanı **kabul ölçütüne** çevir (Verilen / Olunca / O zaman, `gorev-yazma`).
-5. Üretim aşamasında yazan ajanlar paralelse #10: ayrı worktree, dosya sahipliği haritası, en çok 3, kullanıcı onayı Mod 3 satırıyla verilmiş sayılmaz; paralel yazım ayrıca sorulur.
+5. Üretim aşamasında yazan ajanlar paralelse #10: her biri ayrı worktree, dosya sahipliği haritası (iki ajan aynı dosyaya yazmaz), başlamadan kullanım kontrolü. Sayıyı işin bölünebildiği parça sayısı belirler; ayrıca onay beklenmez, mod satırında yazılır.
 6. **Kapanış:** `yorumcu` + `hater`, kabul ölçütleri ve durdurma ölçütü karşısında.
 
 ## 5. Görev metni

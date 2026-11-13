@@ -55,7 +55,7 @@ The agent does not see the chat history. The text must be enough on its own.
 
 **Closing on the failure path too:** If the agent failed, stopped halfway, or hit a limit or a gate, the run is still written to the log. The result is `failed` or `halfway`, with the reason and the last point the agent reached beside it. The line is not skipped and is not filled with an empty or guessed result. From a half report of an agent only the verified part is used.
 
-## C. Parallel dispatch (Level 1, at most 3 scouts)
+## C. Parallel dispatch (number fits the job, #10)
 - **Independence test:** Do the tasks write to the same file; is one's result another's input? If so, do not give them in parallel.
 - Give every agent a separate scope that does not overlap. Start them together in the same message.
 - When the results come, do a **conflict check**: do two reports say different things about the same matter? Verify the important claims yourself (`verification`).

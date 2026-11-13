@@ -4,7 +4,7 @@ status: active
 tags: [schema, instructions]
 aliases: [schema details]
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-13
 ---
 
 > [!info] Detailed reference for the schema
@@ -258,7 +258,7 @@ When Claude processes a log:
   - `evaluator` (Sonnet, read-only): scoring against expectations, blind A/B comparison, analysis of why one option won. It measures skill, prompt and agent changes. In a blind comparison the central agent shuffles the labels and calls it twice with the order swapped.
 
   - Three-mode system: `advisor` (Sonnet, balanced review), `hater` (Opus, counter-view), `news` (Sonnet, web with allowed domains), `language-editor` (Sonnet, spelling and AI traces), `writer` (Sonnet, writes only to the given file), `developer` (Opus, `isolation: worktree`).
-  - Others: `planner` (Sonnet, independent second plan), `auditor` (Sonnet; rule mode before commit and handoff, release mode before push), `red-team` (Opus, tests defences with harmless input; ask first). `scout` at most 3 in parallel; `evaluator` asks before a large trial. The model is in the `model:` field of each agent's definition.
+  - Others: `planner` (Sonnet, independent second plan), `auditor` (Sonnet; rule mode before commit and handoff, release mode before push), `red-team` (Opus, tests defences with harmless input; ask first). The number of `scout`s fits the job (#10); `evaluator` asks before a large trial. The model is in the `model:` field of each agent's definition.
 
   The central agent is the main chat; the council method is in the `orchestration` skill.
 - **Council record:** Every council job gets a thin note `councils/YYYY-MM-DD-<job>.md` (template `council`; mode, agents, conflicts and the user's decision, acceptance criteria, cost, link to the decision note). The decision body lives in the job's own note (the project's ADR or progress; for the vault's own work a research note); it is not copied. The news agent's report goes to `research/` (`tags: [news]`), the writer agent's text to `drafts/` or `projects/<project>/`. Raw reports stay outside git under `_system/output/council/`.
@@ -268,7 +268,7 @@ When Claude processes a log:
   |---|---|---|---|
   | 1 · Solo | Questions, single fixes, notes and upkeep | Central agent; if needed scout, auditor, maintainer | — |
   | 2 · Core council | Medium work | Advisor + Hater, two rounds and a close | Mode line (the user can change it) |
-  | 3 · Full council | Large work | Mode 2 + news, writer, language editor, planner, developer, reviewer | Mode line; parallel writing needs separate approval (#10) |
+  | 3 · Full council | Large work | Mode 2 + news, writer, language editor, planner, developer, reviewer | Mode line (agent count included); parallel writing with separate worktrees and separate files (#10) |
   | — | Agent teams, external agent | — | Off by default; asked every time |
 - **Measurement, each agent's own log:** Every agent run is written as one line in the "Log" table **on that agent's page** (`knowledge/agents-log/agent-<name>.md`). Row: `| date | mode | model | job | result | chat | project |`. Weekly maintenance summarizes the logs.
 - **Security:** Hooks (`command_guard`, `site_guard`) and CLAUDE.md apply in subagents too (verified with the official docs). Nested agent spawning is off (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1`, `~/.claude/settings.json`).

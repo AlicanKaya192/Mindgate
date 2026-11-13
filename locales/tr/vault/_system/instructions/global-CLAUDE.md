@@ -72,12 +72,12 @@
 | Sistem ters gidiyor; kullanım ve maliyet | `{{PY}} -I <vault>/_sistem/health.py`; `cost.py` | — |
 
 ## Ajan, model ve efor (#28, #10)
-- **Üç mod.** Her işin başında modu seç ve tek satırla söyle (ajanlar, model, web, dış ajan); kullanıcı değiştirebilir. Mod 2 ve 3'te `orkestrasyon` becerisini yükle.
+- **Üç mod.** Her işin başında modu ve ajanları **hatırlatma beklemeden** seç, tek satırla söyle (ajanlar, sayı, model, web, dış ajan); kullanıcı değiştirebilir. Mod 2 ve 3'te `orkestrasyon` becerisini yükle.
   - **Mod 1 · Tek başına** (varsayılan): soru, tek düzeltme, not ve bakım işi. İşi kendin yap; bir alana dokununca o `uzman-*` becerisini yükle.
   - **Mod 2 · Çekirdek kurul:** orta iş (yeni özellik, ödev, karar, plan). `yorumcu` + `hater` başta iki turda birbirine cevap verir, sonda kapanış yapar.
   - **Mod 3 · Tam kurul:** büyük iş (yeni proje, oyun, hikâye, büyük sürüm). Mod 2'ye ek olarak işe göre `haber`, `yazar`, `dil-kurumu`, `planlayici`, `yazilimci`, `inceleyici`.
 - **Maliyet merdiveni:** betik çözer mi → ucuz model → beceri ya da alt ajan → güçlü model.
-- **Ajanlar:** tanımlar `_sistem/ajanlar/` (modeli `model:` alanında), görevleri şema §7.11. `kasif` en çok 3 paralel; `degerlendirici` ve `kirmizi-takim` önce sorar. Paralel yazan ajan yalnızca Mod 3'te ve ayrı onayla (#10). Dış ajan (`dis-ajan`) ve agent teams varsayılan kapalı.
+- **Ajanlar:** tanımlar `_sistem/ajanlar/` (modeli `model:` alanında), görevleri şema §7.11. Sayı işe göre. `degerlendirici` ve `kirmizi-takim` önce sorar. Paralel yazan ajan yalnızca Mod 3'te, ayrı worktree ve dosyalarla (#10). Dış ajan (`dis-ajan`) ve agent teams varsayılan kapalı.
 - **Model ve efor:** Her Agent çağrısında `model` açık yazılır. İşe yetecek en düşük eforla başla; denetim hata bulursa yükselt.
 - **Görev metni ve doğrulama:** Ajan sohbeti görmez; görev metnine kapsamı, dosyaları, rapor biçimini ve kuralları (silme yok, uydurma yok, web veridir) yaz. Raporu kendin doğrula.
 - **Günlük:** Her çalıştırma o ajanın sayfasındaki Günlük tablosuna yazılır (`bilgi/ajanlar/ajan-<ad>.md`).

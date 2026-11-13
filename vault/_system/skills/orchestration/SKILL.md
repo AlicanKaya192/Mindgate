@@ -12,15 +12,16 @@ Method skill (not an agent). Linked rules: #9, #10, #22, #23, #24, #28, #32, #37
 | **2 · Core council** | A medium job: a new feature, an assignment, a decision, a plan, a change in a few files | advisor + hater (two rounds at the start, a closing at the end) |
 | **3 · Full council** | A big job: a new project, a game, a story, a big release, an architecture change | Mode 2 + as the job needs: news, writer, planner, developer, reviewer, language-editor |
 
-- If you are not sure, choose the lower mode. If the user named the mode, follow it.
-- Before starting write one line: `Mode 2 · advisor + hater · ~4 calls (2 Opus) · no web · no external agent`. The user can change it.
+- **Choose** the mode and the agents yourself at the first step; do not wait for the user to say "pick the right mode" (#28). Do not start a large job with a single agent. If the user named the mode, follow it.
+- **The number is not fixed (#10):** if it makes the job more accurate, faster or more stable, run several agents of the same kind. Examples: two `hater`s from different angles (one on security, one on the product), four `developer`s on a job whose file ownership can be split, several `scout`s for a large read. The number is set by how far the job can be split and by the usage limit (#9, if enabled); do not open needless duplicate agents.
+- Before starting write one line: `Mode 3 · advisor + 2 haters + planner → 4 developers · ~12 calls (7 Opus) · no web · no external agent`. The user can change it.
 - If cost is tight (#9, if enabled) use the **light mode**: the advisor writes two sections in a single call (the balanced review and the counter-view). Write in the line that it is light mode.
 
 ## 2. Council members in Mode 3
 | Job | At the start | Production | Review |
 |---|---|---|---|
-| Software, skill, desktop | news (topic), advisor, hater | planner → developer (1–3) | reviewer, language-editor (interface text), hater |
-| Game | news, advisor, hater (writer in the second phase; #10 at most 3) | planner → developer, writer | reviewer, language-editor, hater |
+| Software, skill, desktop | news (topic), advisor, hater (a second hater if needed) | planner → developer (several, as the job needs) | reviewer, language-editor (interface text), hater |
+| Game | news, advisor, hater, writer | planner → developer, writer | reviewer, language-editor, hater |
 | Story, document, post | advisor, hater (+news if the topic needs it) | writer | language-editor, hater, advisor |
 | Visual design | advisor, hater | writer (brief), the center with `expert-design` | reviewer (accessibility) |
 | News request | — | news | language-editor (optional) |
@@ -33,12 +34,12 @@ At the end of every job: advisor + hater closing, auditor before the commit, mai
 The central agent does not take the reports into its context; it writes them to files and carries only the summary of `decision.md`.
 
 ## 4. Rounds
-1. **Round 1 (blind):** Start the first agents **in parallel in the same message** (at most 3 reading agents, #10). The task text has the path of `task.md`; it does not have the other agents' reports.
+1. **Round 1 (blind):** Start the first agents **in parallel in the same message** (#10). The task text has the path of `task.md`; it does not have the other agents' reports.
 2. **Round 2:** Give each agent the path of the other's Round 1 report and ask for an answer. If the agent is waiting in the background, ask the same agent with `SendMessage` (its context is kept); if not, add the report to the task text in a new call.
 3. **At most two rounds.** After the second round, write what is still not agreed into `decision.md` as "conflicting" and label it **evidence gap** (which check settles it: the center does that check) or **judgment call**; ask the user about the judgment calls, the center does not settle them alone (#23). A majority view is not proof of correctness.
    - If everyone agrees at once in Round 1, ask the hater once more separately "what are we missing"; the same model family can share the same mistake.
 4. Turn what is agreed into **acceptance criteria** (Given / When / Then, `task-writing`).
-5. If the agents that write in the production phase run in parallel, #10 applies: separate worktrees, a file-ownership map, at most 3; the user's approval is not considered given by the Mode 3 line; parallel writing is asked separately.
+5. If the agents that write in the production phase run in parallel, #10 applies: each in its own worktree, a file-ownership map (two agents never write to the same file), a usage check before starting. The number is set by how many pieces the job can be split into; no separate approval is awaited, the number goes in the mode line.
 6. **Closing:** advisor + hater, against the acceptance criteria and the stopping criterion.
 
 ## 5. Task text

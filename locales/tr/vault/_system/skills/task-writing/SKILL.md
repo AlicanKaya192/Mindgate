@@ -55,7 +55,7 @@ Ajan sohbet geçmişini görmez. Metin tek başına yetmeli.
 
 **Hata yolunda da kapanış:** Ajan başarısız olduysa, yarıda kaldıysa, sınıra ya da kapıya takıldıysa çalıştırma yine günlüğe yazılır. Sonuç `başarısız` ya da `yarıda`, yanına neden ve ajanın son ulaştığı nokta. Satır atlanmaz, boş ya da tahmini bir sonuçla doldurulmaz. Ajanın yarım raporundan yalnızca doğrulanan kısım kullanılır.
 
-## C. Paralel dağıtım (Seviye 1, en fazla 3 `kasif`)
+## C. Paralel dağıtım (sayı işe göre, #10)
 - **Bağımsızlık testi:** Görevler aynı dosyaya yazıyor mu, birinin sonucu ötekinin girdisi mi? Öyleyse paralel verme.
 - Her ajana ayrı ve çakışmayan kapsam ver. Aynı mesajda birlikte başlat.
 - Sonuçlar gelince **çakışma kontrolü** yap: iki rapor aynı şey hakkında farklı mı diyor? Önemli iddiaları kendin doğrula (`dogrulama`).

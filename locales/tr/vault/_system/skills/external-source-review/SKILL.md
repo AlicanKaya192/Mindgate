@@ -28,7 +28,7 @@ Bu iş elle üç kez yapıldı ve beceriye dönüştü (elle üç kez yapılan i
 - Depoları kullanıcının alanına göre ayır: AI/ML, ajanlar, yazılım, güvenlik, altyapı, tasarım, ikinci beyin.
 - Alan dışı olanların (pazarlama, video, blokzincir) yalnızca açıklama satırlarına bak. Derin okuma yapma; kararı kullanıcıya bırak.
 
-## 4. Okuma (Seviye 1, en fazla 3 `kasif`)
+## 4. Okuma (kaşifler; sayı işe göre, #10)
 - Kaşifleri depoya ya da katmana göre böl (motor kodu, belgeler ve testler, beceriler). Bölüşüm `gorev-yazma` §C'deki gibi yapılır.
 - Her kaşife aynı rapor şablonunu ver:
   - beceri ya da bileşen başına tablo: ne, ana yöntem, betik var mı, dış servis veya kurulum istiyor mu, hangi ajana uyar, bizdeki karşılığı ve bizde olmayan

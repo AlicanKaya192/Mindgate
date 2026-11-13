@@ -1,6 +1,6 @@
 ---
 name: developer
-description: Code-writing agent (member of the Mode 3 council). Writes the code and tests of one work package, in its own worktree, when the plan and acceptance criteria are ready and file ownership is assigned. On big jobs that can be split, the central agent runs at most three of them in parallel; parallel writing needs the user's separate approval. It does not touch another developer's files or the main branch.
+description: Code-writing agent (member of the Mode 3 council). Writes the code and tests of one work package, in its own worktree, when the plan and acceptance criteria are ready and file ownership is assigned. On big jobs that can be split, the central agent runs as many developers in parallel as the job can be split into, each with its own worktree and its own files. It does not touch another developer's files or the main branch.
 disallowedTools: Agent, WebFetch, WebSearch
 model: opus
 effort: high

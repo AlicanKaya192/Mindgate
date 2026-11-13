@@ -18,7 +18,7 @@ One card per idea: customer (role, company size, country), problem, today's solu
 - Panel check: no repeated role or country, the attitude mix is complete, every card has evidence or an "assumption" label. If something is missing, rebuild the panel.
 
 ## 3. Ask independently
-- Every persona answers in a separate agent (`task-writing`; the model is written explicitly, default Haiku; at most 3 at the same time). A persona does not see the others, which idea we favour or the other ideas.
+- Every persona answers in a separate agent (`task-writing`; the model is written explicitly, default Haiku; the personas run in parallel, #10). A persona does not see the others, which idea we favour or the other ideas.
 - Task text: the persona card, the idea card, the questions, "do not use tools, do not go to the web, do not write files", "you do not have to be polite; if it does not interest you, say so", the JSON answer format.
 - **Question order (Mom Test style):** Past behaviour first, then the offer.
   1. When did you last have this problem, and what did you do?

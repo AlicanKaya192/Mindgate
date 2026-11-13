@@ -18,7 +18,7 @@ Her fikir için tek kart: müşteri (rol, şirket büyüklüğü, ülke), sorun,
 - Panel kontrolü: rol ve ülke tekrarı yok, tutum karışımı tam, her kartta kanıt ya da "varsayım" etiketi var. Eksikse paneli yeniden kur.
 
 ## 3. Bağımsız sor
-- Her persona ayrı bir ajanda cevap verir (`gorev-yazma`; model açık yazılır, varsayılan Haiku; aynı anda en çok 3). Persona diğerlerini, bizim hangi fikri tuttuğumuzu ve öteki fikirleri görmez.
+- Her persona ayrı bir ajanda cevap verir (`gorev-yazma`; model açık yazılır, varsayılan Haiku; personalar paralel çalışır, #10). Persona diğerlerini, bizim hangi fikri tuttuğumuzu ve öteki fikirleri görmez.
 - Görev metni: persona kartı, fikir kartı, sorular, "araç kullanma, web'e çıkma, dosya yazma", "kibar olmak zorunda değilsin; ilgini çekmiyorsa söyle", JSON cevap biçimi.
 - **Soru sırası (Mom Test usulü):** Önce geçmiş davranış, sonra teklif.
   1. Bu sorunu en son ne zaman yaşadın, ne yaptın?

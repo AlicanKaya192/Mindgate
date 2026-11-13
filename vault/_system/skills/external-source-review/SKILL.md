@@ -28,7 +28,7 @@ This job was done by hand three times and turned into this skill (work done by h
 - Sort the repositories by the user's field: AI/ML, agents, software, security, infrastructure, design, second brain.
 - For those outside the field (marketing, video, blockchain) look only at the description lines. Do not read deeply; leave the decision to the user.
 
-## 4. Reading (Level 1, at most 3 scouts)
+## 4. Reading (scouts; number fits the job, #10)
 - Split the scouts by repository or layer (engine code, documents and tests, skills). Split the work as in `task-writing` §C.
 - Give every scout the same report template:
   - a table per skill or component: what, main method, is there a script, does it need an outside service or an install, which agent it fits, our equivalent and what we do not have
