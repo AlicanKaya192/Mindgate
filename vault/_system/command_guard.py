@@ -235,8 +235,9 @@ SED_BACKSLASH_REASON = (
     "kullan. Parça: `{part}`")
 
 # From the download tool to the interpreter: the first stage and the pipes in between (tee, sed, Out-String …). Every
-# stage starts with `|`; the possessive `*+` does not backtrack inside a stage.
-PIPES_BETWEEN = r"[^|\n]*+(?:\|[^|\n]*+)*?"
+# stage starts with `|`. A stage is taken whole and never given back: a lookahead captures it and a backreference
+# consumes it (a possessive quantifier would say the same, but needs Python 3.11 and Mindgate supports 3.10).
+PIPES_BETWEEN = r"(?=(?P<stage>[^|\n]*))(?P=stage)(?:\|(?=(?P<next>[^|\n]*))(?P=next))*?"
 DOWNLOADERS = r"(?:curl|wget|iwr|irm|invoke-webrequest|invoke-restmethod)\b"
 DOWNLOAD_RUN = ("downloading from the internet and running it directly", "internetten indirip doğrudan çalıştırma")
 DESTRUCTIVE = [  # deny in every case: (pattern, (English, Turkish))

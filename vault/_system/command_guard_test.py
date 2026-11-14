@@ -858,6 +858,24 @@ def in_process_failures() -> list[int]:
     return failures
 
 
+# Possessive quantifiers (`*+`, `++`, `?+`, `}+`) and atomic groups (`(?>`) are Python 3.11 syntax; Mindgate supports
+# 3.10, where such a pattern raises re.error when the module loads and the guard answers no command at all.
+GUARD_SOURCES = ("command_guard.py", "write_guard.py", "site_guard.py", "agent_gate.py", "hook_io.py", "common.py",
+                 "session_mode.py")
+NEW_REGEX_SYNTAX = re.compile(r"[*+?}]\+(?!=)|\(\?>")
+
+
+def old_python_failures() -> int:
+    """Patterns in the guard scripts must compile on Python 3.10; True (1) for each script that uses newer syntax."""
+    failures = 0
+    for script in GUARD_SOURCES:
+        code = [line for line in SCRIPT.with_name(script).read_text(encoding="utf-8").splitlines()
+                if not line.lstrip().startswith("#")]
+        found = next((line.strip()[:80] for line in code if NEW_REGEX_SYNTAX.search(line)), "")
+        failures += report(not found, f"{script}: no Python 3.11-only regex syntax {('(' + found + ')') if found else ''}")
+    return failures
+
+
 def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     start = time.perf_counter()
@@ -873,11 +891,12 @@ def main() -> None:
                            f"the reason shows '{part}': …{command[-40:]}")
     failures += record_mode_failures()
     failures += time_failures()
+    failures += old_python_failures()
     extra = in_process_failures() + end_to_end_failures()
     failures += sum(extra)
     took = time.perf_counter() - start
     failures += report(took < TOTAL_TIME_LIMIT_S, f"total time {took:.1f} s (limit {TOTAL_TIME_LIMIT_S} s)")
-    total = len(every) + len(REASON_CASES) + len(RECORD_MODE_CASES) + len(BAD_LONG_INPUTS) + len(extra) + 1
+    total = len(every) + len(REASON_CASES) + len(RECORD_MODE_CASES) + len(BAD_LONG_INPUTS) + len(GUARD_SOURCES) + len(extra) + 1
     print(f"\n{total - failures}/{total} passed")
     sys.exit(1 if failures else 0)
 
