@@ -134,5 +134,35 @@ class HomeFolderTest(unittest.TestCase):
             self.assertEqual(Path.home().resolve(), Path(expected).resolve())
 
 
+class DefenseSetTest(unittest.TestCase):
+    """One definition for the write guard (tool paths) and the command guard (shell text)."""
+
+    def test_covers_settings_scripts_agents_rules_and_schema(self):
+        members = {(d.root, d.folder, d.pattern) for d in common.DEFENSE_SET}
+        system = common.name("_system")
+        for member in [("home", ".claude", "settings*.json"), ("home", ".codex", "hooks.json"),
+                       ("home", ".gemini", "settings.json"), ("home", ".gemini/config", "hooks.json"),
+                       ("vault", ".claude", "settings*.json"), ("any", ".claude", "launch.json"),
+                       ("home", ".claude", "CLAUDE.md"), ("home", ".claude/scheduled-tasks", "**"),
+                       ("vault", system, "*.py"), ("vault", f"{system}/{common.name('agents')}", "**"),
+                       ("home", ".claude/agents", "**"), ("any", ".git/hooks", "**"),
+                       ("vault", f"{common.name('knowledge')}/{common.name('security')}", common.name("blocked-sites.md")),
+                       ("vault", common.name("rules"), common.name("general-rules.md")),
+                       ("vault", f"{system}/{common.name('instructions')}", "**"), ("vault", "", "CLAUDE.md")]:
+            self.assertIn(member, members)
+
+    def test_every_member_names_itself_in_both_languages(self):
+        for member in common.DEFENSE_SET:
+            self.assertIn(member.root, ("home", "vault", "any"))
+            self.assertEqual(len(member.about), 2)
+            self.assertTrue(all(member.about), member)
+
+    def test_standard_library_names_shadow(self):
+        for file_name in ("json.py", "RE.PY", "tempfile.pyc", "os.pyw"):
+            self.assertTrue(common.stdlib_shadow(file_name), file_name)
+        for file_name in ("common.py", "command_guard.py", "json.md", "json"):
+            self.assertFalse(common.stdlib_shadow(file_name), file_name)
+
+
 if __name__ == "__main__":
     unittest.main()

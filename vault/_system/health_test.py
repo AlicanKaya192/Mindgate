@@ -260,5 +260,75 @@ class HealthTest(unittest.TestCase):
         self.assertTrue({"triggers", "control_characters"} <= keys)
 
 
+GUARD_COMMAND = '{py} -I "C:/v/_system/{script}"{extra}'
+
+
+def guard_hooks(**matchers) -> dict:
+    """Claude Code settings with the guard hooks; a matcher given as a keyword replaces the template's."""
+    def group(matcher, script, extra=""):
+        return {"matcher": matcher, "hooks": [{"type": "command", "command": GUARD_COMMAND.format(py="py", script=script, extra=extra)}]}
+    return {"hooks": {
+        "PreToolUse": [group(matchers.get("command", "Bash|PowerShell|mcp__terminal__run_in_terminal"), "command_guard.py"),
+                       group(matchers.get("write", "Write|Edit|MultiEdit|NotebookEdit"), "write_guard.py"),
+                       group(matchers.get("site", "WebFetch|WebSearch|mcp__Claude_Browser__navigate"), "site_guard.py"),
+                       group("Agent", "agent_gate.py")],
+        "PostToolUse": [group("WebFetch|WebSearch", "site_guard.py", " after")]}}
+
+
+class DefenseIntegrityTest(unittest.TestCase):
+    """Security hooks and their matchers, broad permission patterns, standard library names, the commit hook."""
+    setUp, tearDown, write = HealthTest.setUp, HealthTest.tearDown, HealthTest.write
+
+    def test_complete_guard_hooks_are_ok(self):
+        self.assertEqual(health.hook_gaps(guard_hooks()), [])
+
+    def test_a_narrowed_matcher_is_reported(self):
+        gaps = health.hook_gaps(guard_hooks(command="Bash", site="WebFetch"))
+        self.assertEqual(len(gaps), 2)
+        self.assertIn("mcp__terminal__run_in_terminal", gaps[0])
+        self.assertIn("WebSearch", gaps[1])
+
+    def test_a_missing_hook_and_disabled_hooks_are_reported(self):
+        settings = guard_hooks()
+        settings["hooks"]["PostToolUse"] = []
+        self.assertEqual(len(health.hook_gaps(settings)), 1)
+        self.assertEqual(len(health.hook_gaps({"disableAllHooks": True, **guard_hooks()})), 1)
+
+    def test_a_catch_all_matcher_covers_every_tool(self):
+        self.assertEqual(health.hook_gaps(guard_hooks(command="*", site="", write=".*")), [])
+
+    def test_the_after_hook_needs_its_argument(self):
+        settings = guard_hooks()
+        settings["hooks"]["PostToolUse"][0]["hooks"][0]["command"] = GUARD_COMMAND.format(py="py", script="site_guard.py", extra="")
+        self.assertEqual(len(health.hook_gaps(settings)), 1)
+
+    def test_broad_permission_patterns(self):
+        for rule in ("Bash", "Bash(*)", "PowerShell(:*)", "Bash(py -c:*)", "Bash(python -:*)", "Bash(py -3.14 *)",
+                     "Bash(git add * *)", "Bash(git push origin *)"):
+            with self.subTest(rule=rule):
+                self.assertTrue(health.broad_rule(rule))
+        for rule in ("Bash(git status)", "Bash(py -3.14 -I _system/search.py:*)", "Read(*)", "Bash(git add notes.md)",
+                     "Bash(npm test)"):
+            with self.subTest(rule=rule):
+                self.assertFalse(health.broad_rule(rule))
+
+    def test_broad_permissions_reads_the_settings_files(self):
+        self.write("home/.claude/settings.json", json.dumps({"permissions": {"allow": ["Bash(*)", "Bash(git status)"]}}))
+        result = health.broad_permissions()
+        self.assertEqual((result.status, result.count), ("warning", 1))
+
+    def test_standard_library_names_in_the_script_folder(self):
+        self.write(f"{name('_system')}/tool.py", "x = 1\n")
+        self.assertEqual(health.stdlib_names().status, "ok")
+        self.write(f"{name('_system')}/json.py", "x = 1\n")
+        result = health.stdlib_names()
+        self.assertEqual(result.status, "error")
+        self.assertIn("json.py", result.details)
+
+    def test_the_new_checks_are_in_the_full_list(self):
+        keys = {result.key for result in health.checks()}
+        self.assertTrue({"security_hooks", "stdlib_names", "broad_permissions", "guard_changes", "commit_hook"} <= keys)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

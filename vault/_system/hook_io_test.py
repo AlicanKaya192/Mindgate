@@ -78,6 +78,20 @@ class ReadCall(unittest.TestCase):
     def test_claude_ignores_tools_it_does_not_guard(self):
         self.assertIsNone(hook_io.read_call("claude", unknown_payload("claude"), "shell"))
 
+    def test_claude_terminal_tool_is_a_shell_call(self):
+        payload = {"tool_name": "mcp__terminal__run_in_terminal", "tool_input": {"command": "git status"}, "session_id": "s1"}
+        self.assertEqual(hook_io.read_call("claude", payload, "shell").command, "git status")
+
+    def test_loads_without_the_other_helpers(self):
+        """A guard whose common.py or session_mode.py is broken still answers in its client's format."""
+        folder = OUTPUT / "test_hook_io" / "alone"
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "hook_io.py").write_text((HERE / "hook_io.py").read_text(encoding="utf-8"), encoding="utf-8")
+        code = "import hook_io; print(hook_io.render('gemini', hook_io.FAIL, 'x'))"
+        result = subprocess.run([sys.executable, "-I", "-c", f"import sys; sys.path.append({str(folder)!r}); {code}"],
+                                capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual((result.returncode, json.loads(result.stdout or "{}").get("decision")), (0, "deny"), result.stderr)
+
     def test_other_clients_reject_an_unknown_tool(self):
         for client in NOT_CLAUDE:
             with self.subTest(client=client), self.assertRaises(hook_io.UnknownCall):

@@ -18,7 +18,9 @@ import re
 import shlex
 from dataclasses import dataclass
 
-import session_mode as sm
+# Only the standard library at import time: when common.py or session_mode.py cannot be loaded, a guard still answers
+# through this module in its client's format (Claude asks, the others deny).
+UNKNOWN_SESSION = "?"   # = session_mode.UNKNOWN_SESSION: a client that sent no session id counts as unrecorded
 
 CLIENTS = ("claude", "codex", "gemini", "antigravity")
 CLIENT_HOMES = (".claude", ".codex", ".gemini", ".agents")   # settings, hooks, instructions and skills of each client
@@ -28,7 +30,7 @@ ASK_OR_CLIENT = "ask-or-client"   # a single delete: ask, or leave it to the cli
 
 SHELL, WRITE, WEB = "shell", "write", "web"
 TOOLS = {
-    "claude": {"Bash": SHELL, "PowerShell": SHELL, "Write": WRITE, "Edit": WRITE, "MultiEdit": WRITE, "NotebookEdit": WRITE},
+    "claude": {"Bash": SHELL, "PowerShell": SHELL, "mcp__terminal__run_in_terminal": SHELL, "Write": WRITE, "Edit": WRITE, "MultiEdit": WRITE, "NotebookEdit": WRITE},
     "codex": {"Bash": SHELL, "apply_patch": WRITE},
     "gemini": {"run_shell_command": SHELL, "write_file": WRITE, "replace": WRITE, "web_fetch": WEB},
     "antigravity": {"run_command": SHELL, "write_to_file": WRITE, "replace_file_content": WRITE,
@@ -140,7 +142,7 @@ def claude_call(tool: str, fields: dict, cwd: str, session: str, kind: str) -> C
 
 
 def other_call(client: str, tool: str, fields: dict, cwd: str, session: str, kind: str) -> Call:
-    session = session.strip() or sm.UNKNOWN_SESSION
+    session = session.strip() or UNKNOWN_SESSION
     if kind == WEB:
         return Call(client, kind, tool, urls=web_addresses(fields), cwd=cwd, session_id=session)
     command_key, path_key = ARGUMENTS[client]

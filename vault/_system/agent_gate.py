@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
+sys.path.append(str(Path(__file__).resolve().parent))  # -I leaves the folder off the path; at the end, not first: no stdlib shadowing
 import common  # noqa: E402
 from common import log_error  # noqa: E402
 

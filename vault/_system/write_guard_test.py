@@ -75,6 +75,44 @@ CONTROL_CHARACTER_CASES = [
 ]
 CASES += CONTROL_CHARACTER_CASES
 
+# Changing a defense (hook and permission settings, guard scripts, agent definitions, git hooks, blocklist, preview
+# command, rules, instructions, vault schema) is asked; the reason names the defense. A file named after a standard
+# library module in _system/ could shadow what the guards import: denied.
+HOME = Path.home()
+SYSTEM = VAULT / name("_system")
+DEFENSE_CASES = [
+    ("Write", {"file_path": str(HOME / ".claude" / "settings.json"), "content": "{}"}, "ask"),
+    ("Edit", {"file_path": str(HOME / ".claude" / "settings.local.json"), "old_string": "a", "new_string": "b"}, "ask"),
+    ("Edit", {"file_path": str(SYSTEM / "command_guard.py"), "old_string": "a", "new_string": "b"}, "ask"),
+    ("Write", {"file_path": str(SYSTEM / "new_tool.py"), "content": "x = 1"}, "ask"),
+    ("Write", {"file_path": str(SYSTEM / "config.json"), "content": "{}"}, "ask"),
+    ("Write", {"file_path": str(SYSTEM / name("agents") / "scout.md"), "content": "x"}, "ask"),
+    ("Write", {"file_path": str(HOME / ".claude" / "agents" / "scout.md"), "content": "x"}, "ask"),
+    ("Write", {"file_path": str(HOME / ".codex" / "agents" / "scout.toml"), "content": "x"}, "ask"),
+    ("Write", {"file_path": str(HOME / ".claude" / "scheduled-tasks" / "nightly" / "SKILL.md"), "content": "x"}, "ask"),
+    ("Write", {"file_path": str(HOME / ".claude" / "CLAUDE.md"), "content": "x"}, "ask"),
+    ("Write", {"file_path": str(HOME / ".codex" / "AGENTS.md"), "content": "x"}, "ask"),
+    ("Write", {"file_path": str(OUTSIDE / ".git" / "hooks" / "pre-commit"), "content": "x"}, "ask"),
+    ("Write", {"file_path": str(OUTSIDE / ".claude" / "launch.json"), "content": "{}"}, "ask"),
+    ("Write", {"file_path": str(VAULT / ".claude" / "settings.local.json"), "content": "{}"}, "ask"),
+    ("Write", {"file_path": str(VAULT / name("knowledge") / name("security") / name("blocked-sites.md")), "content": "x"}, "ask"),
+    ("Edit", {"file_path": str(VAULT / name("rules") / name("general-rules.md")), "old_string": "a", "new_string": "b"}, "ask"),
+    ("Write", {"file_path": str(SYSTEM / name("instructions") / "global-CLAUDE.md"), "content": "x"}, "ask"),
+    ("Edit", {"file_path": str(VAULT / "CLAUDE.md"), "old_string": "a", "new_string": "b"}, "ask"),
+    # standard library names in _system/
+    ("Write", {"file_path": str(SYSTEM / "json.py"), "content": "x"}, "deny"),
+    ("Write", {"file_path": str(SYSTEM / "RE.PY"), "content": "x"}, "deny"),
+    ("Write", {"file_path": str(SYSTEM / "json" / "__init__.py"), "content": "x"}, "deny"),
+    # silent
+    ("Write", {"file_path": str(SYSTEM / name("output") / "report.json"), "content": "{}"}, ""),
+    ("Write", {"file_path": str(VAULT / name("rules") / name("rule-violations.md")), "content": "x"}, ""),
+    ("Write", {"file_path": str(VAULT / name("inbox") / "CLAUDE.md"), "content": "x"}, ""),
+    ("Write", {"file_path": str(OUTSIDE / "json.py"), "content": "x"}, ""),                         # outside _system/
+    ("Write", {"file_path": str(OUTSIDE / "CLAUDE.md"), "content": "x"}, ""),                       # another project's file
+    ("Write", {"file_path": str(HOME / ".claude" / "skills" / "x" / "notes.md"), "content": "x"}, ""),
+]
+CASES += DEFENSE_CASES
+
 
 MODE_FILE = TEST_DIR / "session_mode.json"
 MEMORY = Path.home() / ".claude" / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(VAULT)) / "memory" / "x.md"
@@ -181,6 +219,25 @@ def language_failures() -> int:
             + failed(installed.startswith(expected), f"install language ({common.LANGUAGE}) reason: {installed}"))
 
 
+def import_failure_failures() -> int:
+    """With common.py or session_mode.py missing the guard cannot check anything: Claude asks, another client denies."""
+    copy = TEST_DIR / "copy"
+    copy.mkdir(parents=True, exist_ok=True)
+    for file_name in ("write_guard.py", "hook_io.py"):
+        (copy / file_name).write_text(SCRIPT.with_name(file_name).read_text(encoding="utf-8"), encoding="utf-8")
+    failures = 0
+    for args, payload, expected in (([], {"tool_name": "Write", "tool_input": {"file_path": str(OUTSIDE / "a.md")}}, "ask"),
+                                    (["--client", "gemini"], {"tool_name": "write_file", "session_id": "s",
+                                                              "tool_input": {"file_path": str(OUTSIDE / "a.md")}}, "deny")):
+        output = subprocess.run([sys.executable, "-I", "-B", str(copy / "write_guard.py"), *args], input=json.dumps(payload),
+                                capture_output=True, text=True, encoding="utf-8")
+        data = json.loads(output.stdout or "{}")
+        found = data.get("hookSpecificOutput", {}).get("permissionDecision") if not args else data.get("decision")
+        failures += failed(output.returncode == 0 and found == expected,
+                           f"import failure {args or 'claude'}: exit {output.returncode}, '{found}', expected '{expected}'")
+    return failures
+
+
 def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")   # the "→" in a failure line must not crash a legacy console
     prepare_files()
@@ -197,7 +254,10 @@ def main() -> None:
     failures += failed(decision("Edit", {"file_path": "log.md", "old_string": "a", "new_string": "b"}, cwd=str(VAULT)) == "deny",
                        "relative log.md path not caught")
     failures += language_failures()
-    total = len(IN_PROCESS_CASES) + len(CASES) + 1 + len(RECORD_MODE_CASES) + 2
+    reason = run("Write", {"file_path": str(HOME / ".claude" / "settings.json"), "content": "{}"}).get("permissionDecisionReason", "")
+    failures += failed("Claude Code settings" in reason or "Claude Code ayarı" in reason, f"the reason names the defense: {reason}")
+    failures += import_failure_failures()
+    total = len(IN_PROCESS_CASES) + len(CASES) + 1 + len(RECORD_MODE_CASES) + 2 + 1 + 2
     print(f"{total - failures}/{total} passed")
     sys.exit(1 if failures else 0)
 

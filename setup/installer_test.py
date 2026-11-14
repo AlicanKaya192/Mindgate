@@ -400,6 +400,24 @@ class LanguageTest(unittest.TestCase):
         self.assertEqual(ids, set(msg.HOOK_DESCRIPTIONS["en"]))
 
 
+class GuardMatcherTest(unittest.TestCase):
+    """The Claude hook template covers every tool the guards check (vault/_system/health.py reports a narrowed one)."""
+
+    def matcher(self, event: str, script: str) -> str:
+        specs = lib.hook_specs(lib.Values(Path("/v"), "py", Path("/h"), "en", "x"), "_system", "en")
+        return next(s.matcher for s in specs if s.event == event and script in s.command and "after" not in s.command)
+
+    def test_command_guard_covers_the_terminal_tool(self):
+        for tool in ("Bash", "PowerShell", "mcp__terminal__run_in_terminal"):
+            with self.subTest(tool=tool):
+                self.assertTrue(re.fullmatch(self.matcher("PreToolUse", "command_guard.py"), tool))
+
+    def test_site_guard_covers_web_search_before_it_runs(self):
+        for tool in ("WebFetch", "WebSearch", "mcp__Claude_Browser__navigate"):
+            with self.subTest(tool=tool):
+                self.assertTrue(re.fullmatch(self.matcher("PreToolUse", "site_guard.py"), tool))
+
+
 class InstalledContentTest(unittest.TestCase):
     """Leak and placeholder checks on everything an install writes, in both languages."""
 

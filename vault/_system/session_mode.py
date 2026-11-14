@@ -29,7 +29,7 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
+sys.path.append(str(Path(__file__).resolve().parent))  # -I leaves the folder off the path; at the end, not first: no stdlib shadowing
 from common import OUTPUT, atomic_write, locked  # noqa: E402
 
 DEFAULT_FILE = OUTPUT / "session_mode.json"

@@ -7,12 +7,15 @@ number). Scripts that write shared files (pending, log, handoff) read-modify-wri
 Folder and file names are never hard-coded: `name()` and `vault_path()` turn an English base name into the
 name used by the active install (read from `config.json` next to this file).
 """
+import importlib.machinery
 import json
 import os
 import re
+import sys
 import tempfile
 import time
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 
 SYSTEM_DIR = Path(__file__).resolve().parent
@@ -76,6 +79,74 @@ TR_ASCII = str.maketrans("çğıöşüâîû", "cgiosuaiu")
 # Folders and files whose name contains one of these stay out of the dashboard and automatic context
 # (extra safety net; secrets are never written anyway, #18). Turkish words are kept so Turkish vaults are covered.
 SENSITIVE_PATH = re.compile(r"sifre|parola|gizli|kasa|private|secret|password|credential")
+# A file such as `_system/json.py` shadows the standard library once the script folder is on the import path and runs
+# in place of the guard. File names are case-insensitive on Windows.
+STDLIB = {module.lower() for module in sys.stdlib_module_names}
+IMPORTABLE = tuple(importlib.machinery.all_suffixes())    # .py, .pyw, .pyc, .pyd …
+
+
+@dataclass(frozen=True)
+class Defense:
+    """A member of the defense set. root: "home" (the user's home folder), "vault" (the vault root) or "any" (any
+    folder); folder: under the root, "/"-separated ("" is the root itself); pattern: a file name pattern (* and ?) or
+    "**" (everything under the folder); about: (English, Turkish) name the guards show in their reason."""
+    root: str
+    folder: str
+    pattern: str
+    about: tuple[str, str]
+
+
+def vault_folder(relative: str) -> str:
+    """A "/"-separated vault folder in the names of the active install."""
+    return "/".join(name(segment) for segment in relative.split("/") if segment)
+
+
+# One write could switch every guard off: if one of these files changes, the other rules are only written down. One
+# definition: the write guard (the path a tool writes) and the command guard (the text of a shell command) both read
+# it. Home members cover every supported assistant's settings, hooks, instructions and agents (setup/ writes them).
+DEFENSE_SET = (
+    Defense("home", ".claude", "settings*.json", ("Claude Code settings (hooks and the permission list)",
+                                                   "Claude Code ayarı (hook'lar ve izin listesi)")),
+    Defense("home", ".codex", "hooks.json", ("Codex CLI hooks", "Codex CLI hook'ları")),
+    Defense("home", ".codex", "config.toml", ("Codex CLI settings (hooks and approvals)", "Codex CLI ayarı (hook'lar ve onaylar)")),
+    Defense("home", ".gemini", "settings.json", ("Gemini CLI settings (hooks)", "Gemini CLI ayarı (hook'lar)")),
+    Defense("home", ".gemini/config", "hooks.json", ("Antigravity hooks", "Antigravity hook'ları")),
+    Defense("vault", ".claude", "settings*.json", ("the vault's project settings (permission list)",
+                                                   "vault'un proje ayarı (izin listesi)")),
+    Defense("any", ".claude", "launch.json",
+            ("preview start command (preview_start runs it without passing the command guard)",
+             "önizleme başlatma komutu (preview_start bu komutu komut kapısına uğramadan çalıştırır)")),
+    Defense("home", ".claude", "CLAUDE.md", ("global instructions", "global talimat")),
+    Defense("home", ".claude/mindgate", "**", ("Mindgate's installed instructions and install manifest",
+                                               "Mindgate'in kurulu talimatı ve kurulum listesi")),
+    Defense("home", ".codex", "AGENTS.md", ("Codex CLI instructions", "Codex CLI talimatı")),
+    Defense("home", ".gemini", "GEMINI.md", ("Gemini CLI instructions", "Gemini CLI talimatı")),
+    Defense("home", ".gemini", "AGENTS.md", ("Antigravity instructions", "Antigravity talimatı")),
+    Defense("home", ".claude/scheduled-tasks", "**", ("scheduled task (runs unattended)", "zamanlanmış görev (gözetimsiz çalışır)")),
+    Defense("vault", vault_folder("_system"), "*.py", ("vault script (the guards and hooks run from here)",
+                                                       "vault betiği (kapılar ve hook'lar buradan çalışır)")),
+    Defense("vault", vault_folder("_system"), "config.json",
+            ("vault tool settings (its name map tells the guards which folders to protect)",
+             "vault araç ayarı (ad eşlemesi kapılara hangi klasörü koruyacağını söyler)")),
+    Defense("vault", vault_folder("_system/agents"), "**", ("agent definition (tools and model)", "ajan tanımı (araçlar ve model)")),
+    Defense("home", ".claude/agents", "**", ("agent definition (tools and model)", "ajan tanımı (araçlar ve model)")),
+    Defense("home", ".codex/agents", "**", ("agent definition (tools and model)", "ajan tanımı (araçlar ve model)")),
+    Defense("home", ".gemini/agents", "**", ("agent definition (tools and model)", "ajan tanımı (araçlar ve model)")),
+    Defense("home", ".gemini/config/agents", "**", ("agent definition (tools and model)", "ajan tanımı (araçlar ve model)")),
+    Defense("any", ".git/hooks", "**", ("git hook (the pre-commit secret scan)", "git kancası (commit öncesi sır taraması)")),
+    Defense("vault", vault_folder("knowledge/security"), name("blocked-sites.md"), ("site blocklist", "site kara listesi")),
+    Defense("vault", vault_folder("rules"), name("general-rules.md"), ("the full text of the rules", "kuralların tam metni")),
+    Defense("vault", vault_folder("_system/instructions"), "**",
+            ("master copy of the instructions (global instructions and schema details)",
+             "talimatların asıl kopyası (global talimat ve şema ayrıntısı)")),
+    Defense("vault", "", "CLAUDE.md", ("vault schema (CLAUDE.md in the vault root)", "vault şeması (vault kökündeki CLAUDE.md)")),
+)
+
+
+def stdlib_shadow(file_name: str) -> bool:
+    """An importable file named after a standard library module (`json.py`, `RE.PY`, `tempfile.pyc`)."""
+    lowered = file_name.lower()
+    return any(lowered.endswith(suffix) and lowered[:-len(suffix)] in STDLIB for suffix in IMPORTABLE)
 
 
 def ascii_lower(text: str) -> str:

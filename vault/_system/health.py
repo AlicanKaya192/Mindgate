@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
+sys.path.append(str(Path(__file__).resolve().parent))  # -I leaves the folder off the path; at the end, not first: no stdlib shadowing
 import common  # noqa: E402
 import install_instructions  # noqa: E402
 import search_eval  # noqa: E402
@@ -130,6 +130,170 @@ def hooks() -> Result:
         return Result("hooks", "Hooks", "error", f"{len(missing)} hooks missing, {len(absent)} scripts not found",
                       first(missing + absent), "compare the hooks section of ~/.claude/settings.json with setup/hooks.template.json")
     return Result("hooks", "Hooks", "ok", f"{len(EXPECTED_HOOKS)} hooks installed, scripts in place")
+
+
+# ---------- defense integrity ----------
+# (event, script, argument that must follow the script, tools the matcher must cover)
+SECURITY_HOOKS = [
+    ("PreToolUse", "command_guard.py", "", ("Bash", "PowerShell", "mcp__terminal__run_in_terminal")),
+    ("PreToolUse", "write_guard.py", "", ("Write", "Edit", "MultiEdit", "NotebookEdit")),
+    ("PreToolUse", "site_guard.py", "", ("WebFetch", "WebSearch")),
+    ("PreToolUse", "agent_gate.py", "", ()),
+    ("PostToolUse", "site_guard.py", "after", ()),
+]
+GUARD_SCRIPTS = ("command_guard.py", "write_guard.py", "site_guard.py", "agent_gate.py", "session_mode.py", "common.py",
+                 "hook_io.py")
+PERMISSION_RULE = re.compile(r"^(Bash|PowerShell)(?:\((.*)\))?$", re.S)
+PYTHON_NAME = re.compile(r"(?i)^(?:py|pythonw?|python3(?:\.\d+)?)(?:\.exe)?$")
+ANY_TOOL = {None, "", "*"}
+
+
+def read_json(path: Path) -> dict:
+    """A JSON settings file; OSError or ValueError if it cannot be read."""
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def covers(matcher: str | None, tool: str) -> bool:
+    """Does a Claude Code matcher cover the tool: empty or `*` covers every tool, anything else is a full regex match."""
+    if matcher in ANY_TOOL:
+        return True
+    try:
+        return re.fullmatch(matcher, tool) is not None
+    except re.error:
+        return False
+
+
+def calls_script(hook: dict, script: str, argument: str) -> bool:
+    """Does the hook command call the script (and, if needed, the argument after it)?"""
+    words = " ".join([hook.get("command", ""), *hook.get("args", [])]).replace('"', " ").split()
+    index = next((i for i, w in enumerate(words) if w.replace("\\", "/").endswith("/" + script) or w == script), None)
+    return index is not None and (not argument or argument in words[index + 1:])
+
+
+def hook_gaps(settings: dict) -> list[str]:
+    """The security hooks that are missing or whose matcher was narrowed."""
+    if settings.get("disableAllHooks"):
+        return ["disableAllHooks is on: no hook runs"]
+    gaps = []
+    for event, script, argument, tools in SECURITY_HOOKS:
+        label = f"{event}:{script}{' ' + argument if argument else ''}"
+        matchers = [g.get("matcher") for g in settings.get("hooks", {}).get(event, []) for h in g.get("hooks", [])
+                    if calls_script(h, script, argument)]
+        if not matchers:
+            gaps.append(f"{label} missing")
+            continue
+        uncovered = [t for t in tools if not any(covers(m, t) for m in matchers)]
+        if uncovered:
+            gaps.append(f"{label} matcher narrowed ({', '.join(uncovered)} not covered)")
+    return gaps
+
+
+def security_hooks() -> Result:
+    key, check = "security_hooks", "Security hooks and their matchers"
+    try:
+        gaps = hook_gaps(read_json(CLAUDE / "settings.json"))
+    except (OSError, ValueError, AttributeError) as error:
+        return Result(key, check, "error", f"settings.json could not be read: {type(error).__name__}")
+    if gaps:
+        return Result(key, check, "error", f"{len(gaps)} security hooks missing or narrowed", first(gaps),
+                      "fix the hooks section of ~/.claude/settings.json from setup/hooks.template.json (the user approves)")
+    return Result(key, check, "ok", f"{len(SECURITY_HOOKS)} security hooks installed, matchers complete")
+
+
+def broad_rule(rule: str) -> bool:
+    """Does a Bash/PowerShell permission rule allow every command, any Python code or every git add/push?"""
+    m = PERMISSION_RULE.match(rule.strip())
+    if not m:
+        return False
+    words = (m.group(2) or "").replace(":*", " *").split()
+    if not words or words == ["*"]:
+        return True
+    if PYTHON_NAME.match(words[0]):
+        for word in words[1:]:      # interpreter options only: what follows the script name is the script's argument
+            if word == "-" or "*" in word or (word.startswith("-c") and not word.startswith("--")):
+                return True
+            if not word.startswith("-"):
+                return False
+        return False
+    return words[0] == "git" and len(words) > 2 and words[1] in ("add", "push") and words[-1] == "*"
+
+
+def permission_files() -> list[Path]:
+    return [CLAUDE / "settings.json", CLAUDE / "settings.local.json", VAULT / ".claude" / "settings.local.json"]
+
+
+def broad_permissions() -> Result:
+    key, check = "broad_permissions", "Broad patterns in the permission lists"
+    found, unreadable = [], []
+    for path in permission_files():
+        if not path.is_file():
+            continue
+        try:
+            rules = read_json(path).get("permissions", {}).get("allow", [])
+        except (OSError, ValueError, AttributeError) as error:
+            unreadable.append(f"{path.name}: {type(error).__name__}")
+            continue
+        found += [f"{path.name}: {r}" for r in rules if isinstance(r, str) and broad_rule(r)]
+    if found or unreadable:
+        return Result(key, check, "warning", f"{len(found)} broad permission patterns" + (", a file could not be read" if unreadable else ""),
+                      first(unreadable + found, 12), "narrow or remove the pattern (the user decides; an unattended task can run "
+                                                     "it without asking)", count=len(found))
+    return Result(key, check, "ok", "no broad permission pattern", count=0)
+
+
+def stdlib_names() -> Result:
+    """A file in the script folder that could shadow the standard library."""
+    folder = system_dir()
+    shadows = sorted(p.name for p in folder.iterdir() if p.is_file() and common.stdlib_shadow(p.name)) if folder.is_dir() else []
+    if shadows:
+        return Result("stdlib_names", "Script named after the standard library", "error", f"{len(shadows)} shadowing files in "
+                      f"{name('_system')}/", first(shadows), "find out who wrote the file; show it to the user, deleting needs "
+                                                             "permission (#22)")
+    return Result("stdlib_names", "Script named after the standard library", "ok", f"no such file in {name('_system')}/")
+
+
+def git_output(*args: str) -> subprocess.CompletedProcess:
+    return subprocess.run(["git", "-C", str(VAULT), *args], capture_output=True, text=True, encoding="utf-8",
+                          errors="replace", stdin=subprocess.DEVNULL)
+
+
+def guard_changes() -> Result:
+    """A script write the guards cannot see (a Python file run with `py x.py`) shows up here afterwards."""
+    key, check = "guard_changes", "Uncommitted changes in the guard scripts"
+    try:
+        c = git_output("status", "--porcelain", "--", *(f"{name('_system')}/{s}" for s in GUARD_SCRIPTS))
+    except OSError as error:
+        return Result(key, check, "warning", f"git could not run: {type(error).__name__}")
+    if c.returncode != 0:
+        return Result(key, check, "info", "no git state", (c.stderr.strip().splitlines() or [""])[0][:120])
+    changed = [s[3:] for s in c.stdout.splitlines() if s.strip()]
+    if changed:
+        return Result(key, check, "warning", f"{len(changed)} guard scripts not committed", first(changed),
+                      "review the change with git diff; if it is not clear who made it, show it to the user")
+    return Result(key, check, "ok", f"{len(GUARD_SCRIPTS)} guard scripts match the commit")
+
+
+def commit_hook() -> Result:
+    """Is the secret scan hook bypassed: core.hooksPath points elsewhere or the pre-commit hook lost its scan."""
+    key, check = "commit_hook", "Commit hook integrity"
+    try:
+        hooks_path = git_output("config", "--get", "core.hooksPath").stdout.strip()
+        common_dir = git_output("rev-parse", "--git-common-dir").stdout.strip()
+    except OSError as error:
+        return Result(key, check, "warning", f"git could not run: {type(error).__name__}")
+    if not common_dir:
+        return Result(key, check, "info", "no git repository")
+    problems = [f"core.hooksPath is set ({hooks_path}): .git/hooks/pre-commit does not run"] if hooks_path else []
+    hook = (Path(common_dir) if Path(common_dir).is_absolute() else VAULT / common_dir) / "hooks" / "pre-commit"
+    try:
+        if HOOK_SIGNATURE not in hook.read_text(encoding="utf-8", errors="replace"):
+            problems.append("the pre-commit hook does not run secret_scan.py")
+    except OSError:
+        problems.append("no pre-commit hook")
+    if problems:
+        return Result(key, check, "warning", f"{len(problems)} problems", first(problems),
+                      f"git config --unset core.hooksPath (the user approves); for the hook: {PY} -I {name('_system')}/secret_scan.py --install")
+    return Result(key, check, "ok", "pre-commit runs secret_scan.py, core.hooksPath is not set")
 
 
 def same_file(a: Path, b: Path) -> bool:
@@ -595,11 +759,13 @@ def security_scan() -> Result:
 def checks(full: bool = False) -> list[Result]:
     notes = read_notes()
     broken, orphans = link_checks(notes)
-    results = [hooks(), compact_threshold(), links(), precommit(), settings(), fields(notes), problem_history(notes),
+    results = [hooks(), security_hooks(), stdlib_names(), compact_threshold(), links(), precommit(), settings(), fields(notes),
+               problem_history(notes),
                broken, orphans, index_missing(notes), pending(), log_check(), handoff(), hook_errors(), leftover_files(),
                instructions(), file_sizes(notes), trigger_set(), control_characters()]
     results.append(baseline_check(results))
-    results += [session_records(), tasks(), remind_size(), git_state(), regression_markers(notes)]
+    results += [session_records(), tasks(), remind_size(), git_state(), regression_markers(notes),
+                broad_permissions(), guard_changes(), commit_hook()]
     if full:
         results += [command_result("secrets", "Secret scan (tracked files)", [str(system_dir() / "secret_scan.py"), "--all"],
                                    "take the value out of the file (#18)"),

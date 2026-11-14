@@ -9,32 +9,50 @@ Decisions (Write, Edit, MultiEdit, NotebookEdit):
              (#43; project files outside the vault are allowed)
   deny     — changing an EXISTING file under the vault's `sources/` (adding a new source file is allowed)
   deny     — writing to or editing the vault's `log.md` directly (to append: `records.py log`, locked, #36)
+  deny     — writing a file named after a standard library module (`json.py`, `re.pyc` …) or such a package folder
+             under the vault's `_system/`: it could shadow a module the guards import
+  ask      — changing a defense (common.DEFENSE_SET: hook and permission settings of every assistant, guard scripts,
+             agent definitions, git hooks, blocklist, preview command, rules, instructions, vault schema …); the reason
+             names the defense. Where the client cannot ask, it is denied (Antigravity asks every time)
   ask      — text that goes into a text file (.json, .py, .md …) holds an invisible control character (Claude only)
   (silent) — everything else
-  ask      — if the guard cannot parse the input (when unsure, ask)
+  ask      — if the guard cannot parse the input or load its helpers (common, session_mode): when unsure, ask
 
 Writing to the same files with shell commands is asked by `command_guard.py`.
 Other assistants call it with `--client codex|gemini|antigravity` (hook_io.py): their write tools, every path of a
 Codex patch, and the homes of every client (~/.codex, ~/.gemini, ~/.agents) are checked the same way.
 """
+import fnmatch
 import json
 import os
 import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # the -I flag does not add the script folder to the path
-import common  # noqa: E402
+# The -I flag does not add the script folder to the path. It goes to the END: a file such as `json.py` in the folder
+# must not shadow the standard library. hook_io needs only the standard library and answers even when the others fail.
+sys.path.append(str(Path(__file__).resolve().parent))
 import hook_io  # noqa: E402
-import session_mode as sm  # noqa: E402
-from common import VAULT, name, vault_path  # noqa: E402
+try:
+    import common  # noqa: E402
+    import session_mode as sm  # noqa: E402
+    from common import DEFENSE_SET, STDLIB, VAULT, name, stdlib_shadow, vault_path  # noqa: E402
+    IMPORT_ERROR = ""
+except Exception as _error:  # whatever the error, the decision must be "ask" (main)
+    common = sm = None
+    IMPORT_ERROR = f"{type(_error).__name__}: {_error}"
+    VAULT, DEFENSE_SET = Path(__file__).resolve().parent.parent, ()
+
+    def name(key: str) -> str:
+        return key
+
+    def vault_path(*parts: str) -> Path:
+        return VAULT.joinpath(*parts)
 
 CLIENT = "claude"   # set from --client in main(); decides the answer format (hook_io.py)
 # Every assistant's home: memory, instructions, skills, hooks and scheduled tasks (~/.claude, ~/.codex, ~/.gemini, ~/.agents)
 CLIENT_ROOTS = tuple(Path.home() / home for home in hook_io.CLIENT_HOMES)
-# The hook files of the other assistants: writing one can switch the guards off (audit 7 November 2026)
-CLIENT_HOOK_FILES = (Path.home() / ".codex" / "hooks.json", Path.home() / ".codex" / "config.toml",
-                     Path.home() / ".gemini" / "settings.json", Path.home() / ".gemini" / "config" / "hooks.json")
+SYSTEM = vault_path("_system")
 DEVICE_PREFIX = re.compile(r"^(?:[\\/]{2}[?.][\\/])")   # \\?\C:\…, //?/C:/…, \\.\C:\…
 DRIVE = re.compile(r"^[a-zA-Z]:")
 SOURCES = vault_path("sources")
@@ -48,7 +66,7 @@ CONTENT_FIELDS = ("content", "new_string")
 
 def localized(en: str, tr: str) -> str:
     """Text the user sees directly (permissionDecisionReason), in the install language (config.json `language`)."""
-    return tr if common.LANGUAGE == "tr" else en
+    return tr if common and common.LANGUAGE == "tr" else en
 
 
 def normal(path: Path) -> str:
@@ -129,7 +147,61 @@ def check(path: Path) -> bool:
             f"{sources}/ altındaki ham kaynaklar değiştirilmez (CLAUDE.md §2, §7.4): {path.name}. Özet ya da düzeltme "
             f"{knowledge}/ altında ayrı nota yazılır; yeni kaynak yeni dosya adıyla eklenir."))
         return True
+    if shadows_stdlib(path):
+        system = name("_system")
+        decide("deny", localized(
+            f"No file named after a standard library module is written under {system}/: {path.name}. It could shadow a "
+            "module the guards import; give the script another name.",
+            f"{system}/ altına standart kütüphane modülü adıyla dosya yazılmaz: {path.name}. Kapıların içe aktardığı "
+            "modülü gölgeleyebilir; betiğe başka bir ad ver."))
+        return True
     return False
+
+
+def shadows_stdlib(path: Path) -> bool:
+    """`_system/json.py` or `_system/json/…`: a name in the script folder that shadows a standard library module."""
+    target, system = real(path), real(SYSTEM)
+    if target == system or not target.is_relative_to(system):
+        return False
+    first = target.relative_to(system).parts
+    return stdlib_shadow(first[0]) if len(first) == 1 else first[0].lower() in STDLIB
+
+
+def is_member(member, path: Path) -> bool:
+    """Is the path in this defense member? Both sides are resolved to their real path: ~/.claude/agents may be a
+    junction. Names are compared in the platform's case rules."""
+    target = real(path)
+    folder = [os.path.normcase(segment) for segment in member.folder.split("/") if segment]
+    pattern = os.path.normcase(member.pattern)
+    if member.root == "any":
+        for start in range(len(target.parts) - len(folder) + 1):
+            if list(target.parts[start:start + len(folder)]) != folder:
+                continue
+            rest = target.parts[start + len(folder):]
+            if pattern == "**" or (len(rest) == 1 and fnmatch.fnmatchcase(rest[0], pattern)):
+                return True
+        return False
+    base = real((Path.home() if member.root == "home" else VAULT).joinpath(*folder))
+    if pattern == "**":
+        return target == base or target.is_relative_to(base)
+    return target.parent == base and fnmatch.fnmatchcase(target.name, pattern)
+
+
+def defense_of(path: Path):
+    """The defense member the path belongs to, or None."""
+    return next((member for member in DEFENSE_SET if is_member(member, path)), None)
+
+
+def check_defense(path: Path) -> bool:
+    """Asks before a defense is changed (denies where the client cannot ask); True if it decided."""
+    member = defense_of(path)
+    if member is None:
+        return False
+    decide(hook_io.ASK_OR_DENY, localized(
+        f"This write changes a defense: {member.about[0]} ({path}). The change can weaken the guards; the user decides.",
+        f"Bu yazma bir savunmayı değiştiriyor: {member.about[1]} ({path}). Değişiklik kapıları zayıflatabilir; kararı "
+        "kullanıcı verir."))
+    return True
 
 
 def check_stream(raw: str) -> bool:
@@ -138,17 +210,6 @@ def check_stream(raw: str) -> bool:
         return False
     decide("deny", localized(f"A path with a data stream name is not written: {raw}. Use the plain file name.",
                              f"Veri akışı adı taşıyan yola yazılmaz: {raw}. Dosyanın düz adını kullan."))
-    return True
-
-
-def check_hook_file(path: Path) -> bool:
-    """Asks (or denies where the client cannot ask) before an assistant's hook file is changed; True if it decided."""
-    target = real(path)
-    if not any(target == real(hook_file) for hook_file in CLIENT_HOOK_FILES):
-        return False
-    decide(hook_io.ASK_OR_DENY, localized(
-        f"This is an assistant's hook file ({path.name}); changing it can switch the guards off. The user decides.",
-        f"Bu bir asistanın hook dosyası ({path.name}); değiştirmek kapıları kapatabilir. Kararı kullanıcı verir."))
     return True
 
 
@@ -175,7 +236,7 @@ def check_call(call: hook_io.Call) -> bool:
         if check_stream(raw):
             return True
         path = resolve(raw, call.cwd)
-        if check_recording_mode(path, call.session_id) or check_hook_file(path) or check(path):
+        if check_recording_mode(path, call.session_id) or check(path) or check_defense(path):
             return True
     return False
 
@@ -186,6 +247,10 @@ def main() -> None:
         sys.stdout.reconfigure(encoding="utf-8")
         sys.stdin.reconfigure(encoding="utf-8")
         CLIENT = hook_io.client_from_args(sys.argv[1:])
+        if IMPORT_ERROR:
+            decide(hook_io.FAIL, f"The write guard could not load its helper modules (common, session_mode: {IMPORT_ERROR}); "
+                                 "it cannot check this write, the user should approve.")
+            return
         data = json.loads(sys.stdin.read() or "{}")
         call = hook_io.read_call(CLIENT, data, hook_io.WRITE)
         # Only Claude's Write/Edit payload carries the text; the other clients' answers have no "ask" for this
