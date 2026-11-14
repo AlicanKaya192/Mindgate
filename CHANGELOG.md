@@ -4,6 +4,25 @@
 
 # Changelog
 
+## v1.2.1 — Security update: update check
+
+**Updating is recommended.** This release holds everything in v1.2.0 below and adds a way to hear about the next one.
+
+- **Update check (off by default).** Mindgate is a set of files, not a program, so nothing told you when a release was
+  out. `health.py` can now ask GitHub for the latest release and say `Mindgate vX is out (security update)`. Turn it
+  on with `"update_check": {"enabled": true}` in `_system/config.json` (`_sistem/` in a Turkish install). It asks only
+  `https://api.github.com/repos/AlicanKaya192/Mindgate/releases/latest`; nothing from the vault is sent, and only the
+  version number of the answer is used. The daily and weekly tasks run `health.py`, so the warning reaches you there.
+  While the check is off, the health report shows how to turn it on.
+- **Python 3.10 works again.** A pattern in the command guard used syntax that came with Python 3.11; on 3.10 the
+  command guard could not load. It is rewritten, and a test keeps 3.11-only pattern syntax out of the guards.
+- **Hear about releases without the check:** on GitHub, *Watch → Custom → Releases* sends you a notice for every
+  release.
+
+**How to update:** follow the v1.2.0 steps below. The installer does not overwrite `config.json`; to use the update
+check, add the `update_check` block from the release's `vault/_system/config.json` to yours (editing it is asked, by
+design).
+
 ## v1.2.0 — Security update
 
 **Updating is recommended.** This release tightens the command, write and site guards. On the same test inputs, the
@@ -82,7 +101,7 @@ agent definition or the rules file is asked. A web search is asked.
 
 The installer does not overwrite files that already exist, so an existing install is updated by hand:
 
-1. Get v1.2.0 (`git pull` in your Mindgate folder, or download the release).
+1. Get the latest release (`git pull` in your Mindgate folder, or download the release).
 2. Close Claude Code. Copy every `vault/_system/*.py` file of the release into the `_system/` folder of your vault
    (`_sistem/` in a Turkish install; the script names are the same in both languages). Inside a session the write
    guard would ask for every file, by design.

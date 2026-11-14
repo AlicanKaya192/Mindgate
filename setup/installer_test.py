@@ -66,6 +66,15 @@ def files_under(folder: Path) -> list:
     return sorted(p for p in folder.rglob("*") if p.is_file()) if folder.exists() else []
 
 
+# The project's public address may appear in installed files (the update check in health.py asks it for the latest
+# release); the owner's name anywhere else is still a leak.
+# The address is read from its one definition, so the owner's name is not written here either.
+PROJECT = re.search(r'RELEASES_URL = "https://api\.github\.com/repos/([\w.-]+)/([\w.-]+)/',
+                    (REPO / "vault" / "_system" / "health.py").read_text(encoding="utf-8"))
+PROJECT_ADDRESS = re.compile(r"(?i)(?:api\.)?github\.com/(?:repos/)?" + re.escape(PROJECT[1]) + "/" + re.escape(PROJECT[2])
+                             + r"(?![\w-])")
+
+
 def blocklist() -> list:
     lines = BLOCKLIST.read_text(encoding="utf-8").splitlines()
     return [re.compile(l.strip(), re.I) for l in lines if l.strip() and not l.strip().startswith("#")]
@@ -439,13 +448,13 @@ class InstalledContentTest(unittest.TestCase):
         for language, run in self.runs.items():
             hits = []
             for path in self.installed(run):
-                text = run.neutral(path.read_text(encoding="utf-8", errors="replace"))
+                text = PROJECT_ADDRESS.sub("", run.neutral(path.read_text(encoding="utf-8", errors="replace")))
                 hits += [f"{path.relative_to(run.root)} #{i}" for i, p in enumerate(self.patterns) if p.search(text)]
             self.assertEqual(hits, [], f"{language}: blocklist matches")
 
     def test_blocklist_has_no_match_in_the_new_setup_files(self):
         hits = [f"{name} #{i}" for name in NEW_FILES for i, p in enumerate(self.patterns)
-                if p.search((HERE / name).read_text(encoding="utf-8"))]
+                if p.search(PROJECT_ADDRESS.sub("", (HERE / name).read_text(encoding="utf-8")))]
         self.assertEqual(hits, [])
 
     def test_no_installer_placeholder_is_left(self):

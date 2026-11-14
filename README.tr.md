@@ -9,7 +9,7 @@
 <h1 align="center">Mindgate</h1>
 
 > [!IMPORTANT]
-> **v1.2.0 bir güvenlik güncellemesidir. Güncellemeniz önerilir.** Kapılardaki şu açıkları kapatır:
+> **v1.2.1 bir güvenlik güncellemesidir. Güncellemeniz önerilir.** Kapılardaki şu açıkları kapatır:
 >
 > - **Kapıların kendi dosyaları** (her asistanın hook ve izin ayarları, kapı betikleri, ajan tanımları, git kancaları, kara liste, kurallar ve talimatlar) tek bir kabuk komutu ya da dosya yazımıyla değiştirilebiliyordu. Artık sorulur.
 > - **Kabuktan ağa çıkış** (`curl`, `Invoke-WebRequest`, soket, `ssh`, `git clone`, `gh api`, Python ya da node içindeki ağ kodu) site kapısını dolanıyordu. Artık adresiyle sorulur. İndirileni yorumlayıcıya bağlamak, araya başka borular, süreç ikamesi ya da base64 girse de reddedilir.
@@ -17,6 +17,8 @@
 > - **Yavaş girdiler** komut kapısını hook'un süre sınırının ötesinde meşgul ediyordu: en yavaş kapı kararı 123 sn'den 1 sn'nin altına indi; 20.000 karakteri geçen komut sorulur.
 > - **Daha fazla riskli komut** sorulur ya da reddedilir: commit kancasını atlama, dosya içeriğini boşaltma, silmenin ve süreç öldürmenin başka yolları, sır gösterme, kalıcılık ve yürütme politikası değişiklikleri, paket kurulumu, yama uygulama, vault dosyasını geçici klasöre taşıma.
 > - **Web araması ve terminal aracı** artık kapılardan geçer; bozuk bir yardımcı modül ya da kapıların yanındaki bir `json.py` onları artık kapatamaz.
+>
+> - **Yeni: güncelleme denetimi** (varsayılan kapalı): `health.py` bir sonraki sürüm çıktığında size söyler. GitHub'da *Watch → Custom → Releases* de her sürümde bildirim gönderir.
 >
 > Aynı sınama girdilerinde kapının sessiz kaldığı kabuk komutu 72'de 68'den 72'de 7'ye indi. **Nasıl güncellenir:** [CHANGELOG.tr.md](CHANGELOG.tr.md#nasıl-güncellenir). Bilinen sınırlar: [SECURITY.tr.md](SECURITY.tr.md#bilinen-sınırlar).
 

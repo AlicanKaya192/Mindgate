@@ -4,6 +4,26 @@
 
 # Değişiklik günlüğü
 
+## v1.2.1 — Güvenlik güncellemesi: güncelleme denetimi
+
+**Güncellemeniz önerilir.** Bu sürüm aşağıdaki v1.2.0'ın tamamını içerir ve bir sonraki sürümden haberdar olmanın
+yolunu ekler.
+
+- **Güncelleme denetimi (varsayılan kapalı).** Mindgate bir program değil, bir dosya kümesi; yeni sürüm çıktığında size
+  bunu söyleyen bir şey yoktu. `health.py` artık GitHub'a son sürümü sorup `Mindgate vX is out (security update)`
+  diyebilir. Açmak için `_sistem/config.json` (İngilizce kurulumda `_system/`) içinde `"update_check": {"enabled": true}`
+  yazın. Yalnızca `https://api.github.com/repos/AlicanKaya192/Mindgate/releases/latest` adresine sorar; vault'tan hiçbir
+  şey gönderilmez, cevaptan yalnızca sürüm numarası kullanılır. Günlük ve haftalık görevler `health.py`'yi çalıştırdığı
+  için uyarı orada görünür. Denetim kapalıyken sağlık raporu nasıl açılacağını gösterir.
+- **Python 3.10 yeniden çalışıyor.** Komut kapısındaki bir desen Python 3.11 ile gelen bir sözdizimi kullanıyordu;
+  3.10'da komut kapısı yüklenemiyordu. Desen yeniden yazıldı; bir test 3.11'e özgü desen sözdizimini kapılardan uzak
+  tutar.
+- **Denetim olmadan da haber almak için:** GitHub'da *Watch → Custom → Releases* her sürümde size bildirim gönderir.
+
+**Nasıl güncellenir:** aşağıdaki v1.2.0 adımlarını izleyin. Kurucu `config.json` dosyasının üzerine yazmaz; güncelleme
+denetimini kullanmak için sürümdeki `vault/_system/config.json` içinden `update_check` bölümünü kendi dosyanıza ekleyin
+(düzenlemek sorulur; bu bilerek böyle).
+
 ## v1.2.0 — Güvenlik güncellemesi
 
 **Güncellemeniz önerilir.** Bu sürüm komut, yazma ve site kapılarını sıkılaştırır. Aynı sınama girdilerinde komut
@@ -82,7 +102,7 @@ tanımı ya da kurallar dosyasını düzenlemek sorulur. Web araması sorulur.
 
 Kurucu var olan dosyaların üzerine yazmaz; var olan kurulum elle güncellenir:
 
-1. v1.2.0'ı alın (Mindgate klasörünüzde `git pull` ya da sürümü indirin).
+1. Son sürümü alın (Mindgate klasörünüzde `git pull` ya da sürümü indirin).
 2. Claude Code'u kapatın. Sürümdeki bütün `vault/_system/*.py` dosyalarını vault'unuzun `_system/` klasörüne
    (Türkçe kurulumda `_sistem/`; betik adları iki dilde de aynı) kopyalayın. Oturum içinde yazma kapısı her dosya
    için sorar; bu bilerek böyle.

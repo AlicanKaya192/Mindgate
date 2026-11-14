@@ -18,6 +18,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
+# The installed Mindgate version: health.py compares it with the latest release when the update check is on
+VERSION = "1.2.1"
 SYSTEM_DIR = Path(__file__).resolve().parent
 VAULT = SYSTEM_DIR.parent
 CONFIG_FILE = SYSTEM_DIR / "config.json"   # bootstrap file: holds the name map, so its own name is fixed

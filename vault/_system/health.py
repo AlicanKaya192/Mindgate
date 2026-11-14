@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.request
 from contextlib import redirect_stdout
 from dataclasses import asdict, dataclass
 from datetime import date, datetime, timedelta
@@ -756,6 +757,51 @@ def security_scan() -> Result:
                   advice="review the findings in the weekly maintenance" if findings else "")
 
 
+# ---------- update check ----------
+# Mindgate is files, not a program: nothing tells a user that a release is out. When the user turns it on
+# (config.json update_check.enabled, off by default, #37), this check asks GitHub for the latest release of the
+# project. Only this fixed address is asked; nothing from the vault is sent. Only the version number of the answer is
+# used: release text comes from the web and is never echoed (#27).
+RELEASES_URL = "https://api.github.com/repos/AlicanKaya192/Mindgate/releases/latest"
+RELEASES_PAGE = "https://github.com/AlicanKaya192/Mindgate/releases/latest"
+UPDATE_TIMEOUT_S = 5
+RELEASE_BYTES = 200_000
+
+
+def version_tuple(text: str) -> tuple[int, ...]:
+    """`v1.10.0` → (1, 10, 0); () when the text holds no version."""
+    match = re.match(r"v?(\d+)\.(\d+)(?:\.(\d+))?", str(text).strip())
+    return tuple(int(part or 0) for part in match.groups()) if match else ()
+
+
+def fetch_latest(url: str, timeout: float) -> dict:
+    request = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "Mindgate-health"})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return json.loads(response.read(RELEASE_BYTES).decode("utf-8"))
+
+
+def update_check(config: dict | None = None, fetch=fetch_latest) -> Result:
+    key, check = "update_check", "Mindgate update"
+    settings = (common.CONFIG if config is None else config).get("update_check") or {}
+    if settings.get("enabled") is not True:
+        return Result(key, check, "info", f"update check is off (installed v{common.VERSION})", "",
+                      f'to be told about new releases, set "update_check": {{"enabled": true}} in {name("_system")}/config.json; '
+                      f"it asks only api.github.com for the latest release, nothing from the vault is sent")
+    try:
+        latest = fetch(RELEASES_URL, UPDATE_TIMEOUT_S)
+        newest = version_tuple(latest.get("tag_name", ""))
+    except (OSError, ValueError, AttributeError) as error:
+        return Result(key, check, "info", f"the latest release could not be checked ({type(error).__name__})")
+    if not newest:
+        return Result(key, check, "info", "the latest release could not be checked (no version in the answer)")
+    if newest <= version_tuple(common.VERSION):
+        return Result(key, check, "ok", f"v{common.VERSION} is the latest release")
+    shown = ".".join(str(part) for part in newest)
+    security = " (security update)" if "security" in str(latest.get("name", "")).lower() else ""
+    return Result(key, check, "warning", f"Mindgate v{shown} is out{security}; installed v{common.VERSION}", RELEASES_PAGE,
+                  "read the release notes and the update steps in CHANGELOG.md; updating is the user's decision")
+
+
 def checks(full: bool = False) -> list[Result]:
     notes = read_notes()
     broken, orphans = link_checks(notes)
@@ -765,7 +811,7 @@ def checks(full: bool = False) -> list[Result]:
                instructions(), file_sizes(notes), trigger_set(), control_characters()]
     results.append(baseline_check(results))
     results += [session_records(), tasks(), remind_size(), git_state(), regression_markers(notes),
-                broad_permissions(), guard_changes(), commit_hook()]
+                broad_permissions(), guard_changes(), commit_hook(), update_check()]
     if full:
         results += [command_result("secrets", "Secret scan (tracked files)", [str(system_dir() / "secret_scan.py"), "--all"],
                                    "take the value out of the file (#18)"),

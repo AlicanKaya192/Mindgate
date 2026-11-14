@@ -63,5 +63,9 @@
  },
  "dashboard": {
   "url": ""
+ },
+ "update_check": {
+  "_about": "Off by default (#37). When true, health.py asks api.github.com once per run for the latest Mindgate release and says when a newer one is out. Only that fixed address is asked; nothing from the vault is sent. Turning it on is the user's standing approval for that one address.",
+  "enabled": false
  }
 }

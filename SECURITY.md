@@ -12,12 +12,15 @@ Mindgate is in early development. Reports are checked against the current
 | Version | Supported |
 |---|:-:|
 | `main` | ✅ |
-| `v1.2.0` (security update) | ✅ |
+| `v1.2.1` (security update, latest) | ✅ |
+| `v1.2.0` (security update) | ✅ (on Python 3.10 the command guard does not load: update to v1.2.1) |
 | `v1.1.0` and older | ❌ (please update, see [CHANGELOG.md](CHANGELOG.md)) |
 
 ## What Mindgate does on your computer
 
-Mindgate is not a service. It has no server, no account and no telemetry.
+Mindgate is not a service. It has no server, no account and no telemetry. The update check in `health.py` is off
+by default; when you turn it on, it asks one fixed GitHub address for the latest release number and sends nothing
+from the vault.
 
 - **The installer** writes only the places listed in the README's Security
   notes: the vault folder you choose, `~/.claude/CLAUDE.md` (or an import line

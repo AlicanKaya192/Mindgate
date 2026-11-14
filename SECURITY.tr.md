@@ -12,12 +12,15 @@ hâline göre değerlendirilir.
 | Sürüm | Destek |
 |---|:-:|
 | `main` | ✅ |
-| `v1.2.0` (güvenlik güncellemesi) | ✅ |
+| `v1.2.1` (güvenlik güncellemesi, en son) | ✅ |
+| `v1.2.0` (güvenlik güncellemesi) | ✅ (Python 3.10'da komut kapısı yüklenmez: v1.2.1'e güncelleyin) |
 | `v1.1.0` ve öncesi | ❌ (lütfen güncelleyin, bkz. [CHANGELOG.tr.md](CHANGELOG.tr.md)) |
 
 ## Mindgate bilgisayarınızda ne yapar
 
-Mindgate bir servis değildir. Sunucusu, hesabı ve telemetrisi yoktur.
+Mindgate bir servis değildir. Sunucusu, hesabı ve telemetrisi yoktur. `health.py` içindeki güncelleme denetimi
+varsayılan olarak kapalıdır; açarsanız sabit bir GitHub adresine yalnızca son sürüm numarasını sorar, vault'tan
+hiçbir şey göndermez.
 
 - **Kurucu** yalnızca README'nin Güvenlik notu bölümünde sayılan yerlere
   yazar: seçtiğiniz vault klasörü, `~/.claude/CLAUDE.md` (ya da içindeki bir
