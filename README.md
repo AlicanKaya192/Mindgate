@@ -8,6 +8,18 @@
 
 <h1 align="center">Mindgate</h1>
 
+> [!IMPORTANT]
+> **v1.2.0 is a security update. Updating is recommended.** It closes these gaps in the guards:
+>
+> - **The guards' own files** (every assistant's hook and permission settings, the guard scripts, agent definitions, git hooks, the blocklist, the rules and instructions) could be changed with one shell command or file write. Now asked.
+> - **Network calls from the shell** (`curl`, `Invoke-WebRequest`, sockets, `ssh`, `git clone`, `gh api`, network code in Python or node) went around the site guard. Now asked, with the address. Piping a download into an interpreter is refused, also through other pipes, process substitution or base64.
+> - **Hidden command names** (`"r""m"`, `c''url`, `command curl`, `$(echo curl)`) blinded the command guard. Now opened or asked.
+> - **Slow inputs** kept the command guard busy past the hook's time limit: the slowest decision fell from 123 s to under 1 s, and a command over 20,000 characters is asked.
+> - **More risky commands** are asked or refused: skipping the commit hook, emptying files, more ways to delete files or kill processes, printing secrets, persistence and execution-policy changes, installing packages, applying patches, moving vault files to a temporary folder.
+> - **Web searches and the terminal tool** now pass the guards, and a broken helper module or a `json.py` beside the guards no longer switches them off.
+>
+> On the same test inputs, the shell commands the guard let through without a word fell from 68 of 72 to 7 of 72. **How to update:** [CHANGELOG.md](CHANGELOG.md#how-to-update). Known limits: [SECURITY.md](SECURITY.md#known-limits).
+
 <p align="center"><i>A second brain for AI coding assistants, and the guards that decide what they may do on your computer.</i></p>
 
 <p align="center">
@@ -52,9 +64,9 @@ The vault has 24 Python scripts (standard library only) with 25 test files. They
 
 | Hook | When it runs | What it does |
 |---|---|---|
-| `command_guard` | before every shell command | blocks dangerous commands: deleting outside the project, killing processes, system settings |
-| `write_guard` | before every file write | protects raw sources, archives and rule files |
-| `site_guard` | before a web page is opened | checks the address and asks you first |
+| `command_guard` | before every shell or terminal command | blocks dangerous commands: deleting outside the project, killing processes, system settings, piping a download into an interpreter; asks before network calls, package installs and writes to the guards' own files |
+| `write_guard` | before every file write | protects raw sources, archives and the guards' own files (settings, scripts, agents, hooks, rules) |
+| `site_guard` | before a web page is opened or a web search runs | checks the address (or shows the query) and asks you first |
 | `agent_gate` | before a task goes to an agent | the model must be named and the task-writing skill loaded |
 | `session_log save` | when a session ends, before compaction | writes a raw session record into the vault inbox |
 | `context_check before` | before compaction | adds what must be kept |
@@ -148,7 +160,8 @@ Step 8 of the installer can set up Google Antigravity, Google Gemini CLI and Ope
 - Gemini CLI's documents show no way to ask the user from a hook, so what Claude would ask (an unlisted site, a delete) is refused there.
 - In no assistant do the read tools pass a guard; `.env` files are protected only in the shell.
 - The unrecorded (temporary) chat of rule #43 works only in Claude Code, which asks the record question at session start. In the other assistants a chat counts as recorded unless the session id is missing.
-- Writing another assistant's hook file (`~/.codex/hooks.json`, `~/.gemini/settings.json`, `~/.gemini/config/hooks.json`) is asked in Claude and Antigravity and refused in Gemini CLI and Codex.
+- Writing a defense file (any assistant's hooks, settings, instructions or agents, such as `~/.codex/hooks.json`, `~/.gemini/settings.json`, `~/.gemini/config/hooks.json`; the guard scripts; the rules) is asked in Claude and Antigravity and refused in Gemini CLI and Codex.
+- Web searches pass the site guard only in Claude Code (`WebSearch`); the search tools of the other assistants are not hooked.
 
 ## What a vault looks like
 
@@ -314,7 +327,7 @@ Known limits: some note texts that the scripts generate (for example the headers
 
 The installer writes only these: the vault folder you choose, `~/.claude/CLAUDE.md` (or an import line in it), the hooks in `~/.claude/settings.json`, the skills and agents under `~/.claude/`, the task files under `~/.claude/scheduled-tasks/`, and `~/.claude/mindgate/` (manifest, backups and, with `import`, the core instructions); for each other assistant you choose, its hooks file, instructions file, skills and agents under `~/.gemini`, `~/.codex` or `~/.agents`. An existing file that is changed is copied first to `~/.claude/mindgate/backups/<time stamp>/`. It downloads nothing and installs no packages. Run it with `--dry-run` first to see the full list.
 
-Hooks run commands on your computer: every hook calls a Python script in your vault each time Claude Code reaches that event. Read [`setup/hooks.template.json`](setup/hooks.template.json) and the scripts in [`vault/_system/`](vault/_system/) before you install them. The guards reduce risk; they do not make a model safe on their own.
+Hooks run commands on your computer: every hook calls a Python script in your vault each time Claude Code reaches that event. Read [`setup/hooks.template.json`](setup/hooks.template.json) and the scripts in [`vault/_system/`](vault/_system/) before you install them. The guards reduce risk; they do not make a model safe on their own. What they check and what they cannot see (a script that writes indirectly, a path kept in a variable or joined from strings) is listed in [`SECURITY.md`](SECURITY.md#what-the-guards-check-since-v120).
 
 ![Command guard asking before a deletion](docs/screenshots/guard-blocks-command.png)
 

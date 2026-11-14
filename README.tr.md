@@ -8,6 +8,18 @@
 
 <h1 align="center">Mindgate</h1>
 
+> [!IMPORTANT]
+> **v1.2.0 bir güvenlik güncellemesidir. Güncellemeniz önerilir.** Kapılardaki şu açıkları kapatır:
+>
+> - **Kapıların kendi dosyaları** (her asistanın hook ve izin ayarları, kapı betikleri, ajan tanımları, git kancaları, kara liste, kurallar ve talimatlar) tek bir kabuk komutu ya da dosya yazımıyla değiştirilebiliyordu. Artık sorulur.
+> - **Kabuktan ağa çıkış** (`curl`, `Invoke-WebRequest`, soket, `ssh`, `git clone`, `gh api`, Python ya da node içindeki ağ kodu) site kapısını dolanıyordu. Artık adresiyle sorulur. İndirileni yorumlayıcıya bağlamak, araya başka borular, süreç ikamesi ya da base64 girse de reddedilir.
+> - **Gizlenmiş komut adları** (`"r""m"`, `c''url`, `command curl`, `$(echo curl)`) komut kapısını kör ediyordu. Artık açılır ya da sorulur.
+> - **Yavaş girdiler** komut kapısını hook'un süre sınırının ötesinde meşgul ediyordu: en yavaş kapı kararı 123 sn'den 1 sn'nin altına indi; 20.000 karakteri geçen komut sorulur.
+> - **Daha fazla riskli komut** sorulur ya da reddedilir: commit kancasını atlama, dosya içeriğini boşaltma, silmenin ve süreç öldürmenin başka yolları, sır gösterme, kalıcılık ve yürütme politikası değişiklikleri, paket kurulumu, yama uygulama, vault dosyasını geçici klasöre taşıma.
+> - **Web araması ve terminal aracı** artık kapılardan geçer; bozuk bir yardımcı modül ya da kapıların yanındaki bir `json.py` onları artık kapatamaz.
+>
+> Aynı sınama girdilerinde kapının sessiz kaldığı kabuk komutu 72'de 68'den 72'de 7'ye indi. **Nasıl güncellenir:** [CHANGELOG.tr.md](CHANGELOG.tr.md#nasıl-güncellenir). Bilinen sınırlar: [SECURITY.tr.md](SECURITY.tr.md#bilinen-sınırlar).
+
 <p align="center"><i>Yapay zekâ kodlama asistanları için bir ikinci beyin ve bilgisayarınızda ne yapabileceklerine karar veren kapılar.</i></p>
 
 <p align="center">
@@ -52,9 +64,9 @@ Vault'ta 24 Python betiği (yalnızca standart kütüphane) ve 25 test dosyası 
 
 | Hook | Ne zaman çalışır | Ne yapar |
 |---|---|---|
-| `command_guard` | her kabuk komutundan önce | tehlikeli komutları engeller: proje dışında silme, süreç öldürme, sistem ayarları |
-| `write_guard` | her dosya yazmadan önce | ham kaynakları, arşivleri ve kural dosyalarını korur |
-| `site_guard` | bir web sayfası açılmadan önce | adresi denetler ve önce size sorar |
+| `command_guard` | her kabuk ya da terminal komutundan önce | tehlikeli komutları engeller: proje dışında silme, süreç öldürme, sistem ayarları, indirileni yorumlayıcıya bağlama; ağa çıkıştan, paket kurulumundan ve kapıların kendi dosyalarına yazmadan önce sorar |
+| `write_guard` | her dosya yazmadan önce | ham kaynakları, arşivleri ve kapıların kendi dosyalarını (ayarlar, betikler, ajanlar, kancalar, kurallar) korur |
+| `site_guard` | bir web sayfası açılmadan ya da web araması yapılmadan önce | adresi denetler (ya da sorguyu gösterir) ve önce size sorar |
 | `agent_gate` | bir ajana görev verilmeden önce | model açıkça yazılmalı, görev yazma becerisi yüklenmiş olmalı |
 | `session_log save` | oturum bitince ve sıkıştırmadan önce | ham oturum kaydını vault'un gelen kutusuna yazar |
 | `context_check before` | sıkıştırmadan önce | korunması gerekenleri ekler |
@@ -148,7 +160,8 @@ Kurucunun 8. adımı Google Antigravity, Google Gemini CLI ve OpenAI Codex CLI'y
 - Gemini CLI belgelerinde hook'un kullanıcıya soru sormasının bir yolu yok; bu yüzden Claude'un soracağı şey (listede olmayan site, silme) orada reddedilir.
 - Hiçbir asistanda okuma araçları kapıdan geçmez; `.env` dosyaları yalnızca kabukta korunur.
 - #43 numaralı kuralın kayıtsız (geçici) sohbeti yalnızca Claude Code'da çalışır; kayıt sorusunu oturum başında o sorar. Öteki asistanlarda oturum kimliği eksik değilse sohbet kayıtlı sayılır.
-- Başka bir asistanın hook dosyasına (`~/.codex/hooks.json`, `~/.gemini/settings.json`, `~/.gemini/config/hooks.json`) yazmak Claude'da ve Antigravity'de sorulur, Gemini CLI'da ve Codex'te reddedilir.
+- Bir savunma dosyasına (herhangi bir asistanın hook, ayar, talimat ya da ajan dosyası, örneğin `~/.codex/hooks.json`, `~/.gemini/settings.json`, `~/.gemini/config/hooks.json`; kapı betikleri; kurallar) yazmak Claude'da ve Antigravity'de sorulur, Gemini CLI'da ve Codex'te reddedilir.
+- Web araması yalnızca Claude Code'da (`WebSearch`) site kapısından geçer; öbür asistanların arama araçlarına hook bağlı değildir.
 
 ## Bir vault nasıl görünür
 
@@ -316,7 +329,7 @@ Bilinen sınırlar: betiklerin ürettiği bazı not metinleri (örneğin devir v
 
 Kurucu yalnızca şunları yazar: seçtiğiniz vault klasörü, `~/.claude/CLAUDE.md` (ya da içine bir içe aktarma satırı), `~/.claude/settings.json` içindeki hook'lar, `~/.claude/` altındaki beceriler ve ajanlar, `~/.claude/scheduled-tasks/` altındaki görev dosyaları ve `~/.claude/mindgate/` (kurulum kaydı, yedekler ve `import` seçildiyse çekirdek talimatlar); seçtiğiniz her başka asistan için `~/.gemini`, `~/.codex` ya da `~/.agents` altında hook dosyası, talimat dosyası, beceriler ve ajanlar. Değişecek bir dosya önce `~/.claude/mindgate/backups/<zaman damgası>/` altına kopyalanır. Kurucu internetten bir şey indirmez, paket kurmaz. Tam listeyi görmek için önce `--dry-run` ile çalıştırın.
 
-Hook'lar bilgisayarınızda komut çalıştırır: Claude Code ilgili olaya her geldiğinde her hook vault'unuzdaki bir Python betiğini çağırır. Kurmadan önce [`setup/hooks.template.json`](setup/hooks.template.json) dosyasını ve [`vault/_system/`](vault/_system/) altındaki betikleri okuyun. Kapılar riski azaltır; bir modeli tek başlarına güvenli yapmaz.
+Hook'lar bilgisayarınızda komut çalıştırır: Claude Code ilgili olaya her geldiğinde her hook vault'unuzdaki bir Python betiğini çağırır. Kurmadan önce [`setup/hooks.template.json`](setup/hooks.template.json) dosyasını ve [`vault/_system/`](vault/_system/) altındaki betikleri okuyun. Kapılar riski azaltır; bir modeli tek başlarına güvenli yapmaz. Neyi denetledikleri ve neyi göremedikleri (dolaylı yazan bir betik, değişkende tutulan ya da dizgi birleştirerek kurulan bir yol) [`SECURITY.tr.md`](SECURITY.tr.md#kapılar-neyi-denetler-v120dan-beri) dosyasında yazılı.
 
 ![Command guard asking before a deletion](docs/screenshots/guard-blocks-command.png)
 

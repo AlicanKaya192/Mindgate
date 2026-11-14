@@ -159,9 +159,9 @@ updated: 2026-01-15           # güncelleme
        - Kara listede ([[engelli-siteler]]) → **deny**.
        - Çalıştırılabilir dosya adresi → **deny**.
        - Adres hilesi (punycode/Latin dışı harf, IP, typosquat, `kullanici@`, `.zip/.mov`) → gerekçesiyle sorulur.
-       - Geri kalan her şey → **yine kullanıcıya sorulur** (#32). Yerel dosya, localhost, isimle başlatılan önizleme ve her JavaScript çalıştırma (`javascript_tool`; sayfadan veri göndermenin yolu çok, kalıpla yakalanamaz) de dahil. Toplu çağrıda bir adres çözülemezse yalnızca o adres sorulur; diğerinin engeli kaybolmaz.
+       - Geri kalan her şey → **yine kullanıcıya sorulur** (#32). Yerel dosya, localhost, isimle başlatılan önizleme, her web araması (`WebSearch`; sorgu gösterilir) ve her JavaScript çalıştırma (`javascript_tool`; sayfadan veri göndermenin yolu çok, kalıpla yakalanamaz) de dahil. Toplu çağrıda bir adres çözülemezse yalnızca o adres sorulur; diğerinin engeli kaybolmaz.
      - **Onaydan sonra (PostToolUse, `site_guard.py after`):** WebFetch, WebSearch ve tarayıcıların okuma araçlarının (`get_page_text`, `read_page`, `find`, `javascript_tool`, `browser_batch`) getirdiği metin taranır. Regex'lerde sınırsız tekrar yok (ReDoS önlemi), çok büyük yanıtın ilk 2 milyon karakteri taranır.
-       - Görünmez Unicode etiket karakterleri → **kesin saldırı**: alt alan adı dahil tam adres kara listeye yazılır, Claude'a uyarı gider. Gizli metnin kendisi bağlama ve vault'a yazılmaz (yalnızca sayı ve karma), yoksa görünmez talimat görünür hâle gelirdi.
+       - Görünmez Unicode etiket karakterleri → **kesin saldırı**: alt alan adı dahil tam adres kara listeye yazılır, Claude'a uyarı gider. Gizli metnin kendisi bağlama ve vault'a yazılmaz (yalnızca sayı ve karma), yoksa görünmez talimat görünür hâle gelirdi. Bilinen bir site ya da çok kullanıcılı barındırma (`github.io`, `pages.dev`, `medium.com` …) kendiliğinden yazılmaz: tek bir sayfa bütün siteyi engellemesin; karar kullanıcının.
        - Talimat kalıbı, yön değiştiren ya da yığınla sıfır genişlikli karakter → şüphe uyarısı (kara listeye yazılmaz).
      - **Sınır:** Sonraki tarama yalnızca aracın döndürdüğü metni görür (WebFetch özetlenmiş metin döndürür; CSS ile gizlenmiş HTML görünmeyebilir). Bu yüzden 2. adımdaki okuma kuralları her zaman geçerlidir.
 

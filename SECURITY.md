@@ -12,7 +12,8 @@ Mindgate is in early development. Reports are checked against the current
 | Version | Supported |
 |---|:-:|
 | `main` | ✅ |
-| Older commits | ❌ |
+| `v1.2.0` (security update) | ✅ |
+| `v1.1.0` and older | ❌ (please update, see [CHANGELOG.md](CHANGELOG.md)) |
 
 ## What Mindgate does on your computer
 
@@ -35,6 +36,39 @@ Mindgate is not a service. It has no server, no account and no telemetry.
 > agent gate catch known risky patterns and ask or refuse. They lower the risk
 > of a model acting on bad instructions; they cannot stop every harmful
 > command, and they do not make a model safe on their own.
+
+### What the guards check (since v1.2.0)
+
+- **Defense files.** Changing the guards' own ground is asked: the hook and
+  permission settings of every supported assistant, the vault scripts in
+  `_system/`, `config.json`, agent definitions, scheduled tasks, git hooks, the
+  blocklist, the rules, the instructions and the vault schema. One list
+  (`common.DEFENSE_SET`) serves the write guard and the command guard.
+- **Network calls from the shell** are asked, with the address in the reason:
+  download tools, raw sockets and remote shells, remote paths, .NET network
+  classes, network code given to node/deno/bun or Python, opening an address in
+  the browser, `git clone`/`git remote`, `gh api`. Piping a download into an
+  interpreter is refused. A web search (`WebSearch`) is asked like a page.
+- **Hidden command names** (quotes or backslashes inside the name, prefixes
+  such as `command` or `env`, a name computed with `$(…)`) are checked as the
+  real command or asked.
+- **Long commands.** A command over 20,000 characters is asked (refused in an
+  unrecorded chat) before any pattern runs, so no input can run out the hook's
+  time limit.
+- **Broken helpers.** If a guard cannot load its helper modules it asks (other
+  assistants: refuses) instead of crashing, and a file named after a standard
+  library module in `_system/` cannot take its place.
+- `health.py` reports missing or narrowed security hooks, broad permission
+  patterns, a bypassed commit hook and uncommitted changes in the guard scripts.
+
+### Known limits
+
+- **A script that writes indirectly is not seen.** `py tool.py` that edits a
+  guard file passes the command guard when the path is not on its command line;
+  `health.py` shows the uncommitted change afterwards.
+- **Values built at run time are not resolved:** a path or command name kept in
+  a variable (`$p`, `%P%`) or joined from strings is not seen by the guard.
+- The read tools pass no guard; `.env` files are protected only in the shell.
 
 ## Reporting a vulnerability
 

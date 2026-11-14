@@ -12,7 +12,8 @@ hâline göre değerlendirilir.
 | Sürüm | Destek |
 |---|:-:|
 | `main` | ✅ |
-| Eski commit'ler | ❌ |
+| `v1.2.0` (güvenlik güncellemesi) | ✅ |
+| `v1.1.0` ve öncesi | ❌ (lütfen güncelleyin, bkz. [CHANGELOG.tr.md](CHANGELOG.tr.md)) |
 
 ## Mindgate bilgisayarınızda ne yapar
 
@@ -37,6 +38,41 @@ Mindgate bir servis değildir. Sunucusu, hesabı ve telemetrisi yoktur.
 > ile ajan kapısı bilinen riskli kalıpları yakalar, sorar ya da reddeder.
 > Modelin kötü bir talimata uyma riskini azaltır; her zararlı komutu
 > durduramaz ve bir modeli tek başına güvenli yapmaz.
+
+### Kapılar neyi denetler (v1.2.0'dan beri)
+
+- **Savunma dosyaları.** Kapıların kendi zeminini değiştirmek sorulur:
+  desteklenen her asistanın hook ve izin ayarları, `_system/` içindeki vault
+  betikleri, `config.json`, ajan tanımları, zamanlanmış görevler, git
+  kancaları, kara liste, kurallar, talimatlar ve vault şeması. Tek liste
+  (`common.DEFENSE_SET`) yazma kapısına da komut kapısına da hizmet eder.
+- **Kabuktan ağa çıkış** sorulur, gerekçede adres görünür: indirme araçları,
+  ham soket ve uzak kabuk, uzak yol, .NET ağ sınıfları, node/deno/bun ya da
+  Python'a verilen ağ kodu, tarayıcıda adres açma, `git clone`/`git remote`,
+  `gh api`. İndirileni yorumlayıcıya bağlamak reddedilir. Web araması
+  (`WebSearch`) bir sayfa gibi sorulur.
+- **Gizlenmiş komut adları** (ada serpiştirilmiş tırnak ya da ters bölü,
+  `command`, `env` gibi önekler, `$(…)` ile hesaplanan ad) gerçek komut gibi
+  denetlenir ya da sorulur.
+- **Uzun komutlar.** 20.000 karakteri geçen komut, hiçbir desen çalışmadan
+  sorulur (kayıtsız sohbette reddedilir); hiçbir girdi hook'un süre sınırını
+  tüketemez.
+- **Bozuk yardımcı modüller.** Kapı yardımcı modüllerini yükleyemezse çökmek
+  yerine sorar (öbür asistanlarda reddeder); `_system/` içindeki standart
+  kütüphane adlı bir dosya onun yerine geçemez.
+- `health.py` eksik ya da daralmış güvenlik hook'larını, geniş izin
+  kalıplarını, atlatılmış commit kancasını ve kapı betiklerindeki commit
+  edilmemiş değişikliği gösterir.
+
+### Bilinen sınırlar
+
+- **Dolaylı yazan betik görülmez.** Bir kapı dosyasını değiştiren
+  `py arac.py`, yol komut satırında geçmiyorsa komut kapısından geçer;
+  `health.py` commit edilmemiş değişikliği sonradan gösterir.
+- **Çalışırken kurulan değerler çözülmez:** değişkende tutulan (`$p`, `%P%`)
+  ya da dizgi birleştirerek kurulan bir yol veya komut adı kapıdan görülmez.
+- Okuma araçları hiçbir kapıdan geçmez; `.env` dosyaları yalnızca kabukta
+  korunur.
 
 ## Güvenlik açığı bildirme
 
