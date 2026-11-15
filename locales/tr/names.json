@@ -114,6 +114,7 @@
     "expert-frontend": "uzman-frontend",
     "expert-security": "uzman-guvenlik",
     "expert-content": "uzman-icerik",
+    "expert-brand-content": "uzman-marka-icerigi",
     "expert-architecture": "uzman-mimari",
     "expert-ml": "uzman-ml",
     "expert-seo": "uzman-seo",
@@ -148,7 +149,9 @@
     "chapters-search": "bolumler-arama",
     "channel": "kanal",
     "thresholds": "esikler",
-    "voice-profile": "ses-profili"
+    "voice-profile": "ses-profili",
+    "ad_metrics": "reklam_hesap",
+    "ad_metrics_test": "reklam_hesap_test"
   },
   "tasks": {
     "daily": "gunluk",

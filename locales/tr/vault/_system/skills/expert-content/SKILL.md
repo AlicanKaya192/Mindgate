@@ -1,6 +1,6 @@
 ---
 name: uzman-icerik
-description: Kişisel teknik içerik yazımı uzmanlık paketi. Kullanıcının ağzından blog yazısı, LinkedIn gönderisi, GitHub README ya da portfolio sayfası metni taslağı yazarken veya düzenlerken, yayın hattı (taslaklar) için konu seçerken ya da bir metinden yapay zekâ izini ayıklarken yükle. Satış ve pazarlama metni için değildir.
+description: Kişisel teknik içerik yazımı uzmanlık paketi. Kullanıcının ağzından blog yazısı, LinkedIn gönderisi, GitHub README ya da portfolio sayfası metni taslağı yazarken veya düzenlerken, yayın hattı (taslaklar) için konu seçerken ya da bir metinden yapay zekâ izini ayıklarken yükle. Satış ve pazarlama metni için değildir; marka ve reklam içeriği için uzman-marka-icerigi.
 ---
 
 Uzmanlık paketi (ajan değil). Yayın hattı kuralları önce gelir: vault `CLAUDE.md` §7.9 ve `_sablonlar/taslak.md`.

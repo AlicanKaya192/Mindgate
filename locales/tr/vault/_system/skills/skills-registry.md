@@ -33,6 +33,7 @@ Kendiliğinden yüklenir (iş o alana dokununca). Uzmanlaşma her paketin **Ders
 | `uzman-yazarlik` | Oyun anlatısı, karakter, diyalog, hikâye, arayüz metni, teknik belge, tasarım brief'i | 0 | — |
 | `uzman-cografi-veri` | Kamuya açık canlı coğrafi veri (uçak, gemi, uydu geçişi, deprem, harita) ve açık kaynak istihbaratı (OSINT) tarzı olay ve altyapı araştırması | 0 | — |
 | `uzman-youtube` | YouTube senaryosu ve kanca, başlık ve küçük resim, kurgu karar listesi, Shorts, bölümler, arama metni, yorumlar, haftalık plan, kanal denetimi (Türkçe ve İngilizce); `scripts/` içinde çevrimdışı dört araç | 0 | — |
+| `uzman-marka-icerigi` | Marka içeriği ve reklam hazırlığı: girdi envanteri, iddia defteri, gönderi ve karusel metni, ürün çekim briefi, UGC senaryosu, reklam testi planı, ROAS ve CPA okuma; `scripts/ad_metrics.py` çevrimdışı hesap aracı | 0 | — |
 
 ### Yöntem becerileri
 Ajan tanımındaki `skills:` alanıyla o ajana başlarken önceden yüklenir. Ana sohbet de aynı işi yaparken yükleyebilir.

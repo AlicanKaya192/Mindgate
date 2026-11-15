@@ -1,6 +1,6 @@
 ---
 name: expert-content
-description: Personal technical content writing expertise pack. Load when writing or editing, in the user's voice, a blog post, a LinkedIn post, a GitHub README or a portfolio page text; when choosing topics for the publishing pipeline (drafts); or when removing AI traces from a text. Not for sales and marketing copy.
+description: Personal technical content writing expertise pack. Load when writing or editing, in the user's voice, a blog post, a LinkedIn post, a GitHub README or a portfolio page text; when choosing topics for the publishing pipeline (drafts); or when removing AI traces from a text. Not for sales and marketing copy; for brand and ad content, expert-brand-content.
 ---
 
 Expertise pack (not an agent). The publishing pipeline rules come first: §7.9 of the vault `CLAUDE.md` and `_templates/draft.md`.

@@ -32,6 +32,12 @@ file, open it before you use that skill or agent again; hooks belong in `setting
 - **Searching a skill directory without installing** (`external-source-review`, new step 0): look at your own
   skills first, search only through the browser with permission, never run the directory's install tool, and treat
   install counts and stars as reading order, not as safety. The candidate's `SKILL.md` is read before any decision.
+- **New skill: brand content and ads** (`expert-brand-content`): posts and carousels, product shoot briefs, UGC
+  scripts, ad angles and test plans, and reading an ad report. An input inventory and a claim ledger come first;
+  nothing invented, nothing published. `scripts/ad_metrics.py` computes spend, conversions, revenue, CPA and ROAS from
+  a CSV without guessing the format: currency and attribution columns are named or declared absent, mixed currencies
+  and broken cells are refused, and so are identical lines unless `--count-duplicates` is given. `expert-content`
+  now points to it for brand copy.
 
 ## v1.2.1 — Security update: update check
 

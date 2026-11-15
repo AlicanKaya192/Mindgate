@@ -61,7 +61,7 @@ The installer follows the same idea. It asks before every step, explains what ha
 
 The vault comes with a fixed folder structure (inbox, projects, ideas, problems, knowledge, research, rules, archive and more), 16 note templates, an index, an append-only log, a pending list for everything that waits for your answer, and handoff cards that tell the next session where the work stopped. The schema is in [`vault/CLAUDE.md`](vault/CLAUDE.md).
 
-Claude Code gets 13 agents, 41 skills and a global instruction file that points it to the vault. The rules file has 46 numbered rules; two of them are optional and offered by the installer. Antigravity, Gemini CLI and Codex CLI can get the guards, instructions, skills and agents too (experimental, see Other assistants).
+Claude Code gets 13 agents, 42 skills and a global instruction file that points it to the vault. The rules file has 46 numbered rules; two of them are optional and offered by the installer. Antigravity, Gemini CLI and Codex CLI can get the guards, instructions, skills and agents too (experimental, see Other assistants).
 
 The vault has 24 Python scripts (standard library only) with 25 test files. They write the pending list and the log under a lock, search the notes, check the vault's health, scan for secrets and hidden instructions, and keep session records. The hooks are:
 
@@ -272,6 +272,7 @@ Expertise packs, loaded when the work touches the field:
 | `expert-writing` | narrative, dialogue, interface text, technical documents |
 | `expert-geodata` | public live geographic data and OSINT-style research |
 | `expert-youtube` | YouTube scripts, hooks, titles and thumbnails, chapters, edit lists (Turkish and English) |
+| `expert-brand-content` | brand posts and carousels, product shoot briefs, UGC scripts, ad tests, ROAS and CPA from an ad report |
 
 ## Rules
 

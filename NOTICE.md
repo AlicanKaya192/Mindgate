@@ -78,10 +78,11 @@ Several skill files note that a source was read from a downloaded copy and that 
 | OWASP GenAI LLM Top 10 (https://genai.owasp.org/llm-top-10/) | `expert-security` |
 | Turkish Language Association (TDK) spelling rule pages; the addresses are in `references/tdk.md` | `expert-language` |
 | A social media image, "20 things to tell Claude" (source unknown) | `expert-security` |
+| Beyazıt Osman, "Markalar için 5 Claude sistemi" ("Five Claude systems for brands"), an application guide (PDF dated 6 November 2026; no license notice found). Some checks overlap with it; its prompt texts, figures, tables and folder layout were not taken | `expert-brand-content` |
 
 ## Our own design
 
-The skill files mark these as our own design, with no outside source: the two-ended structure of `advisor-method` (judging at the start and at the end), the off-by-default bridge of `external-agent`, and the council of `orchestration` run through the central agent with a blind first round and at most two rounds.
+The skill files mark these as our own design, with no outside source: the two-ended structure of `advisor-method` (judging at the start and at the end), the off-by-default bridge of `external-agent`, the council of `orchestration` run through the central agent with a blind first round and at most two rounds, and the claim ledger, the data-flow order and the input contract of the calculation tool in `expert-brand-content`.
 
 ## License notices
 

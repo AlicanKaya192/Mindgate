@@ -32,6 +32,12 @@ Bir dosya adı görünürse o beceriyi ya da ajanı yeniden kullanmadan önce do
 - **Kurmadan beceri dizininde arama** (`external-source-review`, yeni 0. adım): önce kendi becerilerine bak, yalnızca
   izinle ve tarayıcıdan ara, dizinin kurulum aracını çalıştırma; kurulum sayısı ve yıldız okuma sırasını belirler,
   güvenliği değil. Karardan önce adayın `SKILL.md` dosyası okunur.
+- **Yeni beceri: marka içeriği ve reklam** (`expert-brand-content`, Türkçe kurulumda `uzman-marka-icerigi`): gönderi
+  ve karusel, ürün çekim briefi, UGC senaryosu, reklam açısı ve test planı, reklam raporu okuma. Önce girdi envanteri
+  ve iddia defteri gelir; hiçbir şey uydurulmaz, hiçbir şey yayınlanmaz. `scripts/ad_metrics.py` bir CSV'den harcama,
+  dönüşüm, gelir, CPA ve ROAS hesaplar, biçim tahmin etmez: para birimi ve atıf sütunu ya adıyla verilir ya da yok
+  diye beyan edilir; karışık para birimi ve bozuk hücre reddedilir, birebir aynı satırlar da `--count-duplicates`
+  verilmedikçe. `uzman-icerik` marka metni için artık bu beceriyi gösterir.
 
 ## v1.2.1 — Güvenlik güncellemesi: güncelleme denetimi
 
