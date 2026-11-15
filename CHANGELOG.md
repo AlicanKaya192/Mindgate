@@ -29,6 +29,9 @@ file, open it before you use that skill or agent again; hooks belong in `setting
   left and right margins, images that did not load or have no size, WebGL contexts over a limit (`--webgl-limit`,
   default 4), and, in one extra measurement under `prefers-reduced-motion: reduce`, animations and rAF loops that keep
   running. Page weight comes from Resource Timing; what cannot be measured is printed as `UNMEASURABLE`.
+- **Searching a skill directory without installing** (`external-source-review`, new step 0): look at your own
+  skills first, search only through the browser with permission, never run the directory's install tool, and treat
+  install counts and stars as reading order, not as safety. The candidate's `SKILL.md` is read before any decision.
 
 ## v1.2.1 — Security update: update check
 

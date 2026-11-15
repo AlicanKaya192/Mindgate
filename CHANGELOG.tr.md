@@ -29,6 +29,9 @@ Bir dosya adı görünürse o beceriyi ya da ajanı yeniden kullanmadan önce do
   sağ boşluk, yüklenmemiş ya da boyutsuz görsel, sınırı aşan WebGL bağlamı (`--webgl-limit`, varsayılan 4) ve
   `prefers-reduced-motion: reduce` altındaki ek ölçümde durmayan animasyon ve rAF döngüsü. Sayfa ağırlığı Resource
   Timing'den okunur; ölçülemeyen `UNMEASURABLE` diye yazılır.
+- **Kurmadan beceri dizininde arama** (`external-source-review`, yeni 0. adım): önce kendi becerilerine bak, yalnızca
+  izinle ve tarayıcıdan ara, dizinin kurulum aracını çalıştırma; kurulum sayısı ve yıldız okuma sırasını belirler,
+  güvenliği değil. Karardan önce adayın `SKILL.md` dosyası okunur.
 
 ## v1.2.1 — Güvenlik güncellemesi: güncelleme denetimi
 

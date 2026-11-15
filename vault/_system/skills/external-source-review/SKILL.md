@@ -11,6 +11,17 @@ Method skill (not an agent). Rules:
 
 This job was done by hand three times and turned into this skill (work done by hand three times becomes a skill, vault `CLAUDE.md` §10.2).
 
+## 0. Searching a skill directory (optional; no installing)
+When the user asks "is there a ready-made skill for this", or before writing a skill from scratch in some area.
+- Look at what we have first: the skills registry (`skills-registry.md`) and `search.py`. If we have a match, use it and do not go to the directory.
+- Searching a directory is a site visit: state the address and the reason, wait for permission (#32). Search only through the browser or a permitted read tool. The directory's install tool (`npx …`) is not run, not even to search (#35); such tools may send usage data (#37).
+- Write a specific query: domain and task together ("React testing", not "testing"; "mobile app interface", not "design").
+- Install count, stars and the publisher's name only decide which candidate is read first; they are not evidence of safety. The decision comes after reading the candidate's `SKILL.md` and the scripts next to it (§2; look for `hooks:` in the front matter, scripts, network calls and install instructions).
+- Present at most 3 candidates: what it does, source and licence, what we already have, red flags. Do not present an install command or offer to install.
+- The chosen candidate goes through the remaining steps of this skill and is written in our own words (`skill-writing`). If nothing fits, say so and do the task without a skill.
+
+Idea source: vercel-labs/skills `find-skills` (read on 15 November 2026; the licence file was not read, only the idea of the method was taken). Not taken: searching with the install tool, treating popularity as a measure of trust, the agent installing the skill itself.
+
 ## 1. Inventory (yourself, 1–2 commands)
 - **Previous review first:** search `research/` with `grep` for the repository and owner name. If one exists, look only at the difference: version and CHANGELOG, new or removed skills. Read the LICENSE files again; a license can change (a skill pack may move from a closed license to an open one, or the other way). Do not delete the old note; add a dated update line.
 - Number of folders and files, extension distribution, number of skills and agents per repository. Do not use `du`; it times out on big repositories. `find | wc` or Glob is enough for counting.

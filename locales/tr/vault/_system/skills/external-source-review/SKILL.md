@@ -11,6 +11,17 @@ Yöntem becerisi (ajan değil). Kurallar:
 
 Bu iş elle üç kez yapıldı ve beceriye dönüştü (elle üç kez yapılan iş beceri olur, vault `CLAUDE.md` §10.2).
 
+## 0. Dizinde beceri arama (isteğe bağlı; kurma yok)
+Kullanıcı "bunun için hazır bir beceri var mı" dediğinde ya da bir alanda sıfırdan beceri yazmadan önce.
+- Önce bizdekilere bak: beceri kaydı (`skills-registry.md`) ve `search.py`. Karşılığı varsa onu kullan, dizine çıkma.
+- Dizinde arama bir site ziyaretidir: adres ve neden yazılır, izin beklenir (#32). Arama yalnızca tarayıcıdan ya da izinli okuma aracından yapılır. Dizinin kurulum aracı (`npx …`) arama için de çalıştırılmaz (#35); böyle araçlar kullanım verisi gönderebilir (#37).
+- Sorguyu belirli yaz: alan ve iş birlikte ("test" değil "React test", "tasarım" değil "mobil uygulama arayüzü").
+- Kurulum sayısı, yıldız ve yayıncının adı yalnızca hangi adayın önce okunacağını sıralar; güvenlik kanıtı değildir. Karar, adayın `SKILL.md` dosyası ve yanındaki betikler okunduktan sonra verilir (§2; ön bilgide `hooks:`, betik, ağ çağrısı ve kurulum talimatı aranır).
+- En çok 3 aday sunulur: ne yapıyor, kaynak ve lisans, bizdeki karşılığı, kırmızı bayraklar. Kurulum komutu sunulmaz, "kurayım mı" diye sorulmaz.
+- Seçilen aday bu becerinin kalan adımlarıyla incelenir ve kendi cümlelerimizle yazılır (`skill-writing`). Uygun aday yoksa bunu söyle ve işi beceri olmadan yap.
+
+Fikir kaynağı: vercel-labs/skills `find-skills` (15 Kasım 2026'da okundu; lisans dosyası okunmadı, yalnızca yöntem fikri alındı). Alınmayan: kurulum aracıyla arama, popülerliği güven ölçüsü sayma, ajanın beceriyi kendisinin kurması.
+
 ## 1. Envanter (kendin, 1–2 komut)
 - **Önce önceki inceleme:** `arastirmalar/`'da depo ve sahip adını `grep` ile ara. Varsa yalnızca farka bak: sürüm ve CHANGELOG, yeni ya da kaldırılan beceriler. LICENSE dosyalarını yeniden oku, lisans değişebilir (bir beceri paketi kapalı lisanstan açığa ya da tersine geçebilir). Eski notu silme, tarihli güncelleme satırı ekle.
 - Klasör ve dosya sayısı, uzantı dağılımı, depo başına beceri ve ajan sayısı. `du` kullanma; büyük depolarda zaman aşımına düşüyor. Sayım için `find | wc` ya da Glob yeterli.
