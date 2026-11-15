@@ -22,6 +22,14 @@ the guards and the health report did not see it.
 **How to update:** follow the v1.2.0 steps below, then run `health.py` once and look at the new check. If it names a
 file, open it before you use that skill or agent again; hooks belong in `settings.json`.
 
+**Also in this release**
+
+- **The design audit measures more** (`expert-design`, `page_audit.py`): placeholder text and empty-looking headings
+  or buttons, headings that overflow when 3 times longer, full-screen section height (`--section-threshold`), unequal
+  left and right margins, images that did not load or have no size, WebGL contexts over a limit (`--webgl-limit`,
+  default 4), and, in one extra measurement under `prefers-reduced-motion: reduce`, animations and rAF loops that keep
+  running. Page weight comes from Resource Timing; what cannot be measured is printed as `UNMEASURABLE`.
+
 ## v1.2.1 — Security update: update check
 
 **Updating is recommended.** This release holds everything in v1.2.0 below and adds a way to hear about the next one.

@@ -28,8 +28,32 @@ DESKTOP_HEIGHT = 900
 LOCAL_NAMES = {"localhost", "127.0.0.1", "::1"}
 LOCAL_SUFFIXES = (".localhost", ".test")
 MEASURE_SCRIPT = HERE / "page_measure.js"
-LIGHT, DARK = "light", "dark"
+LIGHT, DARK, REDUCED = "light", "dark", "reduced"
 EMPTY_RECORD = {"keep": [], "add": [], "exemptions": [], "removed": [], "baseline_inventory": {}, "rounds": []}
+DEFAULT_SETTINGS = {"section_deviation": 0.10, "webgl_limit": 4}
+# "reduced": light theme with prefers-reduced-motion: reduce; this measurement looks at whether motion stops.
+MEDIA = {
+    LIGHT: {"prefers-color-scheme": "light", "prefers-reduced-motion": ""},
+    DARK: {"prefers-color-scheme": "dark", "prefers-reduced-motion": ""},
+    REDUCED: {"prefers-color-scheme": "light", "prefers-reduced-motion": "reduce"},
+}
+# Runs before the page's scripts; it only counts WebGL contexts and rAF calls and does not change behaviour.
+# The resource timing buffer is enlarged: the default 250 entries understate the weight of a page with many resources.
+COUNTER_SCRIPT = """(() => {
+  performance.setResourceTimingBufferSize(5000);
+  const counter = { webgl: new Set(), raf: 0 };
+  Object.defineProperty(window, "__auditCounter", { value: counter });
+  for (const kind of [window.HTMLCanvasElement, window.OffscreenCanvas].filter(Boolean)) {
+    const original = kind.prototype.getContext;
+    kind.prototype.getContext = function (type, ...options) {
+      const context = original.call(this, type, ...options);
+      if (context && /webgl/i.test(String(type))) counter.webgl.add(context);
+      return context;
+    };
+  }
+  const originalRaf = window.requestAnimationFrame;
+  window.requestAnimationFrame = function (callback) { counter.raf++; return originalRaf.call(window, callback); };
+})();"""
 
 
 def is_local_address(address: str) -> bool:
@@ -47,29 +71,39 @@ def _file_name(address: str, width: int, theme: str) -> str:
     return f"{re.sub(r'[^A-Za-z0-9_-]+', '-', path)}-{width}-{theme}.png"
 
 
-def measure_page(browser: br.Browser, address: str, width: int, theme: str, output: Path) -> dict:
-    """Opens the page at the given width and theme, measures it and saves a full-page image."""
+def measure_expression(settings: dict) -> str:
+    """The expression that calls the measuring script with the thresholds."""
+    return f"({MEASURE_SCRIPT.read_text(encoding='utf-8')})({json.dumps(settings)})"
+
+
+def measure_page(browser: br.Browser, address: str, width: int, theme: str, output: Path, settings: dict = DEFAULT_SETTINGS) -> dict:
+    """Opens the page at the given width and theme (light, dark, reduced), measures it and saves a full-page image."""
     mobile = width < MOBILE_LIMIT
     browser.command(
         "Emulation.setDeviceMetricsOverride", width=width, height=MOBILE_HEIGHT if mobile else DESKTOP_HEIGHT, deviceScaleFactor=1, mobile=mobile
     )
-    browser.command("Emulation.setEmulatedMedia", features=[{"name": "prefers-color-scheme", "value": theme}])
-    browser.open(address)
+    browser.command("Emulation.setEmulatedMedia", features=[{"name": name, "value": value} for name, value in MEDIA[theme].items()])
+    counter = browser.command("Page.addScriptToEvaluateOnNewDocument", source=COUNTER_SCRIPT)["identifier"]
+    try:
+        browser.open(address)
+    finally:
+        browser.command("Page.removeScriptToEvaluateOnNewDocument", identifier=counter)
     browser.evaluate("document.fonts.ready.then(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))))")
-    result = browser.evaluate(MEASURE_SCRIPT.read_text(encoding="utf-8"))
+    result = browser.evaluate(measure_expression(settings))
     output.mkdir(parents=True, exist_ok=True)
     image = output / _file_name(address, width, theme)
     image.write_bytes(base64.b64decode(browser.command("Page.captureScreenshot", format="png", captureBeyondViewport=True)["data"]))
     return {**result, "url": address, "width": width, "theme": theme, "image": str(image)}
 
 
-def _take_measurements(browser: br.Browser, addresses: list[str], widths: list[int], output: Path) -> list[dict]:
+def _take_measurements(browser: br.Browser, addresses: list[str], widths: list[int], output: Path, settings: dict) -> list[dict]:
     reports = []
     for address in addresses:
         for width in widths:
-            reports.append(measure_page(browser, address, width, LIGHT, output))
+            reports.append(measure_page(browser, address, width, LIGHT, output, settings))
         for width in [w for w in DARK_WIDTHS if w in widths]:
-            reports.append(measure_page(browser, address, width, DARK, output))
+            reports.append(measure_page(browser, address, width, DARK, output, settings))
+        reports.append(measure_page(browser, address, max(widths), REDUCED, output, settings))
     return reports
 
 
@@ -112,12 +146,22 @@ def _add_round(record: dict, summary: dict, user_note: str | None) -> dict:
     return difference
 
 
+def _kb(size: int) -> str:
+    return f"{size / 1024:.1f} KB"
+
+
 def _print(summary: dict, preservation: dict, difference: dict, round_no: int, output: Path) -> None:
     passed = summary["passed"] and all(p["ok"] for p in preservation.values())
     print(f"{'PASSED' if passed else 'FAILED'} | round {round_no} | error {summary['error']}, warning {summary['warning']}, "
-          f"note {summary['note']}, exempt {summary['exempt']}")
+          f"note {summary['note']}, exempt {summary['exempt']}, unmeasurable {len(summary['unmeasurable'])}")
     for finding in summary["findings"]:
         print(f"  {finding['severity'].upper():7} {finding['rule']} {finding['selector']} [{','.join(map(str, finding['widths']))}] {finding['detail']}")
+    for item in summary["unmeasurable"]:
+        print(f"UNMEASURABLE {item['url']}: {item['name']}")
+    for address, weight in summary["weight"].items():
+        if weight:
+            largest = ", ".join(f"{r['name'].rsplit('/', 1)[-1]} {_kb(r['bytes'])}" for r in weight["largest"])
+            print(f"Weight {address}: {_kb(weight['transferred_bytes'])}, {weight['resource_count']} resources; largest: {largest}")
     for address, result in preservation.items():
         print(f"Preservation {address}: " + ", ".join(f"{kind} {b}/{a}" for kind, (b, a) in result["counts"].items()))
         for lost in result["lost"]:
@@ -143,6 +187,8 @@ def _arguments() -> argparse.Namespace:
     parser.add_argument("--widths", default=",".join(map(str, DEFAULT_WIDTHS)))
     parser.add_argument("--baseline", action="store_true", help="save this measurement as the inventory before the redesign")
     parser.add_argument("--note", dest="user_note", help="the user's feedback for this round")
+    parser.add_argument("--section-threshold", type=float, default=DEFAULT_SETTINGS["section_deviation"], help="height deviation allowed for a full-screen section (ratio)")
+    parser.add_argument("--webgl-limit", type=int, default=DEFAULT_SETTINGS["webgl_limit"], help="the most WebGL contexts a page may have")
     parser.add_argument("--external-url", action="store_true", help="open a non-local address and the external network (only with site permission, #32)")
     return parser.parse_args()
 
@@ -156,9 +202,10 @@ def main() -> int:
         return 2
     record_path = options.record or options.output / "design-record.json"
     record = _read_record(record_path)
+    settings = {"section_deviation": options.section_threshold, "webgl_limit": options.webgl_limit}
     browser = br.Browser(options.output / ".browser-profile", external_network=options.external_url)
     try:
-        reports = _take_measurements(browser, options.addresses, [int(w) for w in options.widths.split(",")], options.output)
+        reports = _take_measurements(browser, options.addresses, [int(w) for w in options.widths.split(",")], options.output, settings)
     finally:
         browser.close()
     inventories = _inventories(reports)

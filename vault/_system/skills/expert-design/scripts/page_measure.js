@@ -1,11 +1,20 @@
-// Runs inside the page: measures the rendered state, returns findings, measurements and the inventory. It does not change the page and does not go out to the network.
-(() => {
+// Runs inside the page: measures the rendered state, returns findings, measurements and the inventory. It does not change the page for good and does not go out to the network.
+// settings: { section_deviation, webgl_limit } (given by page_audit.py).
+async (settings) => {
   const MAX_EXAMPLES = 8;
   const MAX_ELEMENTS = 6000;
   const MOBILE_LIMIT = 768;
   const CONTROL = 'a[href],button,input:not([type=hidden]),select,textarea,summary,[role=button],[role=link],[tabindex]:not([tabindex="-1"])';
   const CODE_TAGS = new Set(["CODE", "PRE", "KBD", "SAMP"]);
   const SKIPPED = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "HEAD", "META", "LINK", "TITLE"]);
+  const HEADING_STRETCH = 3;
+  const MAX_STRESSED_HEADINGS = 12;
+  const MARGIN_DIFFERENCE_LIMIT = 4;
+  const RAF_WINDOW_MS = 500;
+  const RAF_LOOP_FPS = 10;
+  const FULL_SCREEN_SECTION = "section,[data-screen]";
+  const counter = window.__auditCounter;
+  const unmeasurable = [];
 
   // On a mobile browser an overflowing page enlarges innerWidth; the real screen width is clientWidth.
   const width = document.documentElement.clientWidth;
@@ -163,12 +172,14 @@
     return tops.filter((t, i) => i === 0 || t - tops[i - 1] > threshold).length;
   }
 
-  function lineCount(element) {
+  function textNodes(element) {
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
-    return countLines(nodes, element);
+    return nodes;
   }
+
+  const lineCount = (element) => countLines(textNodes(element), element);
 
   const directLineCount = (element) => countLines([...element.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE), element);
 
@@ -291,8 +302,159 @@
       else if (element.matches('button,a[href],[role=button]') && !accessibleName(element) && !element.hasAttribute("aria-labelledby")) add("T17", "error", element, "control has no name");
     }
     const text = document.body.innerText;
-    const placeholder = text.match(/lorem ipsum|john doe|jane doe|sarah johnson|acme (inc|corp)/i);
-    if (placeholder) add("T18", "warning", null, `placeholder content: ${placeholder[0]}`);
+    // TODO is matched in capitals so real content such as "todo list" is not caught. Turkish phrases are for Turkish installs.
+    const patterns = [
+      /lorem ipsum|john doe|jane doe|sarah johnson|acme (inc|corp)|placeholder|sample text|(title|heading|text) goes here|örnek metin|(başlık|metin|açıklama) buraya/giu,
+      /\bTODO\b/g,
+    ];
+    const placeholders = new Set(patterns.flatMap((pattern) => [...text.matchAll(pattern)].map((match) => match[0])));
+    if (placeholders.size) add("T18", "warning", null, `placeholder content: ${[...placeholders].join(", ")}`);
+  }
+
+  // Without text, an image, a background image, a mask or ::before/::after content the element looks empty.
+  function hasVisibleContent(element) {
+    if (element.textContent.trim()) return true;
+    return [element, ...element.querySelectorAll("*")].some((e) => {
+      const style = getComputedStyle(e);
+      if (style.backgroundImage !== "none" || (style.maskImage || style.webkitMaskImage || "none") !== "none") return true;
+      if (["::before", "::after"].some((pseudo) => !/^(none|normal|""|'')$/.test(getComputedStyle(e, pseudo).content))) return true;
+      const box = e.getBoundingClientRect();
+      return e !== element && style.visibility !== "hidden" && box.width > 1 && box.height > 1;
+    });
+  }
+
+  function checkEmptyLooking() {
+    for (const element of document.querySelectorAll("h1,h2,h3,h4,h5,h6,button,[role=button]")) {
+      if (!element.checkVisibility({ visibilityProperty: true })) continue;
+      if (!hasVisibleContent(element)) add("T31", "warning", element, "heading or button looks empty");
+    }
+  }
+
+  function textBox(element) {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    return range.getBoundingClientRect();
+  }
+
+  const intersects = (a, b) => Math.min(a.right, b.right) - Math.max(a.left, b.left) > 2 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 2;
+
+  function clippingAncestor(element, text) {
+    for (let e = element.parentElement; e && e !== document.body; e = e.parentElement) {
+      const style = getComputedStyle(e);
+      if (style.overflowX === "visible" && style.overflowY === "visible") continue;
+      const box = e.getBoundingClientRect();
+      if (text.left < box.left - 1 || text.right > box.right + 1 || text.bottom > box.bottom + 1) return e;
+    }
+    return null;
+  }
+
+  function overflowReason(heading, neighbours) {
+    if (heading.scrollWidth > heading.clientWidth + 1 || heading.scrollHeight > heading.clientHeight + 1) return "overflows its own box";
+    const text = textBox(heading);
+    const clipper = clippingAncestor(heading, text);
+    if (clipper) return `is clipped inside ${selector(clipper)}`;
+    const overlapped = neighbours.find((e) => intersects(text, e.getBoundingClientRect()));
+    return overlapped ? `overlaps ${selector(overlapped)}` : "";
+  }
+
+  // Text nodes are lengthened in place and put back after measuring; no element is created again.
+  function reasonWhenStretched(heading, nodes, neighbours) {
+    const pageBefore = Math.max(document.documentElement.scrollWidth, width);
+    const original = nodes.map((n) => n.data);
+    try {
+      for (const n of nodes) n.data = Array(HEADING_STRETCH).fill(n.data).join(" ");
+      return overflowReason(heading, neighbours) || (document.documentElement.scrollWidth > pageBefore + 1 ? "makes the page scroll sideways" : "");
+    } finally {
+      nodes.forEach((n, i) => { n.data = original[i]; });
+    }
+  }
+
+  function checkHeadingStress() {
+    const candidates = [...withText, ...controls].map((e) => e.element);
+    for (const { element: heading } of elements.filter((e) => /^H[12]$/.test(e.element.tagName)).slice(0, MAX_STRESSED_HEADINGS)) {
+      const nodes = textNodes(heading).filter((n) => n.data.trim());
+      const text = textBox(heading);
+      // A neighbour that overlaps before lengthening is not this check's subject; only problems that appear on lengthening count.
+      const neighbours = candidates.filter((e) => !heading.contains(e) && !e.contains(heading) && !intersects(text, e.getBoundingClientRect()));
+      if (!nodes.length || overflowReason(heading, neighbours)) continue;
+      const reason = reasonWhenStretched(heading, nodes, neighbours);
+      if (reason) add("T32", "warning", heading, `heading ${reason} when ${HEADING_STRETCH} times longer`);
+    }
+  }
+
+  function checkSectionHeight() {
+    for (const element of document.querySelectorAll(FULL_SCREEN_SECTION)) {
+      const box = element.getBoundingClientRect();
+      if (box.height <= 1) continue;
+      const deviation = Math.abs(box.height - height) / height;
+      if (deviation > settings.section_deviation) add("T33", "note", element, `section ${Math.round(box.height)}px, screen ${height}px: ${Math.round(deviation * 100)}% deviation, threshold ${Math.round(settings.section_deviation * 100)}%`);
+    }
+  }
+
+  // The union of the boxes in the flow that do not span the whole screen and fit on it gives the content's left and right edge.
+  function edgeMargins() {
+    const positioned = new Set(elements.filter((e) => /^(absolute|fixed)$/.test(e.style.position)).map((e) => e.element));
+    const hasPositionedAncestor = (element) => { for (let e = element; e; e = e.parentElement) if (positioned.has(e)) return true; return false; };
+    const boxes = elements
+      .filter(({ element, box }) => box.width < width - 2 && box.left >= -1 && box.right <= width + 1 && !hasPositionedAncestor(element))
+      .map((e) => e.box);
+    if (!boxes.length) return null;
+    return [Math.round(Math.min(...boxes.map((b) => b.left))), Math.round(width - Math.max(...boxes.map((b) => b.right)))];
+  }
+
+  function checkMargins(margins) {
+    if (margins && Math.abs(margins[0] - margins[1]) > MARGIN_DIFFERENCE_LIMIT) add("T34", "warning", null, `left margin ${margins[0]}px, right ${margins[1]}px; difference at most ${MARGIN_DIFFERENCE_LIMIT}px`);
+  }
+
+  function checkImages() {
+    let pending = 0;
+    for (const image of document.images) {
+      if (!image.checkVisibility({ visibilityProperty: true })) continue;
+      const sized = image.hasAttribute("width") && image.hasAttribute("height");
+      if (!sized && getComputedStyle(image).aspectRatio === "auto") add("T36", "warning", image, "no width/height or aspect-ratio; the layout shifts when it loads");
+      if (!image.complete) pending++;
+      else if (image.naturalWidth === 0) add("T35", "error", image, `image did not load: ${plain(image.getAttribute("src")).slice(0, 60)}`);
+    }
+    if (pending) unmeasurable.push(`${pending} image${pending > 1 ? "s" : ""} not loaded yet`);
+  }
+
+  function checkWebgl() {
+    if (!counter) { unmeasurable.push("WebGL context count"); return null; }
+    const count = [...counter.webgl].filter((c) => !c.isContextLost()).length;
+    if (count > settings.webgl_limit) add("T37", "warning", null, `${count} WebGL contexts, at most ${settings.webgl_limit}`);
+    return count;
+  }
+
+  const motionReduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function checkAnimations() {
+    const running = document.getAnimations().filter((a) => a.playState === "running");
+    if (motionReduced) for (const a of running) add("T38", "warning", a.effect?.target ?? null, `runs while motion is reduced: ${a.animationName || a.transitionProperty || "Web Animations"}`);
+    return running.length;
+  }
+
+  // The rAF loop can be counted only with the counter in place; without it the result is unmeasurable rather than made up.
+  async function checkRaf() {
+    if (!motionReduced) return null;
+    if (!counter) { unmeasurable.push("rAF loop"); return null; }
+    const before = counter.raf;
+    await new Promise((done) => setTimeout(done, RAF_WINDOW_MS));
+    const fps = Math.round(((counter.raf - before) * 1000) / RAF_WINDOW_MS);
+    if (fps >= RAF_LOOP_FPS) add("T39", "warning", null, `rAF loop keeps running while motion is reduced: ~${fps} frames/s`);
+    return fps;
+  }
+
+  // A resource from the cache has transferSize 0; then its encoded body size is taken.
+  function pageWeight() {
+    const entries = [...performance.getEntriesByType("navigation"), ...performance.getEntriesByType("resource")];
+    const resources = entries.map((e) => ({ name: e.name, bytes: e.transferSize || e.encodedBodySize }));
+    const measured = resources.filter((r) => r.bytes > 0);
+    return {
+      transferred_bytes: measured.reduce((total, r) => total + r.bytes, 0),
+      resource_count: resources.length,
+      unmeasured_resources: resources.length - measured.length,
+      largest: measured.sort((a, b) => b.bytes - a.bytes).slice(0, 5),
+    };
   }
 
   function checkTraces() {
@@ -377,6 +539,8 @@
     };
   }
 
+  // Focusing and lengthening headings can start transitions; running animations are counted before them.
+  const runningAnimations = checkAnimations();
   checkOverflow();
   checkContrast();
   checkTargets();
@@ -390,6 +554,14 @@
   checkLabelBreaks();
   checkFocus();
   checkStructure();
+  checkEmptyLooking();
+  checkSectionHeight();
+  const margins = edgeMargins();
+  checkMargins(margins);
+  checkImages();
+  const webglContexts = checkWebgl();
+  checkHeadingStress();
+  const rafFps = await checkRaf();
 
   const h1 = document.querySelector("h1");
   return {
@@ -410,7 +582,14 @@
       corner_variety: countProperty((s) => (s.borderTopLeftRadius === "0px" ? "" : s.borderTopLeftRadius)).size,
       unmeasurable_contrast: unmeasurableContrast,
       external_resources: externalResources(),
+      edge_margins: margins,
+      canvas_count: document.querySelectorAll("canvas").length,
+      webgl_contexts: webglContexts,
+      running_animations: runningAnimations,
+      raf_frames_per_second: rafFps,
+      page_weight: pageWeight(),
+      unmeasurable,
       finding_counts: findingCounts,
     },
   };
-})()
+}

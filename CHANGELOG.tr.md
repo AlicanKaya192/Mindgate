@@ -22,6 +22,14 @@ taşıyabilir. Böyle bir hook, beceri ya da ajan etkinken her araç çağrısı
 **Nasıl güncellenir:** aşağıdaki v1.2.0 adımlarını izleyin, sonra `health.py`'yi bir kez çalıştırıp yeni denetime bakın.
 Bir dosya adı görünürse o beceriyi ya da ajanı yeniden kullanmadan önce dosyayı açın; hook'ların yeri `settings.json`.
 
+**Bu sürümde ayrıca**
+
+- **Tasarım denetimi daha çok şey ölçüyor** (`expert-design`, `page_audit.py`): yer tutucu metin ve boş görünen başlık
+  ya da düğme, 3 katına uzayınca taşan başlık, tam ekran bölüm yüksekliği (`--section-threshold`), eşit olmayan sol ve
+  sağ boşluk, yüklenmemiş ya da boyutsuz görsel, sınırı aşan WebGL bağlamı (`--webgl-limit`, varsayılan 4) ve
+  `prefers-reduced-motion: reduce` altındaki ek ölçümde durmayan animasyon ve rAF döngüsü. Sayfa ağırlığı Resource
+  Timing'den okunur; ölçülemeyen `UNMEASURABLE` diye yazılır.
+
 ## v1.2.1 — Güvenlik güncellemesi: güncelleme denetimi
 
 **Güncellemeniz önerilir.** Bu sürüm aşağıdaki v1.2.0'ın tamamını içerir ve bir sonraki sürümden haberdar olmanın

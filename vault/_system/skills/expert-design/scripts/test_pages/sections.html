@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Section height</title>
+<style>
+  body { margin: 0; font: 16px/1.5 Arial, sans-serif; background: #f7f6f3; color: #1c1b19; }
+  section, [data-screen] { display: flex; align-items: center; justify-content: center; }
+  h1, h2 { margin: 0; }
+  .full { height: 100vh; }
+  .short { height: 300px; }
+  .tall { height: 200vh; }
+</style>
+</head>
+<body>
+<main>
+  <section class="full"><h1>Full-screen section</h1></section>
+  <section class="short"><h2>Short section</h2></section>
+  <div class="tall" data-screen><h2>Tall section</h2></div>
+</main>
+</body>
+</html>

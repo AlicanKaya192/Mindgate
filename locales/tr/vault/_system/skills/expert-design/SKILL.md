@@ -53,6 +53,9 @@ Token'ları koddan önce kur: renk rolleri, boşluk ölçeği, yazı ölçeği, 
 Tek geçişte iş bitmez. Her tur: çiz, ölç, gözle eleştir, düzelt. Yeni bulgu kalmayana ve kullanıcı onaylayana kadar sürer; en az bir tam tur yapılmadan teslim edilmez.
 
 **Ölç (web):** `scripts/page_audit.py` sayfayı 6 genişlikte ve iki temada çizer, ölçer; kaybolan öğeyi adıyla, önceki tura göre geri gidişi söyler. Kullanıcı yorumu `--note` ile tura yazılır. Komut ve kurallar: `references/denetim.md`. Bu araç yalnızca ölçülebileni görür; geçmesi yetmez.
+- İçerik ve düzen: yer tutucu metin (T18: lorem, TODO, placeholder, "örnek metin", "başlık buraya"), boş görünen başlık ya da düğme (T31), h1/h2 metni 3 katına uzayınca taşma ya da binme (T32; metin ölçümden sonra geri konur), `section` ve `[data-screen]` yüksekliğinin ekrandan sapması (T33, not; `--section-threshold`, varsayılan 0,10), içeriğin sol ve sağ boşluk farkı 4 px'ten çok (T34).
+- Görsel ve 3D: yüklenmemiş `img` (T35, hata), boyutsuz `img` (T36), WebGL bağlamı sınırı aşıyor (T37; `--webgl-limit`, varsayılan 4). Her sayfa bir kez `prefers-reduced-motion: reduce` altında da ölçülür: çalışan CSS animasyonu ya da geçişi (T38), süren rAF döngüsü (T39).
+- Sayfa ağırlığı (aktarılan bayt, en büyük 5 kaynak) Resource Timing'den okunur. Ölçülemeyen (`file://` adreste ağırlık, sayaç yoksa WebGL ve rAF, henüz yüklenmemiş görsel) `UNMEASURABLE` diye yazılır; geçti sayılmaz.
 
 **Eleştir:** Görüntüleri aç, yakınlaştır, sırayla bak:
 1. **Hiyerarşi:** Ekranın asıl görevi ilk bakışta belli mi? Her öğe eşit ağırlıkta mı?

@@ -1,9 +1,30 @@
 """Merges measurement reports; applies exemptions, the preservation counter and the round comparison. Pure computation:
 no file, network or browser."""
 from collections import Counter
+from urllib.parse import urlsplit
 
 SEVERITY_ORDER = {"error": 0, "warning": 1, "note": 2}
 HOUSE_STYLE_PAGES = 3
+WEIGHT_UNMEASURABLE = "page weight: on a file:// address sub-resources are not in Resource Timing"
+
+
+def _is_file(address: str) -> bool:
+    return urlsplit(address).scheme == "file"
+
+
+def _unmeasurable(reports: list[dict]) -> list[dict]:
+    found = {(r["url"], name) for r in reports for name in r["measurements"].get("unmeasurable", [])}
+    found |= {(r["url"], WEIGHT_UNMEASURABLE) for r in reports if _is_file(r["url"])}
+    return [{"url": address, "name": name} for address, name in sorted(found)]
+
+
+def _weights(reports: list[dict]) -> dict:
+    """The weight from the widest light measurement of every page; None on a file address, where it cannot be measured."""
+    chosen: dict[str, dict | None] = {}
+    for report in sorted(reports, key=lambda r: r["width"]):
+        if report["theme"] == "light":
+            chosen[report["url"]] = None if _is_file(report["url"]) else report["measurements"].get("page_weight")
+    return chosen
 
 
 def _is_valid(record: dict) -> bool:
@@ -57,6 +78,8 @@ def summarize(reports: list[dict], exemptions: list[dict]) -> dict:
         "unused_exemptions": [e for e in valid if id(e) not in used],
         "house_style": sorted(r for r, number in pages.items() if number >= HOUSE_STYLE_PAGES),
         "keys": sorted(f"{f['url']}|{f['rule']}|{f['selector']}" for f in remaining if f["severity"] != "note"),
+        "unmeasurable": _unmeasurable(reports),
+        "weight": _weights(reports),
     }
 
 

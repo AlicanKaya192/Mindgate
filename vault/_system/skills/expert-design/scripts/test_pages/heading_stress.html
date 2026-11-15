@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heading stress test</title>
+<style>
+  body { margin: 0; font: 16px/1.5 Arial, sans-serif; background: #f7f6f3; color: #1c1b19; }
+  main { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+  h1, h2 { font-size: 32px; line-height: 1.2; margin: 0 0 16px; }
+  .box { width: 280px; overflow: hidden; }
+  .clipped { white-space: nowrap; }
+  .fixed { height: 40px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="box"><h1 class="clipped">Short title</h1></div>
+  <h2 class="fixed">Selected work and experiments</h2>
+  <p>This paragraph sits right below the fixed-height heading.</p>
+  <h2 class="flexible">About</h2>
+  <p>When this heading grows it wraps and pushes the text below it down.</p>
+</main>
+</body>
+</html>

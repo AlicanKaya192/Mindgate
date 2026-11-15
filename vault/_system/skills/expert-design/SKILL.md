@@ -53,6 +53,9 @@ Sample data resembles the project's real data: realistic names, numbers, long te
 The job is not done in one pass. Each round: draw, measure, critique by eye, fix. It continues until no new finding remains and the user approves; nothing is delivered without at least one full round.
 
 **Measure (web):** `scripts/page_audit.py` renders the page at 6 widths and in two themes and measures it; it names a vanished element and tells you about regression against the previous round. The user's comment is written to the round with `--note`. Command and rules: `references/audit.md`. This tool sees only what is measurable; passing is not enough.
+- Content and layout: placeholder text (T18: lorem, TODO, placeholder, "sample text", "title goes here"), a heading or button that looks empty (T31), h1/h2 text that overflows or overlaps when 3 times longer (T32; the text is put back after measuring), height of `section` and `[data-screen]` off the screen height (T33, note; `--section-threshold`, default 0.10), content's left and right margins differing by more than 4 px (T34).
+- Images and 3D: an `img` that did not load (T35, error), an unsized `img` (T36), more WebGL contexts than the limit (T37; `--webgl-limit`, default 4). Every page is also measured once under `prefers-reduced-motion: reduce`: a running CSS animation or transition (T38), a rAF loop that keeps going (T39).
+- Page weight (transferred bytes, the 5 largest resources) is read from Resource Timing. What cannot be measured (weight on a `file://` address, WebGL and rAF without the counter, an image not loaded yet) is printed as `UNMEASURABLE`; it does not count as passed.
 
 **Critique:** Open the images, zoom in, look in order:
 1. **Hierarchy:** Is the screen's main task clear at first glance? Does every element have equal weight?
