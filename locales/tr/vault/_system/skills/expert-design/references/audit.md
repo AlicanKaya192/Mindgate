@@ -69,6 +69,15 @@ Yerel sayfa ya da sunucu da bir sayfadır: açmadan önce #32 izni alınır.
 | T28 | uyarı | Odakta görünür değişiklik yok | WCAG 2.4.7 |
 | T29 | not | İçerik kısa, ekranın altı boş | Üretilmiş arayüz denetimi |
 | T30 | uyarı | h1 sayısı 1 değil | Vercel |
+| T31 | uyarı | Boş görünen başlık ya da düğme | Kendi denetimimiz |
+| T32 | uyarı | h1/h2 metni 3 katına uzayınca taşma, kırpılma ya da üst üste binme | Kendi denetimimiz |
+| T33 | not | Tam ekran bölümün yüksekliği ekrandan %10'dan çok sapıyor (eşik ayarlanır) | Kendi denetimimiz |
+| T34 | uyarı | İçeriğin sol ve sağ boşluğu 4 px'ten çok farklı | Kendi denetimimiz |
+| T35 | hata | Yüklenmiş ama görüntüsü gelmemiş görsel (`naturalWidth` 0) | Kendi denetimimiz |
+| T36 | uyarı | Görselde genişlik ve yükseklik de en-boy oranı da yok (düzen kayar) | web.dev CLS |
+| T37 | uyarı | 4'ten çok WebGL bağlamı (sınır ayarlanır) | Kendi denetimimiz |
+| T38 | uyarı | Azaltılmış harekette çalışan animasyon ya da geçiş | WCAG 2.3.3 |
+| T39 | uyarı | Azaltılmış harekette süren kare döngüsü (saniyede 10 kare ve üstü) | WCAG 2.3.3 |
 
 **Ölçümler** (`summary.json`, kural değil, gözle yorumlanır): kontrol yükseklikleri, bölüm aralıkları, ilk ekrandaki kelime, h1 ilk ekranda mı, baskın yazı, yazı aileleri, renk ailesi, gölge ve köşe çeşidi, ölçülemeyen kontrast, dış kaynaklar. Kontrol yüksekliğinde çok farklı değer ya da düzensiz bölüm aralığı tutarsızlık işaretidir. Sayısal eşik konmadı, çünkü kaynaklı bir eşik bulunmadı.
 

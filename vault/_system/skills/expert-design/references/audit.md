@@ -69,6 +69,15 @@ An **error** fails the check, a **warning** is fixed or justified, a **note** is
 | T28 | warning | No visible change on focus | WCAG 2.4.7 |
 | T29 | note | Content is short, the bottom of the screen is empty | Generated-interface audit |
 | T30 | warning | Number of h1 is not 1 | Vercel |
+| T31 | warning | A heading or button that looks empty | Our own audit |
+| T32 | warning | Overflow, clipping or overlap when the h1/h2 text is three times as long | Our own audit |
+| T33 | note | A full-screen section's height is more than 10% off the screen (threshold can be set) | Our own audit |
+| T34 | warning | The content's left and right margins differ by more than 4 px | Our own audit |
+| T35 | error | An image that loaded with no picture (`naturalWidth` 0) | Our own audit |
+| T36 | warning | An image with neither width and height nor an aspect ratio (the layout shifts) | web.dev CLS |
+| T37 | warning | More than 4 WebGL contexts (limit can be set) | Our own audit |
+| T38 | warning | An animation or transition that runs under reduced motion | WCAG 2.3.3 |
+| T39 | warning | A frame loop that keeps running under reduced motion (10 frames a second or more) | WCAG 2.3.3 |
 
 **Measurements** (`summary.json`, not rules, interpreted by eye): control heights, section spacings, words on the first screen, whether h1 is on the first screen, dominant text, font families, color family, shadow and corner variety, unmeasurable contrast, external resources. A very different value in control heights or irregular section spacing is a sign of inconsistency. No numeric threshold was set because no sourced threshold was found.
 
