@@ -27,6 +27,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent))  # -I leaves the folder off the path; at the end, not first: no stdlib shadowing
 import common  # noqa: E402
+import hook_io  # noqa: E402
 import install_instructions  # noqa: E402
 import search_eval  # noqa: E402
 import task_status  # noqa: E402
@@ -251,6 +252,42 @@ def stdlib_names() -> Result:
                       f"{name('_system')}/", first(shadows), "find out who wrote the file; show it to the user, deleting needs "
                                                              "permission (#22)")
     return Result("stdlib_names", "Script named after the standard library", "ok", f"no such file in {name('_system')}/")
+
+
+def definition_files() -> list[Path]:
+    """Skill and agent definitions of the vault and of every client home; a junction that resolves to the vault counts
+    the file once. Client homes sit next to CLAUDE (tests replace it)."""
+    sources = [(vpath("_system/skills"), "*/SKILL.md"), (vpath("_system/agents"), "*.md")]
+    for home in hook_io.CLIENT_HOMES:
+        sources += [(CLAUDE.parent / home / "skills", "*/SKILL.md"), (CLAUDE.parent / home / "agents", "*.md")]
+    real_paths: dict[str, Path] = {}
+    for folder, pattern in sources:
+        for path in sorted(folder.glob(pattern)):
+            real_paths.setdefault(os.path.normcase(os.path.realpath(path)), path)
+    return list(real_paths.values())
+
+
+def definition_hooks() -> Result:
+    """`hooks:` in a definition's frontmatter runs a command on every tool call without passing settings.json."""
+    key, check = "definition_hooks", "Hooks in skill and agent definitions"
+    definitions = definition_files()
+    hooked, unreadable = [], []
+    for path in definitions:
+        shown = f"{path.parent.name}/{path.name}"
+        try:
+            fields_found, _ = frontmatter(path.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError) as error:
+            unreadable.append(f"{shown}: {type(error).__name__}")
+            continue
+        if "hooks" in fields_found:
+            hooked.append(shown)
+    if hooked:
+        return Result(key, check, "error", f"{len(hooked)} definition(s) with hooks", first(hooked + unreadable),
+                      "show the file to the user; hooks are defined in settings.json")
+    if unreadable:
+        return Result(key, check, "warning", f"{len(unreadable)} definition(s) could not be read", first(unreadable),
+                      "open the file and check its encoding")
+    return Result(key, check, "ok", f"{len(definitions)} definitions scanned, no hooks")
 
 
 def git_output(*args: str) -> subprocess.CompletedProcess:
@@ -805,8 +842,8 @@ def update_check(config: dict | None = None, fetch=fetch_latest) -> Result:
 def checks(full: bool = False) -> list[Result]:
     notes = read_notes()
     broken, orphans = link_checks(notes)
-    results = [hooks(), security_hooks(), stdlib_names(), compact_threshold(), links(), precommit(), settings(), fields(notes),
-               problem_history(notes),
+    results = [hooks(), security_hooks(), definition_hooks(), stdlib_names(), compact_threshold(), links(), precommit(),
+               settings(), fields(notes), problem_history(notes),
                broken, orphans, index_missing(notes), pending(), log_check(), handoff(), hook_errors(), leftover_files(),
                instructions(), file_sizes(notes), trigger_set(), control_characters()]
     results.append(baseline_check(results))

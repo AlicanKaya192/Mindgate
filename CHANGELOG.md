@@ -4,6 +4,24 @@
 
 # Changelog
 
+## v1.2.2 — Security update: hooks in skill files
+
+**Updating is recommended.** A skill (`SKILL.md`) or agent definition can carry a `hooks:` field in its frontmatter.
+Such a hook runs a command on every tool call while the skill or agent is active, without passing `settings.json`, so
+the guards and the health report did not see it.
+
+- **The write guard asks** when a write puts `hooks:` into the frontmatter of a skill or agent definition: any
+  `SKILL.md`, and any `.md` under the vault's `_system/skills/` or `_system/agents/`, under `skills/` or `agents/` in
+  every assistant's home (`~/.claude`, `~/.codex`, `~/.gemini`, `~/.agents`), or under a project's `.claude/skills/` or
+  `.claude/agents/`. For an edit, a non-indented `hooks:` line in the new text is enough. A `hooks:` inside the body,
+  such as an indented example in a code block, is not asked.
+- **`health.py` shows existing ones:** the new check *Hooks in skill and agent definitions* scans the skill and agent
+  definitions of the vault and of every assistant's home. A definition with `hooks:` is an error with the file name in
+  the details; a file that cannot be read is a warning.
+
+**How to update:** follow the v1.2.0 steps below, then run `health.py` once and look at the new check. If it names a
+file, open it before you use that skill or agent again; hooks belong in `settings.json`.
+
 ## v1.2.1 — Security update: update check
 
 **Updating is recommended.** This release holds everything in v1.2.0 below and adds a way to hear about the next one.

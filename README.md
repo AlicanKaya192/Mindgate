@@ -9,7 +9,7 @@
 <h1 align="center">Mindgate</h1>
 
 > [!IMPORTANT]
-> **v1.2.1 is a security update. Updating is recommended.** It closes these gaps in the guards:
+> **v1.2.2 is a security update. Updating is recommended.** It closes these gaps in the guards:
 >
 > - **The guards' own files** (every assistant's hook and permission settings, the guard scripts, agent definitions, git hooks, the blocklist, the rules and instructions) could be changed with one shell command or file write. Now asked.
 > - **Network calls from the shell** (`curl`, `Invoke-WebRequest`, sockets, `ssh`, `git clone`, `gh api`, network code in Python or node) went around the site guard. Now asked, with the address. Piping a download into an interpreter is refused, also through other pipes, process substitution or base64.
@@ -17,6 +17,7 @@
 > - **Slow inputs** kept the command guard busy past the hook's time limit: the slowest decision fell from 123 s to under 1 s, and a command over 20,000 characters is asked.
 > - **More risky commands** are asked or refused: skipping the commit hook, emptying files, more ways to delete files or kill processes, printing secrets, persistence and execution-policy changes, installing packages, applying patches, moving vault files to a temporary folder.
 > - **Web searches and the terminal tool** now pass the guards, and a broken helper module or a `json.py` beside the guards no longer switches them off.
+> - **Hooks in skill and agent files** (`hooks:` in the frontmatter of a `SKILL.md` or an agent definition) ran a command on every tool call without passing `settings.json`. Writing one is now asked, and `health.py` names the files that have one.
 >
 > - **New: an update check** (off by default) in `health.py` tells you when the next release is out. On GitHub, *Watch → Custom → Releases* also sends a notice for every release.
 >

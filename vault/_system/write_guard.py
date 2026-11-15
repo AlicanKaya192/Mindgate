@@ -14,6 +14,9 @@ Decisions (Write, Edit, MultiEdit, NotebookEdit):
   ask      — changing a defense (common.DEFENSE_SET: hook and permission settings of every assistant, guard scripts,
              agent definitions, git hooks, blocklist, preview command, rules, instructions, vault schema …); the reason
              names the defense. Where the client cannot ask, it is denied (Antigravity asks every time)
+  ask      — writing `hooks:` into the frontmatter of a skill or agent definition (SKILL.md; any .md under the vault's
+             _system/skills or _system/agents, a client home's skills/ or agents/, or any .claude/skills, .claude/agents):
+             a hook in a definition runs a command on every tool call without passing settings.json (Claude only)
   ask      — text that goes into a text file (.json, .py, .md …) holds an invisible control character (Claude only)
   (silent) — everything else
   ask      — if the guard cannot parse the input or load its helpers (common, session_mode): when unsure, ask
@@ -62,6 +65,12 @@ ARCHIVES = (vault_path("archive", "log"), vault_path("archive", "pending"))   # 
 CONTROL_CHARACTER = re.compile(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]")   # tab, line feed and carriage return are fine
 TEXT_EXTENSIONS = {".json", ".py", ".md", ".txt", ".yaml", ".yml", ".csv", ".srt", ".vtt"}
 CONTENT_FIELDS = ("content", "new_string")
+DEFINITION_FOLDERS = (vault_path("_system", "skills"), vault_path("_system", "agents"),
+                      *(root / sub for root in CLIENT_ROOTS for sub in ("skills", "agents")))
+PROJECT_DEFINITION_FOLDERS = ((".claude", "skills"), (".claude", "agents"))   # project-level definitions, anywhere
+SKILL_FILE = "skill.md"                          # the name of a Claude Code skill file, compared in lower case
+FRONTMATTER = re.compile(r"---[ \t]*\r?\n(.*?)^---", re.S | re.M)   # between the first two `---` at the start
+HOOKS_KEY = re.compile(r"^[\"']?hooks[\"']?[ \t]*:", re.M)        # not indented: not a nested field or an example
 
 
 def localized(en: str, tr: str) -> str:
@@ -213,6 +222,48 @@ def check_stream(raw: str) -> bool:
     return True
 
 
+def in_project_definition_folder(target: Path) -> bool:
+    """Is a folder pair such as .claude/skills somewhere above the (real, case-folded) target?"""
+    folders = list(target.parent.parts)
+    pairs = [tuple(os.path.normcase(part) for part in pair) for pair in PROJECT_DEFINITION_FOLDERS]
+    return any(tuple(folders[i:i + 2]) in pairs for i in range(len(folders) - 1))
+
+
+def is_definition(path: Path) -> bool:
+    """A skill or agent definition: a file named SKILL.md, or a .md under one of the definition folders."""
+    target = real(path)
+    if target.name.lower() == SKILL_FILE:
+        return True
+    if target.suffix.lower() != ".md":
+        return False
+    return any(target.is_relative_to(real(folder)) for folder in DEFINITION_FOLDERS) or in_project_definition_folder(target)
+
+
+def writes_hooks(tool_input: dict) -> bool:
+    """Write: `hooks:` in the frontmatter at the start of the text. Edit/MultiEdit: the whole frontmatter is not in view,
+    so a non-indented `hooks:` line in the new text is enough (a false positive is accepted, a false negative is not)."""
+    content = tool_input.get("content")
+    if isinstance(content, str):
+        frontmatter = FRONTMATTER.match(content)
+        if frontmatter and HOOKS_KEY.search(frontmatter.group(1)):
+            return True
+    edits = [tool_input, *(tool_input.get("edits") or [])]
+    new_texts = [edit.get("new_string") for edit in edits if isinstance(edit, dict)]
+    return any(isinstance(text, str) and HOOKS_KEY.search(text) for text in new_texts)
+
+
+def check_definition_hooks(path: Path, tool_input: dict) -> bool:
+    """Asks before content writes a hook into a skill or agent definition; True if it asked."""
+    if not (is_definition(path) and writes_hooks(tool_input)):
+        return False
+    decide("ask", localized(
+        f"A hook in a skill/agent definition ({path}): it can run a command on every tool call, the user decides. "
+        "Hooks are defined in ~/.claude/settings.json; show the content to the user.",
+        f"Beceri/ajan tanımında hook ({path}): her araç çağrısında komut çalıştırabilir, kararı kullanıcı verir. "
+        "Hook'lar ~/.claude/settings.json'da tanımlanır; içeriği kullanıcıya göster."))
+    return True
+
+
 def check_control_characters(path: Path, tool_input: dict) -> None:
     """Asks when the text to be written to a text file holds an invisible control character."""
     if path.suffix.lower() not in TEXT_EXTENSIONS:
@@ -229,14 +280,17 @@ def check_control_characters(path: Path, tool_input: dict) -> None:
             return
 
 
-def check_call(call: hook_io.Call) -> bool:
-    """Every target path of the call (a Codex patch can hold several); stops at the first denial, and returns True then."""
+def check_call(call: hook_io.Call, tool_input: dict | None = None) -> bool:
+    """Every target path of the call (a Codex patch can hold several); stops at the first decision, and returns True then.
+    tool_input is the text-carrying input of a Claude Write/Edit (other clients: None)."""
     for raw in call.paths:
         raw = DEVICE_PREFIX.sub("", raw.strip())
         if check_stream(raw):
             return True
         path = resolve(raw, call.cwd)
-        if check_recording_mode(path, call.session_id) or check(path) or check_defense(path):
+        if check_recording_mode(path, call.session_id) or check(path):
+            return True
+        if (tool_input is not None and check_definition_hooks(path, tool_input)) or check_defense(path):
             return True
     return False
 
@@ -254,8 +308,9 @@ def main() -> None:
         data = json.loads(sys.stdin.read() or "{}")
         call = hook_io.read_call(CLIENT, data, hook_io.WRITE)
         # Only Claude's Write/Edit payload carries the text; the other clients' answers have no "ask" for this
-        if call is not None and not check_call(call) and CLIENT == "claude" and call.paths:
-            check_control_characters(resolve(call.paths[0], call.cwd), data.get("tool_input") or {})
+        tool_input = (data.get("tool_input") or {}) if CLIENT == "claude" else None
+        if call is not None and not check_call(call, tool_input) and tool_input is not None and call.paths:
+            check_control_characters(resolve(call.paths[0], call.cwd), tool_input)
     except Exception as error:  # the guard must never crash; Claude asks, the other clients deny (hook_io.FAIL)
         decide(hook_io.FAIL, localized(f"The write guard could not parse the input ({type(error).__name__}); the user should approve.",
                                 f"Yazma kapısı girdiyi çözümleyemedi ({type(error).__name__}); kullanıcı onaylasın."))

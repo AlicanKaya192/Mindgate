@@ -113,6 +113,36 @@ DEFENSE_CASES = [
 ]
 CASES += DEFENSE_CASES
 
+# `hooks:` in the frontmatter of a skill or agent definition runs a command on every tool call without passing
+# settings.json: content that writes one into a definition is asked
+HOOKED = "---\nname: x\nhooks:\n  PreToolUse:\n    - command: calc\n---\nBody\n"
+UNHOOKED = "---\nname: x\ndescription: y\n---\nBody\n"
+CODE_BLOCK_IN_BODY = "---\nname: x\n---\nExample:\n```yaml\nhooks:\n  PreToolUse: []\n```\n"
+SKILL = str(SYSTEM / name("skills") / "x" / "SKILL.md")
+DEFINITION_HOOK_CASES = [
+    ("Write", {"file_path": SKILL, "content": HOOKED}, "ask"),
+    ("Write", {"file_path": SKILL, "content": HOOKED.replace("\n", "\r\n")}, "ask"),                    # CRLF
+    ("Write", {"file_path": SKILL, "content": UNHOOKED}, ""),
+    ("Write", {"file_path": SKILL, "content": CODE_BLOCK_IN_BODY}, ""),                                   # a documented example
+    ("Write", {"file_path": SKILL, "content": "No frontmatter\nhooks: x\n"}, ""),                         # not frontmatter
+    ("Edit", {"file_path": SKILL, "old_string": "a", "new_string": "name: x\nhooks:\n  Stop: []"}, "ask"),
+    ("Edit", {"file_path": SKILL, "old_string": "a", "new_string": "  hooks: indented"}, ""),
+    ("MultiEdit", {"file_path": SKILL, "edits": [{"old_string": "a", "new_string": "b"},
+                                                  {"old_string": "c", "new_string": "hooks: {}"}]}, "ask"),
+    ("Write", {"file_path": str(SYSTEM / name("skills") / "x" / "reference.md"), "content": HOOKED}, "ask"),
+    ("Write", {"file_path": str(HOME / ".claude" / "skills" / "x" / "SKILL.md"), "content": HOOKED}, "ask"),
+    ("Write", {"file_path": str(HOME / ".claude" / "skills" / "x" / "skill.md"), "content": HOOKED}, "ask"),   # case
+    ("Write", {"file_path": str(HOME / ".gemini" / "skills" / "x" / "notes.md"), "content": HOOKED}, "ask"),   # other client
+    ("Write", {"file_path": str(OUTSIDE / ".claude" / "skills" / "x" / "notes.md"), "content": HOOKED}, "ask"),  # project level
+    ("Write", {"file_path": str(OUTSIDE / ".claude" / "agents" / "reviewer.md"), "content": HOOKED}, "ask"),
+    ("Write", {"file_path": str(OUTSIDE / "docs" / "SKILL.md"), "content": HOOKED}, "ask"),                    # the name is enough
+    ("Write", {"file_path": str(VAULT / name("knowledge") / "x.md"), "content": HOOKED}, ""),                 # not a definition
+    ("Write", {"file_path": str(OUTSIDE / ".claude" / "skills" / "x" / "tool.py"), "content": "hooks: 1\n"}, ""),  # not .md
+    ("Write", {"file_path": str(SYSTEM / name("agents") / "a.md"), "content": UNHOOKED}, "ask"),              # defense set
+    ("Write", {"file_path": str(VAULT / "log.md"), "content": HOOKED}, "deny"),                              # deny comes first
+]
+CASES += DEFINITION_HOOK_CASES
+
 
 MODE_FILE = TEST_DIR / "session_mode.json"
 MEMORY = Path.home() / ".claude" / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(VAULT)) / "memory" / "x.md"
@@ -219,6 +249,15 @@ def language_failures() -> int:
             + failed(installed.startswith(expected), f"install language ({common.LANGUAGE}) reason: {installed}"))
 
 
+def definition_hook_failures() -> int:
+    """The reason names the file and leaves the decision to the user; in an unrecorded chat the denial still comes first."""
+    reason = run("Write", {"file_path": SKILL, "content": HOOKED}).get("permissionDecisionReason", "")
+    return (failed("SKILL.md" in reason and ("the user decides" in reason or "kararı kullanıcı verir" in reason),
+                   f"definition hook reason: {reason}")
+            + failed(decision("Write", {"file_path": SKILL, "content": HOOKED}, session="private") == "deny",
+                     "a hooked skill is not denied in an unrecorded chat"))
+
+
 def import_failure_failures() -> int:
     """With common.py or session_mode.py missing the guard cannot check anything: Claude asks, another client denies."""
     copy = TEST_DIR / "copy"
@@ -257,7 +296,8 @@ def main() -> None:
     reason = run("Write", {"file_path": str(HOME / ".claude" / "settings.json"), "content": "{}"}).get("permissionDecisionReason", "")
     failures += failed("Claude Code settings" in reason or "Claude Code ayarı" in reason, f"the reason names the defense: {reason}")
     failures += import_failure_failures()
-    total = len(IN_PROCESS_CASES) + len(CASES) + 1 + len(RECORD_MODE_CASES) + 2 + 1 + 2
+    failures += definition_hook_failures()
+    total = len(IN_PROCESS_CASES) + len(CASES) + 1 + len(RECORD_MODE_CASES) + 2 + 1 + 2 + 2
     print(f"{total - failures}/{total} passed")
     sys.exit(1 if failures else 0)
 

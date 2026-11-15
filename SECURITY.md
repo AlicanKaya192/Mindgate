@@ -12,7 +12,8 @@ Mindgate is in early development. Reports are checked against the current
 | Version | Supported |
 |---|:-:|
 | `main` | ✅ |
-| `v1.2.1` (security update, latest) | ✅ |
+| `v1.2.2` (security update, latest) | ✅ |
+| `v1.2.1` (security update) | ✅ (a `hooks:` field in a skill or agent definition is not asked: update to v1.2.2) |
 | `v1.2.0` (security update) | ✅ (on Python 3.10 the command guard does not load: update to v1.2.1) |
 | `v1.1.0` and older | ❌ (please update, see [CHANGELOG.md](CHANGELOG.md)) |
 
@@ -61,6 +62,10 @@ from the vault.
 - **Broken helpers.** If a guard cannot load its helper modules it asks (other
   assistants: refuses) instead of crashing, and a file named after a standard
   library module in `_system/` cannot take its place.
+- **Hooks in skill and agent definitions** (since v1.2.2). A `hooks:` field in
+  the frontmatter of a `SKILL.md` or an agent definition runs a command on
+  every tool call without passing `settings.json`. Writing one is asked, and
+  `health.py` names the definitions that already have one.
 - `health.py` reports missing or narrowed security hooks, broad permission
   patterns, a bypassed commit hook and uncommitted changes in the guard scripts.
 

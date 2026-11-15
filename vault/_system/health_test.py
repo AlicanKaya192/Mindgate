@@ -327,7 +327,71 @@ class DefenseIntegrityTest(unittest.TestCase):
 
     def test_the_new_checks_are_in_the_full_list(self):
         keys = {result.key for result in health.checks()}
-        self.assertTrue({"security_hooks", "stdlib_names", "broad_permissions", "guard_changes", "commit_hook"} <= keys)
+        self.assertTrue({"security_hooks", "definition_hooks", "stdlib_names", "broad_permissions", "guard_changes",
+                         "commit_hook"} <= keys)
+
+
+class DefinitionHookTest(unittest.TestCase):
+    """`hooks:` in the frontmatter of a skill or agent definition runs a command without passing settings.json."""
+    setUp, tearDown, write = HealthTest.setUp, HealthTest.tearDown, HealthTest.write
+
+    HOOKED = "---\nname: x\nhooks:\n  PreToolUse:\n    - command: calc\n---\nBody\n"
+    UNHOOKED = "---\nname: x\ndescription: y\n---\nExample:\n```yaml\nhooks:\n  Stop: []\n```\n"
+
+    def skill(self, skill_name: str) -> str:
+        return f"{name('_system')}/{name('skills')}/{skill_name}/SKILL.md"
+
+    def clean_definitions(self) -> None:
+        self.write(self.skill("idea"), self.UNHOOKED)
+        self.write(f"{name('_system')}/{name('agents')}/scout.md", self.UNHOOKED)
+        self.write("home/.claude/skills/local/SKILL.md", self.UNHOOKED)
+        self.write("home/.claude/agents/local-agent.md", self.UNHOOKED)
+
+    def test_clean_definitions_are_ok_with_the_scanned_count(self):
+        self.clean_definitions()
+        self.write(f"{name('_system')}/{name('skills')}/idea/reference.md", self.HOOKED)   # not SKILL.md: not scanned
+        result = health.definition_hooks()
+        self.assertEqual(result.status, "ok", result.details)
+        self.assertIn("4", result.summary)
+
+    def test_a_hooked_skill_is_an_error_named_in_the_details(self):
+        self.clean_definitions()
+        self.write("home/.claude/skills/sneaky/SKILL.md", self.HOOKED)
+        result = health.definition_hooks()
+        self.assertEqual(result.status, "error")
+        self.assertIn("sneaky/SKILL.md", result.details)
+        self.assertNotIn("idea", result.details)
+        self.assertIn("settings.json", result.advice)
+
+    def test_a_hooked_agent_is_an_error(self):
+        self.write(f"{name('_system')}/{name('agents')}/scout.md", self.HOOKED.replace("\n", "\r\n"))
+        result = health.definition_hooks()
+        self.assertEqual(result.status, "error")
+        self.assertIn("scout.md", result.details)
+
+    def test_another_clients_skills_are_scanned(self):
+        self.write("home/.gemini/skills/other/SKILL.md", self.HOOKED)
+        result = health.definition_hooks()
+        self.assertEqual(result.status, "error")
+        self.assertIn("other/SKILL.md", result.details)
+
+    def test_an_unreadable_definition_is_a_warning(self):
+        self.clean_definitions()
+        broken = self.root / "home" / ".claude" / "agents" / "broken.md"
+        broken.write_bytes(b"---\nname: \xff\xfe\n---\n")
+        result = health.definition_hooks()
+        self.assertEqual(result.status, "warning")
+        self.assertIn("broken.md", result.details)
+
+    @unittest.skipUnless(sys.platform == "win32", "junctions are Windows only")
+    def test_a_junction_counts_the_same_file_once(self):
+        import _winapi
+        self.write(self.skill("idea"), self.HOOKED)
+        (self.root / "home" / ".claude" / "skills").mkdir(parents=True)
+        _winapi.CreateJunction(str((self.root / self.skill("idea")).parent), str(self.root / "home" / ".claude" / "skills" / "idea"))
+        result = health.definition_hooks()
+        self.assertEqual(result.status, "error")
+        self.assertIn("1 definition", result.summary)
 
 
 def release(tag: str, title: str = "Mindgate") -> callable:

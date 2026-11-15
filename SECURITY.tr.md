@@ -12,7 +12,8 @@ hâline göre değerlendirilir.
 | Sürüm | Destek |
 |---|:-:|
 | `main` | ✅ |
-| `v1.2.1` (güvenlik güncellemesi, en son) | ✅ |
+| `v1.2.2` (güvenlik güncellemesi, en son) | ✅ |
+| `v1.2.1` (güvenlik güncellemesi) | ✅ (beceri ya da ajan tanımındaki `hooks:` alanı sorulmaz: v1.2.2'ye güncelleyin) |
 | `v1.2.0` (güvenlik güncellemesi) | ✅ (Python 3.10'da komut kapısı yüklenmez: v1.2.1'e güncelleyin) |
 | `v1.1.0` ve öncesi | ❌ (lütfen güncelleyin, bkz. [CHANGELOG.tr.md](CHANGELOG.tr.md)) |
 
@@ -63,6 +64,10 @@ hiçbir şey göndermez.
 - **Bozuk yardımcı modüller.** Kapı yardımcı modüllerini yükleyemezse çökmek
   yerine sorar (öbür asistanlarda reddeder); `_system/` içindeki standart
   kütüphane adlı bir dosya onun yerine geçemez.
+- **Beceri ve ajan tanımlarındaki hook'lar** (v1.2.2'den beri). Bir
+  `SKILL.md`'nin ya da ajan tanımının ön bilgisindeki `hooks:` alanı, her araç
+  çağrısında `settings.json`'a uğramadan komut çalıştırır. Böyle bir alan
+  yazmak sorulur; `health.py` zaten taşıyan tanımları adıyla gösterir.
 - `health.py` eksik ya da daralmış güvenlik hook'larını, geniş izin
   kalıplarını, atlatılmış commit kancasını ve kapı betiklerindeki commit
   edilmemiş değişikliği gösterir.

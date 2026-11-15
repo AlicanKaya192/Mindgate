@@ -4,6 +4,24 @@
 
 # Değişiklik günlüğü
 
+## v1.2.2 — Güvenlik güncellemesi: beceri dosyalarındaki hook'lar
+
+**Güncellemeniz önerilir.** Bir beceri (`SKILL.md`) ya da ajan tanımı, ön bilgisinde (frontmatter) `hooks:` alanı
+taşıyabilir. Böyle bir hook, beceri ya da ajan etkinken her araç çağrısında `settings.json`'a uğramadan komut
+çalıştırır; kapılar da sağlık raporu da bunu görmüyordu.
+
+- **Yazma kapısı sorar:** bir yazma, beceri ya da ajan tanımının ön bilgisine `hooks:` koyuyorsa. Kapsam: her
+  `SKILL.md`; vault'un `_sistem/beceriler/` ya da `_sistem/ajanlar/` klasörlerinin, her asistanın evindeki (`~/.claude`,
+  `~/.codex`, `~/.gemini`, `~/.agents`) `skills/` ya da `agents/` klasörünün ve bir projenin `.claude/skills/` ya da
+  `.claude/agents/` klasörünün altındaki her `.md`. Düzenlemede yeni metindeki girintisiz bir `hooks:` satırı yeter.
+  Gövdedeki `hooks:` (ör. kod bloğundaki girintili bir örnek) sorulmaz.
+- **`health.py` var olanları gösterir:** yeni *Hooks in skill and agent definitions* denetimi vault'un ve her asistanın
+  evindeki beceri ve ajan tanımlarını tarar. `hooks:` taşıyan tanım hatadır, dosya adı ayrıntıda görünür; okunamayan
+  dosya uyarıdır.
+
+**Nasıl güncellenir:** aşağıdaki v1.2.0 adımlarını izleyin, sonra `health.py`'yi bir kez çalıştırıp yeni denetime bakın.
+Bir dosya adı görünürse o beceriyi ya da ajanı yeniden kullanmadan önce dosyayı açın; hook'ların yeri `settings.json`.
+
 ## v1.2.1 — Güvenlik güncellemesi: güncelleme denetimi
 
 **Güncellemeniz önerilir.** Bu sürüm aşağıdaki v1.2.0'ın tamamını içerir ve bir sonraki sürümden haberdar olmanın
