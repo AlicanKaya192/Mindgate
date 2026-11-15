@@ -2,7 +2,7 @@
 
 Mindgate is released under the MIT License (see [`LICENSE`](LICENSE)).
 
-Several skills and agents took ideas from the sources below. No code was copied from them, and the ideas were adapted and written in our own words, under the vault's rules; the exception is noted under License notices. Licenses are given as the skill files record them; "per the repository page" means the license was read from the repository page, not from its LICENSE file. Where no license is given, the skill file does not record one. Where a skill's method text follows a source closely, that source's license notice is reproduced under [License notices](#license-notices) at the end.
+Several skills and agents took ideas from the sources below. No code was copied from them, and the ideas were adapted and written in our own words, under the vault's rules; the exception is noted under License notices. Licenses are given as the skill files record them; "per the repository page" means the license was read from the repository page, not from its LICENSE file. Where no license is given, the skill file does not record one. Where a skill's method text follows a source closely, or a source's license asks for attribution, that source's license notice is given under [License notices](#license-notices) at the end.
 
 Each skill and agent keeps its own list in an "Idea sources" section (`Fikir kaynakları` in the Turkish files).
 
@@ -58,6 +58,7 @@ Each skill and agent keeps its own list in an "Idea sources" section (`Fikir kay
 | hashicorp/agent-skills (Terraform) | not recorded | `expert-server` |
 | ui-ux-pro-max (taken as an idea; not installed) | not recorded | `expert-design` |
 | Hallmark skill: the idea of a measuring audit and a preservation counter, from its output records (the skill itself was not read) | not recorded | `expert-design` |
+| Damir Sokolovsky, unslop (https://github.com/heydamir/unslop; read from a downloaded copy; match with the official repository not verified). Its license asks for attribution, so a notice is given below | CC BY 4.0 | `expert-design` (`references/ai-traces.md`, `references/visual-craft.md`) |
 | bilawalsidhu/gods-eye-view | code MIT; data and 3D models licensed separately | `expert-geodata` |
 | Jake Schincariol, `youtube-agent-skill` 1.0.0 (read from a downloaded copy; match with the official repository not verified). Its method texts are adapted closely, so its license notice is reproduced below | MIT | `expert-youtube` |
 | A public `/stil` skill text (address given with the text: `smokich.gosem.dev/stil`; the site was not opened, owner and license not verified) | not verified | `style` |
@@ -85,6 +86,9 @@ Several skill files note that a source was read from a downloaded copy and that 
 The skill files mark these as our own design, with no outside source: the two-ended structure of `advisor-method` (judging at the start and at the end), the off-by-default bridge of `external-agent`, the council of `orchestration` run through the central agent with a blind first round and at most two rounds, and the claim ledger, the data-flow order and the input contract of the calculation tool in `expert-brand-content`.
 
 ## License notices
+
+### unslop (used in `expert-design`)
+Parts of `expert-design` are adapted from unslop by Damir Sokolovsky (https://github.com/heydamir/unslop), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Adapted: writing a fix next to each trace and the **D** lines in `references/ai-traces.md`, the "how much to change" decision, the character and signature lines in the direction step, the last five interface-text rules, and the chart and stat card section in `references/visual-craft.md`. Changes: the text was rewritten; its code, numeric values and absolute bans were not taken, nor were its image generation and video sections.
 
 ### youtube-agent-skill (used in `expert-youtube`)
 The workflow ideas and method texts of `expert-youtube` are adapted from this project. The code, word lists and hook patterns were written anew; the numeric hook score was dropped.

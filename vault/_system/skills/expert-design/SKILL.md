@@ -19,6 +19,10 @@ So the answer is not to ban ornaments one by one. The answer: **make decisions, 
 - Read the user's taste and the designs they rejected: `me/profile.md` and the `design` lines in [[rejected-proposals]] (#39). This information is not written into the skill (#44).
 - If there is a template, apply its visual language too, not only its structure.
 - Write the **keep and add** list. If you will change an existing web interface, take its inventory first with `--baseline`: `references/audit.md`.
+- **How much to change:** On an existing screen, first go through the trace list in step 9 and count the findings, then decide and tell the user:
+  - **Many traces** (in color, type, icons and text at once): the whole flow.
+  - **Few traces** (the screen is largely designed): fix only what was found; the palette, type, layout and imagery stay. Bigger ideas are not changes; they go into the report as suggestions.
+  - **No traces:** say so plainly; suggest at most two or three small improvements with exact values, and apply them if the user wants. A good screen is not changed just to be different.
 
 ### 2. Brief
 One paragraph: topic, user, the 1–3 most important tasks, frequency of use (how many times a day), the feel wanted. If unclear, ask first (#23). Open up the vague word: not "profile page" but "the progress page of a person enrolled in the course".
@@ -31,7 +35,10 @@ Write before coding:
 - One distinct idea and material from the topic's own world.
 - 4–6 named colors (with values), typefaces and their roles.
 - A one-sentence layout idea and a rough ASCII sketch.
-- A single memorable element; calm around it.
+- A single memorable element; calm around it. Richness (color, material, detail) is not spread over the frame; it goes into one or two moments of the content: a carefully drawn chart, a real object from the product, an image from the product's world.
+- **Character** in two or three concrete words ("calm, precise, a little warm"). Not "clean, modern, sleek, simple, premium": they describe every template.
+- **Signature:** one small detail only this product would carry, used consistently (a live status dot in a monitoring tool, key caps in a developer tool). One, not five.
+- If the product has a real brand (logo, color, typeface), it is kept and the direction is built around it.
 
 **Swap test:** Could this plan be given to a different product as well? If yes, change that part and write why. Do not escape one default only to land on another (from purple gradient to cream-serif-terracotta).
 
@@ -97,6 +104,11 @@ Mobile first. Check at 320, 375, 768, 1280, 1440 and 1920 px widths; no horizont
 - A button says the action ("Save", not "OK"). The same action keeps the same name throughout the flow ("Publish" → "Published").
 - An error message does not apologize: what happened, what to do. An empty screen calls for an action.
 - Do not label data that is clear from its format; "12 left" instead of "Stock: 12".
+- A heading says in plain words what the product does for whom; if it would fit another product, rewrite it. Use the facts on the page; do not invent new ones.
+- No exclamation marks or hype words ("supercharge", "magic", "revolution") in interface text. Instead of a greeting heading, write the context: the page's name or the period.
+- Labels are short ("Search"). Headings, labels and buttons end without a period; periods stay only in paragraphs of several sentences.
+- A change says what it is compared with ("+12% vs last month").
+- A claim that cannot be verified ("10,000+ teams", "10× faster") is put to the user: if it is true, write it calmly and concretely; if not, remove it; list it in the report (#24).
 - Terms are consistent and in the interface language.
 
 ## Platform
@@ -119,6 +131,7 @@ Follow the platform's habits: Apple HIG, Microsoft Fluent, Material 3. Next to e
 - Designers: Anthony Hobday, Rauno Freiberg, Emil Kowalski, Adam Wathan and Steve Schoger (Refactoring UI), Josh Comeau, Ahmad Shadeed, Nikita Prokopov, Matthew Butterick, Luke Wroblewski.
 - Companies: Vercel, Linear, Stripe, Evil Martians, Microsoft Fluent.
 - Skills: anthropics/skills `frontend-design`, wshobson/agents `ui-design`, vercel-labs `web-design-guidelines`, ui-ux-pro-max (as an idea; not installed).
+- unslop, Damir Sokolovsky (CC BY 4.0, https://github.com/heydamir/unslop; read on 15 November 2026 from a downloaded copy, match with the official repository not verified). Adapted: writing a fix next to each trace and the **D** lines in `references/ai-traces.md`, the "how much to change" decision, the character and signature lines in the direction, the last five interface-text rules, and the chart and stat card section in `references/visual-craft.md`. The text was rewritten; its code, numeric values, absolute bans, image generation and video sections were not taken.
 - The idea of a measuring audit and a preservation counter: the output records of the Hallmark skill in a project (the skill itself was not read, no code taken; the scripts are our own).
 - WCAG 2.2: https://www.w3.org/TR/WCAG22/
 

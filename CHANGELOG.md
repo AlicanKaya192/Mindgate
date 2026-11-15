@@ -29,6 +29,12 @@ file, open it before you use that skill or agent again; hooks belong in `setting
   left and right margins, images that did not load or have no size, WebGL contexts over a limit (`--webgl-limit`,
   default 4), and, in one extra measurement under `prefers-reduced-motion: reduce`, animations and rAF loops that keep
   running. Page weight comes from Resource Timing; what cannot be measured is printed as `UNMEASURABLE`.
+- **The AI-trace list says what to do instead** (`expert-design`): every trace in `references/ai-traces.md` now
+  carries its fix, and new **D** traces cover surface, icons, text, charts, the hero, motion and the template a
+  cleaned-up screen falls back to. The flow decides first how much an existing screen should change; the direction
+  names a character and one signature detail and keeps a real brand; five more interface-text rules; a chart and stat
+  card section in `references/visual-craft.md`. Adapted from unslop (Damir Sokolovsky, CC BY 4.0); the text was
+  rewritten, and its code, numeric values and absolute bans were not taken. Attribution is in `NOTICE.md`.
 - **Searching a skill directory without installing** (`external-source-review`, new step 0): look at your own
   skills first, search only through the browser with permission, never run the directory's install tool, and treat
   install counts and stars as reading order, not as safety. The candidate's `SKILL.md` is read before any decision.

@@ -29,6 +29,13 @@ Bir dosya adı görünürse o beceriyi ya da ajanı yeniden kullanmadan önce do
   sağ boşluk, yüklenmemiş ya da boyutsuz görsel, sınırı aşan WebGL bağlamı (`--webgl-limit`, varsayılan 4) ve
   `prefers-reduced-motion: reduce` altındaki ek ölçümde durmayan animasyon ve rAF döngüsü. Sayfa ağırlığı Resource
   Timing'den okunur; ölçülemeyen `UNMEASURABLE` diye yazılır.
+- **Yapay zekâ izi listesi yerine ne yapılacağını söylüyor** (`expert-design`, Türkçe kurulumda `uzman-tasarim`):
+  `references/yapay-zeka-izi.md`'deki her işaret artık düzeltmesini taşır; yeni **D** işaretleri yüzey, simge, metin,
+  grafik, açılış bölümü, hareket ve temizlenmiş ekranın düştüğü şablonu kapsar. Akış, var olan ekranın ne kadar
+  değişeceğine önce karar verir; yön bir karakter ve tek imza ayrıntısı adlandırır, gerçek markayı korur; arayüz metnine
+  beş kural daha; `references/gorsel-zanaat.md`'ye grafik ve sayı kartı bölümü. unslop'tan uyarlandı (Damir
+  Sokolovsky, CC BY 4.0); metin yeniden yazıldı, kodu, sayısal değerleri ve mutlak yasakları alınmadı. Atıf
+  `NOTICE.md`'de.
 - **Kurmadan beceri dizininde arama** (`external-source-review`, yeni 0. adım): önce kendi becerilerine bak, yalnızca
   izinle ve tarayıcıdan ara, dizinin kurulum aracını çalıştırma; kurulum sayısı ve yıldız okuma sırasını belirler,
   güvenliği değil. Karardan önce adayın `SKILL.md` dosyası okunur.

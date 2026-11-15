@@ -19,6 +19,10 @@ Bu yüzden çözüm tek tek süs yasaklamak değildir. Çözüm: **karar vermek,
 - Kullanıcının zevkini ve reddettiği tasarımları oku: `ben/profil.md` ve [[reddedilen-oneriler]]'de `tasarım` satırları (#39). Bu bilgiler beceriye yazılmaz (#44).
 - Şablon varsa görsel dilini de uygula, yalnızca yapısını değil.
 - **Korunacak ve eklenecek** listesini yaz. Var olan web arayüzünü değiştireceksen önce `--baseline` ile envanterini al: `references/denetim.md`.
+- **Ne kadar değişecek:** Var olan ekranda önce 9. adımdaki iz listesini geç ve bulguları say, sonra karar ver ve kullanıcıya söyle:
+  - **Çok iz** (renk, yazı, simge ve metinde birden): akışın tamamı.
+  - **Az iz** (ekran büyük ölçüde tasarlanmış): yalnızca bulunanı düzelt; palet, yazı, düzen ve görsel kalır. Daha büyük fikirler değişiklik değil, raporda öneri olur.
+  - **İz yok:** bunu açıkça söyle; en çok iki üç küçük iyileştirmeyi kesin değerleriyle öner, kullanıcı isterse uygula. İyi bir ekran yalnızca farklı olsun diye değiştirilmez.
 
 ### 2. Brief
 Tek paragraf: konu, kullanıcı, en önemli 1–3 görev, kullanım sıklığı (günde kaç kez), istenen his. Belirsizse önce sor (#23). Belirsiz kelimeyi aç: "profil sayfası" değil, "kursa kayıtlı kişinin kendi ilerleme sayfası".
@@ -31,7 +35,10 @@ Kod yazmadan yaz:
 - Tek belirgin fikir ve konunun kendi dünyasından gelen malzeme.
 - 4–6 adlandırılmış renk (değerleriyle), yazı tipleri ve rolleri.
 - Tek cümlelik düzen fikri ve kaba ASCII taslak.
-- Tek akılda kalacak öğe; çevresi sakin.
+- Tek akılda kalacak öğe; çevresi sakin. Zenginlik (renk, malzeme, ayrıntı) çerçeveye yayılmaz, içeriğin bir iki anına konur: özenle çizilmiş bir grafik, ürünün gerçek bir nesnesi, ürünün dünyasından bir görüntü.
+- **Karakter** iki üç somut kelimeyle ("sakin, kesin, biraz sıcak"). "Temiz, modern, şık, sade, premium" yazılmaz: her şablonu anlatırlar.
+- **İmza:** yalnızca bu ürünün taşıyacağı tek küçük ayrıntı, tutarlı kullanılır (izleme aracında canlı durum noktası, geliştirici aracında tuş görünümü gibi). Bir tane, beş değil.
+- Ürünün gerçek bir markası (logo, renk, yazı tipi) varsa korunur ve yön onun çevresine kurulur.
 
 **Değiştirme sınavı:** Bu plan başka bir ürüne de verilebilir mi? Verilebiliyorsa o kısmı değiştir ve nedenini yaz. Bir varsayılandan kaçarken başka bir varsayılana düşme (mor gradyandan krem-serif-kiremide).
 
@@ -97,6 +104,11 @@ Mobil önce. 320, 375, 768, 1280, 1440 ve 1920 px genişlikte kontrol et; yatay 
 - Düğme eylemi söyler ("Kaydet", "Tamam" değil). Aynı eylem akış boyunca aynı adı taşır ("Yayınla" → "Yayınlandı").
 - Hata mesajı özür dilemez: ne oldu, ne yapılacak. Boş ekran bir eyleme çağırır.
 - Biçimden anlaşılan veriye etiket koyma; "Stok: 12" yerine "12 adet kaldı".
+- Başlık ürünün kime ne yaptığını düz kelimelerle söyler; başka ürüne uyuyorsa yeniden yazılır. Sayfadaki olgular kullanılır, yenisi uydurulmaz.
+- Arayüz metninde ünlem ve abartı kelime ("güçlendirin", "sihirli", "devrim") olmaz. Selamlama başlığı yerine bağlam yazılır: sayfanın adı ya da dönem.
+- Etiket kısa olur ("Ara"). Başlık, etiket ve düğme noktasız biter; nokta yalnızca birkaç cümlelik paragrafta kalır.
+- Değişim neye göre olduğunu söyler ("geçen aya göre +%12").
+- Doğrulanamayan iddia ("10.000+ ekip", "10 kat hızlı") kullanıcıya sorulur: gerçekse sakin ve somut yazılır, değilse kaldırılır; raporda listelenir (#24).
 - Türkçe arayüzde Türkçe, terimler tutarlı.
 
 ## Platform
@@ -119,6 +131,7 @@ Platformun alışkanlığına uy: Apple HIG, Microsoft Fluent, Material 3. Her t
 - Tasarımcılar: Anthony Hobday, Rauno Freiberg, Emil Kowalski, Adam Wathan ve Steve Schoger (Refactoring UI), Josh Comeau, Ahmad Shadeed, Nikita Prokopov, Matthew Butterick, Luke Wroblewski.
 - Şirketler: Vercel, Linear, Stripe, Evil Martians, Microsoft Fluent.
 - Beceriler: anthropics/skills `frontend-design`, wshobson/agents `ui-design`, vercel-labs `web-design-guidelines`, ui-ux-pro-max (fikir olarak; kurulmadı).
+- unslop, Damir Sokolovsky (CC BY 4.0, https://github.com/heydamir/unslop; 15 Kasım 2026'da indirilen kopyadan okundu, resmî depoyla eşleşmesi doğrulanmadı). Uyarlananlar: işaretin yanına düzeltme yazmak ve `references/yapay-zeka-izi.md`'deki **D** satırları, "ne kadar değişecek" kararı, yöndeki karakter ve imza satırları, arayüz metni kurallarının son beşi, `references/gorsel-zanaat.md`'deki grafik ve sayı kartı bölümü. Metin yeniden yazıldı; kodu, sayısal değerleri, mutlak yasakları, görsel üretimi ve video bölümleri alınmadı.
 - Ölçen denetim ve koruma sayacı fikri: Hallmark becerisinin bir projedeki çıktı kayıtları (kendisi okunmadı, kod alınmadı; betikler bizim yazımız).
 - WCAG 2.2: https://www.w3.org/TR/WCAG22/
 

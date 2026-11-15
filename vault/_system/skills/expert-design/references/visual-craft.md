@@ -68,6 +68,15 @@ A safe starting point, not a rule: break it if you have a reason (Hobday). **(S)
 - Lower the contrast of an icon next to text, because the icon looks heavy. A thin icon can be thickened next to medium-weight text. (Hobday, Vercel)
 - Hover, press and focus have higher contrast than the resting state. (Vercel)
 
+## Chart and stat card
+Craft judgment, not measurement (adapted from unslop, CC BY 4.0; source in `SKILL.md` "Idea sources").
+- The data picks the chart type: a trend is a line, a comparison is bars, a share is a single stacked bar or a list with bars, a single target is a progress bar.
+- A screen has one main chart, and it is the largest element. Other elements that show data are smaller and of a different kind (a ranked list, a short table), not a second chart of the same size.
+- One emphasis per chart: what matters (the current month, the line being watched) takes the accent color and the rest stays in neutral steps. Use several colors only when series must be told apart; even then one leads.
+- Grid lines and axis labels are faint. If the chart is a meaningless placeholder, replace it with data that says something.
+- A stat card is a number: a label, a large number and what it changed against. No mini chart, decorative line or icon to fill the space.
+- Cards side by side at the same width, carrying the same kind of content, read like a template; give the grid a rhythm (for example a row of small stat cards with one wide chart below).
+
 ## Process (Linear)
 - Saarinen designed full-screen sets and flows every day for a few weeks, produced hundreds of screens, then narrowed to a few directions. (Linear) Do not settle for a single sketch.
 - Test by view types: list, board, timeline, split, full screen. The direction goes through a stress test on every main screen.

@@ -68,6 +68,15 @@ Kural değil, güvenli başlangıçtır: gerekçen varsa çiğne (Hobday). **(K)
 - Metin yanındaki simgenin kontrastını düşür, simge ağır görünür. İnce simge orta kalınlıkta metnin yanında kalınlaştırılabilir. (Hobday, Vercel)
 - Üzerine gelme, basılma, odak dinlenme hâlinden yüksek kontrastlı. (Vercel)
 
+## Grafik ve sayı kartı
+Zanaat görüşü, ölçüm değil (unslop'tan uyarlandı, CC BY 4.0; kaynak `SKILL.md` "Fikir kaynakları").
+- Grafik türünü veri seçer: eğilim çizgi, karşılaştırma çubuk, pay tek yığılmış çubuk ya da çubuklu liste, tek hedef ilerleme çubuğu.
+- Ekranda tek ana grafik olur ve en büyük öğe odur. Veri gösteren öteki öğeler daha küçük ve farklı türdedir (sıralı liste, kısa tablo); aynı boyda ikinci bir grafik değil.
+- Grafik başına tek vurgu: önemli olan (içinde bulunulan ay, izlenen çizgi) vurgu rengini alır, gerisi nötr basamaklarda kalır. Birden çok renk yalnızca serileri ayırmak gerekiyorsa; o zaman da biri öndedir.
+- Izgara çizgileri ve eksen etiketleri soluktur. Grafik anlamsız yer tutucuysa bir şey anlatan veriyle değiştirilir.
+- Sayı kartı sayıdır: etiket, büyük sayı ve neye göre değiştiği. Boşluğu doldurmak için mini grafik, süs çizgisi ya da simge eklenmez.
+- Yan yana aynı genişlikte, aynı türde içerik taşıyan kartlar şablon gibi okunur; ızgaraya ritim ver (bir sıra küçük sayı kartı ve altında tek geniş grafik gibi).
+
 ## Süreç (Linear)
 - Saarinen birkaç hafta her gün tam ekran seti ve akış tasarlayarak yüzlerce ekran üretti, sonra birkaç yöne indirdi. (Linear) Tek taslakla yetinme.
 - Görünüm türlerine göre sına: liste, pano, zaman çizelgesi, bölünmüş, tam ekran. Yön, her ana ekranda stres testinden geçer.
