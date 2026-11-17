@@ -26,6 +26,7 @@ Claude Code içinde bir proje klasöründesin.
 - **Sınırlar:** Yalnızca bu klasörde çalış. Kendi ürettiğin dosyaların dışında hiçbir dosyayı silme ya da taşıma. Paket ya da program kurma, web'e çıkma: eksik bir araç ya da izin gerekiyorsa dur, neyin neden gerektiğini yaz ve kullanıcıya sor. Süreç öldürme; port gerekiyorsa boş port seç. Video, kredi ve kodda yapay zekâ imzası olmaz.
 - **Kur:** Animasyonu bu klasörde `index.html` olarak yaz (gerekirse ayrı JS ve CSS dosyaları). `window.seek(t)` fonksiyonunu dışa aç (t saniye cinsinden): t anının karesini deterministik çizer. requestAnimationFrame zamanlamasına, `Date.now()`'a ya da tohumsuz `Math.random()`'a bağlı olmaz; rastgelelik tohumlu bir üreteçten gelir. Zamanlama sabit saniyelerle değil, çözülen toplam süreye oranla yazılır. Fontlar `fonts/` klasöründen yerel yüklenir; klasörde yoksa sistem fontuyla yakın bir eşleşme kullan ve raporda belirt.
 - **Çiz (render):** Kurulu ekransız tarayıcıyı (Edge ya da Chrome) `puppeteer-core` ile sür. Sayfayı `file://` ile aç, her kare için `seek(i / fps)` çağır, yapılandırılan doğal çözünürlükte yakala ve ffmpeg ile `out/final.mp4` olarak kodla (H.264, yuv420p). Kareleri `out/kareler/` altında tut.
+- **Önce durağan kare:** Tam videoyu çizmeden önce zaman çizelgesinin 4–6 önemli anını (açılış, her ana fikir, kapanış) tek tek PNG olarak çiz ve bak; sorunları orada düzelt. Tam çizim pahalı adımdır, bozuk bir kareyi ona taşıma.
 - **Seslendirme açıksa:** kayıt bu klasördedir ve süresi ana saattir. Kelime zaman damgalarını kurulu bir Whisper ile al (kurulu değilse dur ve sor). Her görsel fikri söylendiği ana hizala. Kaydı son MP4'e ekle. Seslendirme metni ya da zaman damgası asla uydurulmaz.
 - **Seslendirme kapalıysa:** sabit süreyi kullan; anlatımı görüntüler, kısa ekran metni ve hareket eden diyagramlar taşır.
 - **Ses efektleri açıksa:** klasördeki efekt dosyalarını kullan. Ayar "izinle Openverse" ise yalnızca kullanıcının izin verdiği `api.openverse.org` adresinden CC0 lisanslı ses al (`/v1/audio/?q=<arama>&license=cc0`). Efektler seyrek ve anlamlı anlara bağlı olur; ffmpeg ile tam zaman damgalarına yerleştirilir; kaynaklar `CREDITS.md`'ye yazılır.
@@ -37,6 +38,7 @@ Claude Code içinde bir proje klasöründesin.
 - **Gösteri değil, anlatım.** Önce izleyicinin neyi anlaması gerektiğine karar ver; sonra anlatımı grafiklerin kendisi yapsın: dönüşen nesneler, kurulan diyagramlar, hareket eden sayılar. Hiçbir şey öğretmeyen süs çıkarılır.
 - **Bağlı anlatı.** Sahneler birbirinden doğar; bir fikirdeki öğe sonrakinin başlangıcı olur. Video asla ayrı kartlardan oluşan bir slayt gösterisi gibi durmaz.
 - **Net hiyerarşi.** Her anda tek ana fikir, tek odak noktası, geniş kenar boşlukları; metin telefonda okunur ve okunacak kadar sabit kalır.
+- **Çeşitlilik.** Aynı geçiş art arda iki kez kullanılmaz; video boyunca en az üç farklı geçiş türü olur. Bilerek tekrarlanan bir hareket (motif) sahne planında "motif" diye işaretlenir; işaretsiz tekrar hatadır.
 - **Akıcılık.** Her harekette yumuşatma (easing); titreme, birden belirme ve hiçbir şeyin karar verilmediği kare yok.
 
 # 4. DOĞRULAMA

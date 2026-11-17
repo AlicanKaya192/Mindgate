@@ -32,12 +32,14 @@ The style prompt is written like craft knowledge that an expert designer hands t
 ## 4. Test the prompt, not only the video
 1. Fill in the config with the user's subject: duration 8 s, storyboard off, sound and effects off.
 2. Run the prompt **as written** in a fresh context: a sub-agent (`general-purpose`, with `model` written explicitly). Give the task text only the prompt, the project folder and the rules: no deletion (it overwrites only its own output files), no going to the web, no installing packages, no killing processes. If a sub-agent cannot be used, apply it yourself looking only at the prompt.
-3. Extract frames from the video (`ffmpeg -vf fps=2`) and make a montage side by side with the reference. Judge honestly: would someone believe the two were made by the same designer? In the judgment use the critique steps of `expert-design`.
-4. If they would not, fix the **prompt line** that creates the biggest difference (do not fix the video by hand) and run again. In every round keep a "difference → the line changed in the prompt" record.
+3. Extract frames from the video (`ffmpeg -vf fps=2`) and make a montage side by side with the reference. Judge honestly: would someone believe the two were made by the same designer? In the judgment use the critique steps of `expert-design`. **The maker is not the judge:** do not leave the judgment to the subagent that made the video, and do not count its "I fixed this" note as evidence; look only at the frames, the reference and the topic. If you hand the judgment to a separate subagent, give it only those.
+4. If they would not, fix the **prompt line** that creates the biggest difference (do not fix the video by hand) and run again. In every round keep a "difference → the line changed in the prompt" record. The number of rounds is not fixed: stop when the remaining differences are cosmetic or the user says it is enough.
 5. The first draft is not a finished prompt: expect 2–3 rounds. The style is ready when a fresh, unaided run comes out as good as the reference.
 
 ## 5. Delivery and learning
 - Show the test video and `style-prompt.md`; summarize the round records briefly.
+- **Measured is not listened to:** you cannot hear audio. When there is sound, write what you measured (for example loudness and peak with `ffmpeg -af ebur128`) and say "I did not listen"; give the user 3–5 timestamps to check with headphones. A measurement does not judge taste; never say "it sounds good" (#24).
+- When the user finds a problem in a video you passed, do not only fix the video: add the check that would have caught it to the judgment in step 4.
 - When the user gives feedback, fix the video and add the lesson, in the user's own words, to the **"Notes"** section at the end of the prompt, so that the next video does not need the same fix. A rejected proposal is also written to `rejected-proposals` (#39).
 - There is no AI signature in the video or the credits (#14).
 
@@ -49,11 +51,13 @@ The style prompt is written like craft knowledge that an expert designer hands t
 - [ ] The hex values come from the script output; the style sections are 2,000–4,000 words and all 11 sections are present.
 - [ ] The shared body was copied without changes; the placeholders are in place.
 - [ ] At least one fresh run was done; the side-by-side montage with the reference was seen; the round records exist.
+- [ ] When there is sound, the report states what was measured and what was not listened to.
 - [ ] No text, logo or layout was copied from the reference.
 - [ ] Installs, downloads and web access were done only with the permission received; no files were deleted outside the project.
 
 ## Idea sources
 - The `/stil` skill: adapted from a public /stil skill text (the source address given with the text: `smokich.gosem.dev/stil`). The site was not opened; its owner and license were not verified. The idea was taken and the text was rewritten in our own sentences and according to our rules (#35). What changed: permission instead of installing a missing tool by itself, sound and font downloads with permission, a logo only from the user's file, output outside the vault.
+- A review of sixteen public video and motion graphics skill repositories (17 November 2026). No code was taken; four methods that recur across several of them were written in our own words: still frames before the full render, separating the maker from the judge, reporting measured and listened-to separately, a variety check. They have not yet been tried on a real render.
 
 ## Lessons
 <!-- The central agent adds verified lessons here: general and reusable, without project names or dates. -->

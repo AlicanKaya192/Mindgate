@@ -15,6 +15,12 @@ If there is no transcript, ask for one. The automatic captions of a video upload
 | FILLER | A cue made only of filler words ("um", "uh", Turkish "eee", "yani") | A sentence such as "So this method works" is not cut |
 | REPEAT | A restarted sentence | When the previous speech cue matches the start of the next one and there is a pause between them, the first attempt is cut; an "um" in between does not count. Rolling caption cues that touch end to end are not counted |
 
+**Cut in two passes and record every cut:**
+1. First only the DEAD lines. They rest on a measurement and can be approved together.
+2. Then the FILLER and REPEAT candidates. The script's suggestion is a candidate, not a decision: read each one with the sentence before and after it, and do not cut when the meaning breaks.
+3. In the list you give the user, every cut carries its start, end and reason ("12:04–12:09, repeat: the sentence starts over"). Also write the candidates you decided not to cut, with the reason; the list is the record that later explains why the edit is the way it is.
+4. The raw recording stays unchanged; tell the user to save the cut file under a new name.
+
 **Careful:** The shortening percentage is measured on speech time only. If the video has a long silent demo, the real runtime differs. Do not trust the runtime before checking it against the footage.
 
 **Known limits:** Whether automatic captions write out "um" or Turkish "eee" was not verified; if they do not, filler shows up only as a pause. The real format of YouTube's own VTT files was not verified either. A file saved as UTF-16 (Notepad's "Unicode") is not read; the tool says so, save it as UTF-8.

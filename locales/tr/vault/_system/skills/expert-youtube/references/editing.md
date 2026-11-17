@@ -15,6 +15,12 @@ Döküm yoksa kullanıcıdan iste. YouTube'a liste dışı (unlisted) yüklenen 
 | DOLGU | Yalnızca dolgu kelimesinden oluşan satır ("eee", "yani", "ııı") | "Yani bu yöntem işe yarıyor" gibi cümle kesilmez |
 | TEKRAR | Yeniden başlanan cümle | Önceki konuşma satırı sonrakinin başıyla aynıysa ve aralarında duraklama varsa ilk deneme kesilir; aradaki "eee" sayılmaz. Uç uca eklenen kayan altyazı satırları tekrar sayılmaz |
 
+**İki aşamada kes, her kesimi kayda geçir:**
+1. Önce yalnızca BOŞLUK satırları. Bunlar ölçüme dayanır; toplu onaylanabilir.
+2. Sonra DOLGU ve TEKRAR adayları. Betiğin önerisi adaydır, karar değil: her birini önceki ve sonraki cümleyle birlikte oku, anlamı bozuyorsa kesme.
+3. Kullanıcıya verdiğin listede her kesim başlangıç, bitiş ve neden taşır ("12:04–12:09, tekrar: cümle yeniden başlıyor"). Kesmemeye karar verdiğin adayları da nedeniyle yaz; liste, kurgunun neden böyle olduğunu sonradan açıklayan kayıttır.
+4. Ham kayıt değişmez; kullanıcıya kesilmiş dosyayı yeni adla kaydetmesini söyle.
+
 **Dikkat:** Kısalma yüzdesi yalnızca konuşma süresinden hesaplanır. Videoda uzun bir sessiz gösterim varsa gerçek süre farklıdır. Sonucu görüntüyle karşılaştırmadan süreye güvenme.
 
 **Bilinen sınırlar:** Otomatik altyazıların "eee" ve "ııı" seslerini yazıp yazmadığı doğrulanmadı; yazmıyorsa dolgu yalnızca boşluk olarak görünür. YouTube'un kendi VTT dosyalarının gerçek biçimi de doğrulanmadı. UTF-16 kaydedilmiş dosya (Not Defteri'nde "Unicode") okunmaz; araç bunu söyler, UTF-8 olarak kaydet.

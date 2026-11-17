@@ -55,6 +55,7 @@ py -3 -I scripts/chapters.py --check list.txt --duration 612
 ## Idea sources
 - Jake Schincariol, `youtube-agent-skill` 1.0.0. License: MIT, Copyright (c) 2026 Jake Schincariol; the full permission notice is in `NOTICE.md`. Taken: the eleven workflows and their method texts (adapted closely into English and Turkish), splitting a hook into features and looking at the weakest one, treating title and thumbnail as one unit, reading a niche against each channel's own median, an audit that ends in one fix. No code was taken: the tools, word lists and hook patterns were written anew and the numeric score was dropped. A downloaded copy was read; it was not verified against the official repository.
 - YouTube Help, "Video Chapters" (support.google.com/youtube/answer/9884579) and "Edit video settings" (support.google.com/youtube/answer/57404). Read on 13 November 2026.
+- A review of sixteen public video and motion graphics skill repositories (17 November 2026). No code was taken; the two-pass cut and the decision list with reasons were written in our own words. Not yet tried on a real recording.
 
 ## Lessons
 <!-- The central agent adds verified lessons: date — project — lesson. -->

@@ -32,12 +32,14 @@ Stil istemi, uzman bir tasarımcının çırağına aktardığı zanaat bilgisi 
 ## 4. İstemi sına, yalnızca videoyu değil
 1. Config'i kullanıcının konusuyla doldur: süre 8 sn, storyboard kapalı, ses ve efekt kapalı.
 2. İstemi **yazıldığı gibi** taze bir bağlamda çalıştır: alt ajan (`general-purpose`, `model` açık yazılır). Görev metnine yalnızca istemi, proje klasörünü ve kuralları ver: silme yok (yalnızca kendi çıktı dosyalarının üstüne yazar), web'e çıkma yok, paket kurma yok, süreç öldürme yok. Alt ajan kullanılamıyorsa yalnızca isteme bakarak kendin uygula.
-3. Videodan kareler çıkar (`ffmpeg -vf fps=2`) ve referansla yan yana bir montaj yap. Dürüstçe değerlendir: biri ikisini aynı tasarımcının yaptığına inanır mı? Değerlendirmede `uzman-tasarim` eleştiri adımlarını kullan.
-4. İnanmazsa en büyük farkı yaratan **istem satırını** düzelt (videoyu elle düzeltme) ve yeniden çalıştır. Her turda "fark → istemde değişen satır" kaydını tut.
+3. Videodan kareler çıkar (`ffmpeg -vf fps=2`) ve referansla yan yana bir montaj yap. Dürüstçe değerlendir: biri ikisini aynı tasarımcının yaptığına inanır mı? Değerlendirmede `uzman-tasarim` eleştiri adımlarını kullan. **Yapan ile yargılayan ayrıdır:** değerlendirmeyi videoyu üreten alt ajana bırakma, onun "şunu düzelttim" açıklamasını da ölçüt sayma; yalnızca karelere, referansa ve konuya bak. Değerlendirmeyi ayrı bir alt ajana verirsen ona yalnızca bunları ver.
+4. İnanmazsa en büyük farkı yaratan **istem satırını** düzelt (videoyu elle düzeltme) ve yeniden çalıştır. Her turda "fark → istemde değişen satır" kaydını tut. Tur sayısı sabit değildir: kalan farklar kozmetik kalınca ya da kullanıcı yeter deyince dur.
 5. İlk taslak bitmiş istem değildir: 2–3 tur bekle. Stil, taze ve yardımsız bir çalıştırma referans kadar iyi çıkınca hazırdır.
 
 ## 5. Teslim ve öğrenme
 - Test videosunu ve `stil-prompt.md`'yi göster; tur kayıtlarını kısaca özetle.
+- **Ölçülen ile dinlenen ayrı:** sesi dinleyemezsin. Ses varsa ne ölçtüğünü yaz (ör. `ffmpeg -af ebur128` ile ses düzeyi ve tepe) ve "dinlemedim" de; kullanıcıya kulaklıkla bakması için 3–5 zaman damgası ver. Ölçüm zevki yargılamaz; "iyi duyuluyor" deme (#24).
+- Senin geçirdiğin videoda kullanıcı bir sorun bulursa yalnızca videoyu düzeltme: o sorunu yakalayacak denetimi 4. adımdaki değerlendirmeye ekle.
 - Kullanıcı geri bildirim verince videoyu düzelt ve dersi istemin sonundaki **"Notlar"** bölümüne kullanıcının kendi sözleriyle ekle; bir sonraki video aynı düzeltmeyi istemesin. Reddedilen öneri ayrıca `reddedilen-oneriler`'e yazılır (#39).
 - Video ve kredilerde yapay zekâ imzası olmaz (#14).
 
@@ -49,11 +51,13 @@ Stil istemi, uzman bir tasarımcının çırağına aktardığı zanaat bilgisi 
 - [ ] Hex değerleri betik çıktısından; stil bölümleri 2.000–4.000 kelime, 11 bölümün hepsi var.
 - [ ] Ortak gövde değiştirilmeden kopyalandı; yer tutucular yerinde.
 - [ ] En az bir taze çalıştırma yapıldı; referansla yan yana montaj görüldü; tur kayıtları var.
+- [ ] Ses varsa raporda ölçülen ile dinlenmeyen ayrı yazıldı.
 - [ ] Referanstan metin, logo ya da yerleşim kopyalanmadı.
 - [ ] Kurulum, indirme ve web erişimi yalnızca alınan izinle yapıldı; proje dışında dosya silinmedi.
 
 ## Fikir kaynakları
 - `/stil` becerisi: herkese açık bir /stil beceri metninden uyarlandı (metinle birlikte verilen kaynak adresi: `smokich.gosem.dev/stil`). Site açılmadı; sahibi ve lisansı doğrulanmadı. Fikir alındı, metin kendi cümlelerimizle ve kurallarımıza göre yeniden yazıldı (#35). Değişenler: eksik aracı kendiliğinden kurma yerine izin, ses ve font indirme izinle, logo yalnızca kullanıcı dosyasından, çıktı vault dışında.
+- Herkese açık on altı video ve hareketli grafik becerisi deposunun incelemesi (17 Kasım 2026). Kod alınmadı; birden çok depoda tekrar eden dört yöntem kendi cümlelerimizle yazıldı: tam çizimden önce durağan kare, yapan ile yargılayanın ayrılması, ölçülen ile dinlenenin ayrı raporlanması, çeşitlilik denetimi. Yöntemler gerçek bir çizimde henüz sınanmadı.
 
 ## Dersler
 <!-- Merkezî ajan doğrulanmış dersleri ekler: genel, yeniden kullanılabilir; proje adı ve tarih olmadan. -->
