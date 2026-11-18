@@ -61,6 +61,7 @@ Each skill and agent keeps its own list in an "Idea sources" section (`Fikir kay
 | Damir Sokolovsky, unslop (https://github.com/heydamir/unslop; read from a downloaded copy; match with the official repository not verified). Its license asks for attribution, so a notice is given below | CC BY 4.0 | `expert-design` (`references/ai-traces.md`, `references/visual-craft.md`) |
 | bilawalsidhu/gods-eye-view | code MIT; data and 3D models licensed separately | `expert-geodata` |
 | Jake Schincariol, `youtube-agent-skill` 1.0.0 (read from a downloaded copy; match with the official repository not verified). Its method texts are adapted closely, so its license notice is reproduced below | MIT | `expert-youtube` |
+| gamedev-skills/awesome-gamedev-agent-skills (read from github.com on 18 November 2026; not installed). Ideas and thresholds adapted in our own words; no text or code copied. Version information is the owner's declaration and was not independently verified | Apache-2.0 | `expert-game` |
 | A public `/stil` skill text (address given with the text: `smokich.gosem.dev/stil`; the site was not opened, owner and license not verified) | not verified | `style` |
 
 Several skill files note that a source was read from a downloaded copy and that its match with the official repository was not verified.

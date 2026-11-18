@@ -117,6 +117,7 @@
     "expert-brand-content": "uzman-marka-icerigi",
     "expert-architecture": "uzman-mimari",
     "expert-ml": "uzman-ml",
+    "expert-game": "uzman-oyun",
     "expert-seo": "uzman-seo",
     "expert-server": "uzman-sunucu",
     "expert-design": "uzman-tasarim",
@@ -151,7 +152,19 @@
     "thresholds": "esikler",
     "voice-profile": "ses-profili",
     "ad_metrics": "reklam_hesap",
-    "ad_metrics_test": "reklam_hesap_test"
+    "ad_metrics_test": "reklam_hesap_test",
+    "feel-camera-level": "his-kamera-seviye",
+    "ai-generation": "yapay-zeka-uretim",
+    "save-dialogue-input-ui": "kayit-diyalog-girdi-arayuz",
+    "audio-shader-physics-performance": "ses-golgelendirici-fizik-performans",
+    "genres": "turler",
+    "workflows": "is-akislari",
+    "engine-godot": "motor-godot",
+    "engine-unity": "motor-unity",
+    "engine-unreal": "motor-unreal",
+    "engine-web": "motor-web",
+    "engine-other": "motor-diger",
+    "engine-roblox": "motor-roblox"
   },
   "tasks": {
     "daily": "gunluk",

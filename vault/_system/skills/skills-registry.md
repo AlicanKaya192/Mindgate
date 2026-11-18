@@ -33,6 +33,7 @@ Loaded by themselves (when the work touches that field). Specialization builds u
 | `expert-writing` | Game narrative, character, dialogue, story, interface text, technical documents, design briefs | 0 | — |
 | `expert-geodata` | Public live geographic data (aircraft, ships, satellite passes, earthquakes, maps) and OSINT-style event and infrastructure research | 0 | — |
 | `expert-youtube` | YouTube scripts and hooks, title and thumbnail, edit decision list, Shorts, chapters, search text, comments, weekly plan, channel audit (Turkish and English); four offline tools in `scripts/` | 0 | — |
+| `expert-game` | Game development: engine routing (Godot, Unity, Unreal, Phaser, PixiJS, three.js, Bevy, pygame, LÖVE, Defold, Ebitengine, Roblox), game feel, camera, level design, AI, saves, audio, performance, genres, game jam and release workflows, a verification ladder | 0 | — |
 | `expert-brand-content` | Brand content and ad preparation: input inventory, claim ledger, post and carousel copy, product shoot brief, UGC script, ad test plan, reading ROAS and CPA; offline calculation tool `scripts/ad_metrics.py` | 0 | — |
 
 ### Method skills

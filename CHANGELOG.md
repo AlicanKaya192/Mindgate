@@ -44,6 +44,12 @@ file, open it before you use that skill or agent again; hooks belong in `setting
   a CSV without guessing the format: currency and attribution columns are named or declared absent, mixed currencies
   and broken cells are refused, and so are identical lines unless `--count-duplicates` is given. `expert-content`
   now points to it for brand copy.
+- **New skill: game development** (`expert-game`): finds the engine from the project files (Godot, Unity, Unreal,
+  Phaser, PixiJS, three.js, Bevy, pygame, LÖVE, Defold, Ebitengine, Roblox), then reads only the needed discipline
+  (game feel, camera, level design, AI, procedural generation, saves, dialogue, input, UI, audio, shaders, physics,
+  performance), genre and workflow (game jam, prototype, Steam, itch.io, game document) files. A verification ladder
+  separates what ran from what was only checked or not verified; fun, feel and sound stay the user's call. Ideas and
+  thresholds adapted in our own words; no text or code copied. Attribution is in `NOTICE.md`.
 
 ## v1.2.1 — Security update: update check
 

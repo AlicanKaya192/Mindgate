@@ -45,6 +45,13 @@ Bir dosya adı görünürse o beceriyi ya da ajanı yeniden kullanmadan önce do
   dönüşüm, gelir, CPA ve ROAS hesaplar, biçim tahmin etmez: para birimi ve atıf sütunu ya adıyla verilir ya da yok
   diye beyan edilir; karışık para birimi ve bozuk hücre reddedilir, birebir aynı satırlar da `--count-duplicates`
   verilmedikçe. `uzman-icerik` marka metni için artık bu beceriyi gösterir.
+- **Yeni beceri: oyun geliştirme** (`expert-game`, Türkçe kurulumda `uzman-oyun`): motoru proje dosyalarından bulur
+  (Godot, Unity, Unreal, Phaser, PixiJS, three.js, Bevy, pygame, LÖVE, Defold, Ebitengine, Roblox), sonra yalnızca
+  gereken disiplin (oyun hissi, kamera, seviye tasarımı, yapay zekâ, prosedürel üretim, kayıt, diyalog, girdi,
+  arayüz, ses, gölgelendirici, fizik, performans), tür ve iş akışı (game jam, prototip, Steam, itch.io, oyun belgesi)
+  dosyalarını okur. Doğrulama merdiveni çalıştırılanı yalnızca denetlenenden ve doğrulanmayandan ayırır; eğlence, his
+  ve ses kullanıcının kararıdır. Fikirler ve eşikler kendi cümlelerimizle uyarlandı; metin ya da kod alınmadı. Atıf
+  `NOTICE.md`'de.
 
 ## v1.2.1 — Güvenlik güncellemesi: güncelleme denetimi
 
