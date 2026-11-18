@@ -32,6 +32,7 @@ Referanssız görsel karar verme. Öncelik: projenin şablonu > kullanıcının 
 
 ### 4. Yön
 Kod yazmadan yaz:
+- **Üç fikir, üç ayrı alandan:** konunun adı ya da kökeni, mesleğin malzemesi, yer ve kültür, çalışma biçimine bir benzetme, biçimsel ya da tipografik bir sistem. Her fikrin **dayanağını** yaz: fikrin dayandığı, bu konuya özgü tek gerçek. Dayanağı olmayan fikir şablondur. Her birini özgünlük, uygunluk ve kodla yapılabilirlik için 1–5 puanla; birini seç, nedenini tek satırla yaz.
 - Tek belirgin fikir ve konunun kendi dünyasından gelen malzeme.
 - 4–6 adlandırılmış renk (değerleriyle), yazı tipleri ve rolleri.
 - Tek cümlelik düzen fikri ve kaba ASCII taslak.
@@ -40,7 +41,7 @@ Kod yazmadan yaz:
 - **İmza:** yalnızca bu ürünün taşıyacağı tek küçük ayrıntı, tutarlı kullanılır (izleme aracında canlı durum noktası, geliştirici aracında tuş görünümü gibi). Bir tane, beş değil.
 - Ürünün gerçek bir markası (logo, renk, yazı tipi) varsa korunur ve yön onun çevresine kurulur.
 
-**Değiştirme sınavı:** Bu plan başka bir ürüne de verilebilir mi? Verilebiliyorsa o kısmı değiştir ve nedenini yaz. Bir varsayılandan kaçarken başka bir varsayılana düşme (mor gradyandan krem-serif-kiremide).
+**Değiştirme sınavı:** Bu plan başka bir ürüne de verilebilir mi? Verilebiliyorsa o kısmı değiştir ve nedenini yaz. Bir varsayılandan kaçarken başka bir varsayılana düşme (mor gradyandan krem-serif-kiremide). Bir de şunu sor: benzer isteği alan sıradan bir model buraya mı varırdı? Evetse o kararı değiştir ve neyi değiştirdiğini yaz.
 
 Büyük görsel kararda kullanıcıya birbirinden gerçekten farklı 2–3 taslak göster. Taslak kaba olmaz: kullanıcı gördüğüne göre yorum yapar.
 
@@ -70,8 +71,11 @@ Tek geçişte iş bitmez. Her tur: çiz, ölç, gözle eleştir, düzelt. Yeni b
 3. **Hizalama ve boşluk:** Her öğe bir şeye hizalı mı? Boşluklar ölçekten mi? Alan dengeli mi, altı bomboş mu?
 4. **Renk ve kontrast:** Renk fazla mı? Kontrast ölçüldü mü?
 5. **Ayrıntı:** Köşeler, simge-metin hizası, rakamlar, odak ve üzerine gelme durumları.
+6. **Hareketsiz ve boşta:** Hareket kapalıyken her kare tek başına bir afiş gibi duruyor mu? Hareket bir kompozisyonu güçlendirir, kurtarmaz. Ana bağlantı ve düğmeler üzerine gelince yalnızca renk mi değiştiriyor, hiç mi tepki vermiyor? Fare dururken sayfa bilerek mi durgun (tasarım kaydına yaz), yoksa unutulmuş mu?
 
-Her öğeyi gerekçelendirebilmelisin. Biri rastgele bir yeri gösterse "neden böyle" sorusuna cevabın olmalı. Bitirmeden bir süsü çıkar.
+Her öğeyi gerekçelendirebilmelisin. Biri rastgele bir yeri gösterse "neden böyle" sorusuna cevabın olmalı. Bitirmeden bir süsü çıkar; üzerine gelme, basma ve odak tepkisi süs sayılmaz.
+
+**Taze eleştirmen:** Ne yapmak istediğini bildiğin için ekranda niyetini görürsün. Alt ajan açabiliyorsan her turda yenisine yalnızca ekran görüntülerini ve ölçüm çıktısını ver; tasarım kaydını, kodu ve kendi görüşünü verme. Önce fikri tek cümleyle anlatmasını iste: senin fikrinle uyuşmuyorsa fikir ekrana çıkmamıştır ve düzeltilecek olan sayfadır. Her puan bir ekran görüntüsüne dayanır; kanıtsız puan yok. Puanı tartışma; yalnızca yanlış okunan bir görüntüyü göstererek itiraz et. Alt ajan açamıyorsan eleştiriyi tasarım kaydını yeniden okumadan, yalnızca görüntülerden yap.
 
 ### 9. Yapay zekâ izi denetimi
 `references/yapay-zeka-izi.md` listesini ekrana karşı tek tek geç. Kalan her madde için gerekçe yaz ya da düzelt. Ölçümde bilerek bırakılan bulgu tasarım kaydına **gerekçeli muafiyet** olarak yazılır; gerekçesiz muafiyet geçersizdir. Aynı kural birçok sayfada muafsa ev stilidir, projenin tasarım kararlarına geçer.
@@ -133,6 +137,7 @@ Platformun alışkanlığına uy: Apple HIG, Microsoft Fluent, Material 3. Her t
 - Beceriler: anthropics/skills `frontend-design`, wshobson/agents `ui-design`, vercel-labs `web-design-guidelines`, ui-ux-pro-max (fikir olarak; kurulmadı).
 - unslop, Damir Sokolovsky (CC BY 4.0, https://github.com/heydamir/unslop; 15 Kasım 2026'da indirilen kopyadan okundu, resmî depoyla eşleşmesi doğrulanmadı). Uyarlananlar: işaretin yanına düzeltme yazmak ve `references/yapay-zeka-izi.md`'deki **D** satırları, "ne kadar değişecek" kararı, yöndeki karakter ve imza satırları, arayüz metni kurallarının son beşi, `references/gorsel-zanaat.md`'deki grafik ve sayı kartı bölümü. Metin yeniden yazıldı; kodu, sayısal değerleri, mutlak yasakları, görsel üretimi ve video bölümleri alınmadı.
 - Ölçen denetim ve koruma sayacı fikri: Hallmark becerisinin bir projedeki çıktı kayıtları (kendisi okunmadı, kod alınmadı; betikler bizim yazımız).
+- juliobsz/skills `/awwwards` (MIT; 18 Kasım 2026'da github.com'dan okundu, kurulmadı, kod alınmadı). Uyarlananlar: üç ayrı alandan fikir ve dayanağı, "sıradan model buraya mı varırdı" sorusu, hareketsiz ve boşta eleştiri maddesi, taze eleştirmen.
 - WCAG 2.2: https://www.w3.org/TR/WCAG22/
 
 ## Dersler

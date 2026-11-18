@@ -32,6 +32,7 @@ Make no visual decision without a reference. Priority: the project's template > 
 
 ### 4. Direction
 Write before coding:
+- **Three ideas from three territories:** the subject's name or origin, the material of the craft, place and culture, a metaphor for how they work, a formal or typographic system. Write each idea's **anchor**: the one fact specific to this subject that the idea rests on. An idea with no anchor is a template. Score each 1–5 on originality, fit and feasibility in code; pick one and give the reason in one line.
 - One distinct idea and material from the topic's own world.
 - 4–6 named colors (with values), typefaces and their roles.
 - A one-sentence layout idea and a rough ASCII sketch.
@@ -40,7 +41,7 @@ Write before coding:
 - **Signature:** one small detail only this product would carry, used consistently (a live status dot in a monitoring tool, key caps in a developer tool). One, not five.
 - If the product has a real brand (logo, color, typeface), it is kept and the direction is built around it.
 
-**Swap test:** Could this plan be given to a different product as well? If yes, change that part and write why. Do not escape one default only to land on another (from purple gradient to cream-serif-terracotta).
+**Swap test:** Could this plan be given to a different product as well? If yes, change that part and write why. Do not escape one default only to land on another (from purple gradient to cream-serif-terracotta). Also ask: would a generic model given a similar request land here? If yes, change that decision and write what you changed.
 
 For a big visual decision, show the user 2–3 sketches that are really different from each other. The sketch is not rough: the user comments on what they see.
 
@@ -70,8 +71,11 @@ The job is not done in one pass. Each round: draw, measure, critique by eye, fix
 3. **Alignment and spacing:** Is every element aligned to something? Do the spaces come from the scale? Is the area balanced, or is the bottom empty?
 4. **Color and contrast:** Too much color? Was contrast measured?
 5. **Detail:** Corners, icon-text alignment, numbers, focus and hover states.
+6. **Still and idle:** With motion off, does every frame stand on its own as a poster? Motion strengthens a composition; it does not rescue one. Do the primary links and buttons only change color on hover, or not react at all? When the pointer rests, is the page still on purpose (write it in the design record) or by oversight?
 
-You must be able to justify every element. If someone points at a random spot you should have an answer to "why is it like this". Remove one ornament before finishing.
+You must be able to justify every element. If someone points at a random spot you should have an answer to "why is it like this". Remove one ornament before finishing; hover, press and focus feedback are not ornaments.
+
+**Fresh critic:** Because you know what you meant, you see your intent on screen. If you can start a subagent, give a new one on every round only the screenshots and the measurement output; not the design record, the code or your own opinion. First ask it to state the idea in one sentence: if that does not match yours, the idea has not reached the screen, and the page is what needs fixing. Every score rests on a screenshot; no evidence, no score. Do not argue a score; dispute only by pointing to a screenshot it misread. If you cannot start a subagent, critique from the screenshots alone, before rereading the design record.
 
 ### 9. AI-trace audit
 Go through the list in `references/ai-traces.md` against the screen, item by item. For each remaining item write a reason or fix it. A finding knowingly left in the measurement is written to the design record as a **justified exemption**; an exemption without a reason is invalid. If the same rule is exempt on many pages, it is a house style and moves to the project's design decisions.
@@ -133,6 +137,7 @@ Follow the platform's habits: Apple HIG, Microsoft Fluent, Material 3. Next to e
 - Skills: anthropics/skills `frontend-design`, wshobson/agents `ui-design`, vercel-labs `web-design-guidelines`, ui-ux-pro-max (as an idea; not installed).
 - unslop, Damir Sokolovsky (CC BY 4.0, https://github.com/heydamir/unslop; read on 15 November 2026 from a downloaded copy, match with the official repository not verified). Adapted: writing a fix next to each trace and the **D** lines in `references/ai-traces.md`, the "how much to change" decision, the character and signature lines in the direction, the last five interface-text rules, and the chart and stat card section in `references/visual-craft.md`. The text was rewritten; its code, numeric values, absolute bans, image generation and video sections were not taken.
 - The idea of a measuring audit and a preservation counter: the output records of the Hallmark skill in a project (the skill itself was not read, no code taken; the scripts are our own).
+- juliobsz/skills `/awwwards` (MIT; read on github.com on 18 November 2026, not installed, no code taken). Adapted: three ideas from separate territories with an anchor, the "would a generic model land here" question, the still-and-idle critique item, the fresh critic.
 - WCAG 2.2: https://www.w3.org/TR/WCAG22/
 
 ## Lessons
