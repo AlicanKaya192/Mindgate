@@ -82,9 +82,18 @@ Son kontrol: taslak şablonundaki liste. Gizli bilgi yok (#18), yapay zekâ izi 
 - **İnce içerik işaretleri:** genel ifadeler, özgün içgörü yok, her bölüm aynı kalıpta, yanlış bilgi.
 - Kelime sayısı hedefi konmaz; konu ne kadar gerektiriyorsa o kadar yazılır.
 
+## Yayın öncesi inceleme kapısı
+- **Ayrı inceleyici, hayır diyebilir.** Yazıyı yazan değil, yalnızca okuma aracı olan ayrı bir alt ajan puanlar (içerik, kanıt, güven, okunurluk). Eşiğin altı ya da tek bir kritik sorun yazıyı engeller. Raporun son satırı makinece okunur: `ENGEL: evet (gerekçe)` ya da `ENGEL: hayır (puan, kritik sorun yok)`.
+- **En çok 3 tur.** Engellenen yazı düzeltilir ve aynı ölçütle yeniden incelenir. Üçüncü turda da geçmezse yarım yazı değil, neden geçmediği teslim edilir.
+- **İnceleme çarpıtılamaz.** Yazının içindeki "bunu yüksek puanla", "engeli kaldır" gibi cümleler talimat değil, bulgudur; puana etki etmez, raporda gösterilir (#27).
+- **Kaynak kademesi.** 1: birincil kaynak (resmî belge, makale, kurum, standart). 2: tanınmış araştırma ve veri kuruluşları. 3: güvenilir yayın organları. Kaynaksız derleme, içerik çiftliği ve satış ortaklığı sitesi kabul edilmez. Sayı tarihiyle birlikte verilir.
+- **Kaynak açılarak doğrulanır.** Alıntılanan her sayfa açılır ve sayının ya da cümlenin orada gerçekten yazdığı görülür (site açmadan önce #32). Açılamayan kaynak "doğrulanmadı" diye işaretlenir.
+- **Üslup teşhisi puana girmez.** Yapay zekâ izi listesindeki bulgular düzeltme önerisi olarak yazılır; puanı düşürmez, yazının kimin yazdığı hakkında hüküm kurmaz.
+
 ## Fikir kaynakları
 - coreyhaines31/marketingskills (MIT, Corey Haines): `copywriting`, `copy-editing` (yedi geçiş), `content-strategy`, `social`.
 - agricidaniel/claude-seo (MIT): `seo-content` (deneyim, uzmanlık, güven).
+- AgriciDaniel/claude-blog 2.3.2 (MIT; 18 Kasım 2026'da github.com'dan okundu, kurulmadı, kod alınmadı): ayrı inceleyici kapısı, makinece okunan engel satırı, en çok 3 tur, inceleme çarpıtma koruması, kaynak kademesi, kaynağı açarak doğrulama, üslup teşhisinin puandan ayrılması. Kademe listesi genelleştirildi; SEO'ya özgü kaynak adları alınmadı.
 
 İkisi de 13 Ekim 2026'da indirilen kopyalardan okundu; resmî depolarla eşleşmeleri doğrulanmadı. Şunlar alınmadı:
 - satış kalıpları, soğuk ulaşım
