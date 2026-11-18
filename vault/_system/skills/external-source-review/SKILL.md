@@ -37,7 +37,7 @@ Idea source: vercel-labs/skills `find-skills` (read on 15 November 2026; the lic
 - **No script is run.** An install script, hook or plugin is not installed.
 
 ## 3. Scope (no field filter)
-- Nothing is dropped because of its field, and no field has its own reading rule. Skills are shared and kept ready; marketing, video or finance are read by the same criteria as any other field.
+- Nothing is dropped because of its field, and no field has its own reading rule. Skills are shared and kept ready; marketing, video or finance are read by the same criteria as any other field. Whether the user has a project in that field right now is not a reason to drop it, to advise against it, or to leave it for later either (18 November 2026).
 - The user's request and the usage budget set the reading depth: the section that was asked about first, then the rest. The §1 inventory lists every section of the source.
 - Every section that was not read is named in the report as "not read"; no "we have it" or "we don't" is said about an unread section. The user picks which ones get read.
 - Security, licence, rule conflicts and unverifiable claims decide the classification (§6), not whether something is read. Saying "we already have this" needs file:line evidence (§4b).
