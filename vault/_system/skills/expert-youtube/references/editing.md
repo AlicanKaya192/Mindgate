@@ -20,6 +20,7 @@ If there is no transcript, ask for one. The automatic captions of a video upload
 2. Then the FILLER and REPEAT candidates. The script's suggestion is a candidate, not a decision: read each one with the sentence before and after it, and do not cut when the meaning breaks.
 3. In the list you give the user, every cut carries its start, end and reason ("12:04–12:09, repeat: the sentence starts over"). Also write the candidates you decided not to cut, with the reason; the list is the record that later explains why the edit is the way it is.
 4. The raw recording stays unchanged; tell the user to save the cut file under a new name.
+5. **A cheap cut check:** When the voice was split into lines, compute each line's letters per second. A line more than 35% off the median was most likely cut in the wrong place or lost a word; ask the user to listen to those lines only.
 
 **Careful:** The shortening percentage is measured on speech time only. If the video has a long silent demo, the real runtime differs. Do not trust the runtime before checking it against the footage.
 

@@ -31,17 +31,21 @@ Claude Code içinde bir proje klasöründesin.
 - **Seslendirme kapalıysa:** sabit süreyi kullan; anlatımı görüntüler, kısa ekran metni ve hareket eden diyagramlar taşır.
 - **Ses efektleri açıksa:** klasördeki efekt dosyalarını kullan. Ayar "izinle Openverse" ise yalnızca kullanıcının izin verdiği `api.openverse.org` adresinden CC0 lisanslı ses al (`/v1/audio/?q=<arama>&license=cc0`). Efektler seyrek ve anlamlı anlara bağlı olur; ffmpeg ile tam zaman damgalarına yerleştirilir; kaynaklar `CREDITS.md`'ye yazılır.
 - **Arka plan müziği açıksa:** yalnızca kullanıcının bu klasöre koyduğu müzik dosyası kullanılır; seslendirmenin çok altında, ducking (seslendirme sırasında kısma) ile karıştırılır. Müzik sentezlenmez.
+- **Zaman yalnızca ileri gider:** Açılış ileriden bir an gösterebilir; tek bir köprü cümlesinden ("Dört yıl önce...") sonra hikâyenin zamanı yalnızca ileri akar. Sahne tablosunda bunu denetle.
 - **Storyboard açıksa:** önce bir sahne tablosu yaz (zaman, fikir, kompozisyon, hareket, ekran metni) ve önemli sahnelerin PNG önizleme karelerini çiz; sonra dur ve onay iste. Kapalıysa planı kendin yap ve bitmiş videoyu teslim et.
 
 # 3. KALİTE ÖLÇÜTÜ
 
 - **Gösteri değil, anlatım.** Önce izleyicinin neyi anlaması gerektiğine karar ver; sonra anlatımı grafiklerin kendisi yapsın: dönüşen nesneler, kurulan diyagramlar, hareket eden sayılar. Hiçbir şey öğretmeyen süs çıkarılır.
 - **Bağlı anlatı.** Sahneler birbirinden doğar; bir fikirdeki öğe sonrakinin başlangıcı olur. Video asla ayrı kartlardan oluşan bir slayt gösterisi gibi durmaz.
+- **Her satırda tek kahraman.** Seslendirmenin her satırında kamera tek şeye bakar; gerisi geri çekilir ya da kararır. Bir ifade ya ekranda yazıyla ya gerçek bir belgede gösterilir, ikisi birden değil.
 - **Net hiyerarşi.** Her anda tek ana fikir, tek odak noktası, geniş kenar boşlukları; metin telefonda okunur ve okunacak kadar sabit kalır.
 - **Çeşitlilik.** Aynı geçiş art arda iki kez kullanılmaz; video boyunca en az üç farklı geçiş türü olur. Bilerek tekrarlanan bir hareket (motif) sahne planında "motif" diye işaretlenir; işaretsiz tekrar hatadır.
 - **Akıcılık.** Her harekette yumuşatma (easing); titreme, birden belirme ve hiçbir şeyin karar verilmediği kare yok.
 
 # 4. DOĞRULAMA
+
+Gerçek çizimlerde görülen hatalara tek tek bak: koyu zemin üstünde koyu yazı; kamera ilerlemiş ama vurgu (ışık, karartma) geride kalmış; harita ya da şema, üzerindeki öğelere yer bırakmayacak kadar küçük; çakışan etiketler; yarısı haritada yarısı dışında kalan küme; işaret ettiği kelimeden birkaç piksel kaymış vurgu.
 
 Zaman çizelgesinin her yerinden çok sayıda kareyi PNG olarak çiz ve bak. Taşan, üst üste binen, okunmayan, boş ya da bozuk kareleri ve bu stilde değil de sıradan görünen her şeyi düzelt; sonuçla gurur duyana kadar sürdür. Sonra son MP4'ü çiz ve neyi gösterdiğini kısaca raporla: süre, çözünürlük, sahne listesi, eksik kalan ya da varsayımla doldurulan her şey (font, logo, efekt).
 ```

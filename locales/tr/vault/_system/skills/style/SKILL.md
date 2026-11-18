@@ -46,6 +46,8 @@ Stil istemi, uzman bir tasarımcının çırağına aktardığı zanaat bilgisi 
 ## Telif ve marka
 - **Stili al, resmi alma:** görsel dil kullanılır; özgün çizim, kompozisyon, metin ve logolar asla. Her kare konuya göre kurulmuş yeni bir yerleşimdir.
 - Konu gerçek bir ürün ya da şirket adı geçiriyorsa logo ve renk **uydurulmaz**: kullanıcının proje klasörüne koyduğu dosya kullanılır; yoksa marka logosuz, adıyla yazılır ve kullanıcıya söylenir. Logo web'den izinsiz indirilmez (#32).
+- **Gerçek gibi görünen hiçbir şey uydurulmaz:** Kodla çizilen belge, gazete kupürü ya da kayıt "canlandırma" diye etiketlenir ve yalnızca gerçekten yazılmış ya da söylenmiş sözleri alıntılar; belgenin geri kalanı okunmayan gri satırlardır, uydurma metin değil. Yapay zekâ görseli süs için kullanılabilir; gerçek bir olayın ya da kişinin kanıtı olarak asla.
+- **Görsel lisansı:** Arşiv görseli yalnızca kamu malı, CC0, CC BY ya da CC BY-SA ise kullanılır; ticari kullanımı ya da değiştirmeyi yasaklayan (NC, ND) ya da lisansı bilinmeyen görsel kullanılmaz, kullanıcıya söylenir. Her görselin kaynağı, sahibi ve lisansı `CREDITS.md`'ye yazılır.
 
 ## Bitirmeden doğrula
 - [ ] Hex değerleri betik çıktısından; stil bölümleri 2.000–4.000 kelime, 11 bölümün hepsi var.
@@ -58,6 +60,7 @@ Stil istemi, uzman bir tasarımcının çırağına aktardığı zanaat bilgisi 
 ## Fikir kaynakları
 - `/stil` becerisi: herkese açık bir /stil beceri metninden uyarlandı (metinle birlikte verilen kaynak adresi: `smokich.gosem.dev/stil`). Site açılmadı; sahibi ve lisansı doğrulanmadı. Fikir alındı, metin kendi cümlelerimizle ve kurallarımıza göre yeniden yazıldı (#35). Değişenler: eksik aracı kendiliğinden kurma yerine izin, ses ve font indirme izinle, logo yalnızca kullanıcı dosyasından, çıktı vault dışında.
 - Herkese açık on altı video ve hareketli grafik becerisi deposunun incelemesi (17 Kasım 2026). Kod alınmadı; birden çok depoda tekrar eden dört yöntem kendi cümlelerimizle yazıldı: tam çizimden önce durağan kare, yapan ile yargılayanın ayrılması, ölçülen ile dinlenenin ayrı raporlanması, çeşitlilik denetimi. Yöntemler gerçek bir çizimde henüz sınanmadı.
+- cinematic-skill, exploraX (MIT, https://github.com/Moh4696/cinematic-skill; 18 Kasım 2026'da github.com'dan okundu, kurulmadı, kod alınmadı). Uyarlananlar: canlandırma etiketi ve yapay zekâ görselinin kanıt olarak kullanılmaması, görsel lisans süzgeci, satır başına tek kahraman, kronoloji kuralı, gerçek çizimlerden çıkmış hata listesi.
 
 ## Dersler
 <!-- Merkezî ajan doğrulanmış dersleri ekler: genel, yeniden kullanılabilir; proje adı ve tarih olmadan. -->

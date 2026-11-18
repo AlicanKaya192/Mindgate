@@ -46,6 +46,8 @@ The style prompt is written like craft knowledge that an expert designer hands t
 ## Copyright and brand
 - **Take the style, not the picture:** the visual language is used; original drawing, composition, text and logos never. Every frame is a new layout built for the subject.
 - If the subject mentions a real product or company name, the logo and colors are **not invented**: the file the user put in the project folder is used; if there is none, the brand is written by name without a logo and the user is told. A logo is not downloaded from the web without permission (#32).
+- **Nothing invented that looks real:** A document, clipping or record drawn in code is labelled "recreation" and quotes only words that were really written or said; the rest of the document is unreadable grey rows, not invented text. AI images may be used for illustration, never as evidence of a real event or a real person.
+- **Image licences:** An archive image is used only if it is public domain, CC0, CC BY or CC BY-SA; an image whose licence forbids commercial use or changes (NC, ND), or whose licence is unknown, is not used, and the user is told. The source, owner and licence of every image go into `CREDITS.md`.
 
 ## Verify before finishing
 - [ ] The hex values come from the script output; the style sections are 2,000–4,000 words and all 11 sections are present.
@@ -58,6 +60,7 @@ The style prompt is written like craft knowledge that an expert designer hands t
 ## Idea sources
 - The `/stil` skill: adapted from a public /stil skill text (the source address given with the text: `smokich.gosem.dev/stil`). The site was not opened; its owner and license were not verified. The idea was taken and the text was rewritten in our own sentences and according to our rules (#35). What changed: permission instead of installing a missing tool by itself, sound and font downloads with permission, a logo only from the user's file, output outside the vault.
 - A review of sixteen public video and motion graphics skill repositories (17 November 2026). No code was taken; four methods that recur across several of them were written in our own words: still frames before the full render, separating the maker from the judge, reporting measured and listened-to separately, a variety check. They have not yet been tried on a real render.
+- cinematic-skill, exploraX (MIT, https://github.com/Moh4696/cinematic-skill; read on github.com on 18 November 2026, not installed, no code taken). Adapted: the recreation label and never using AI images as evidence, the image licence filter, one hero per line, the chronology rule, the list of mistakes found in real renders.
 
 ## Lessons
 <!-- The central agent adds verified lessons here: general and reusable, without project names or dates. -->

@@ -20,6 +20,7 @@ Döküm yoksa kullanıcıdan iste. YouTube'a liste dışı (unlisted) yüklenen 
 2. Sonra DOLGU ve TEKRAR adayları. Betiğin önerisi adaydır, karar değil: her birini önceki ve sonraki cümleyle birlikte oku, anlamı bozuyorsa kesme.
 3. Kullanıcıya verdiğin listede her kesim başlangıç, bitiş ve neden taşır ("12:04–12:09, tekrar: cümle yeniden başlıyor"). Kesmemeye karar verdiğin adayları da nedeniyle yaz; liste, kurgunun neden böyle olduğunu sonradan açıklayan kayıttır.
 4. Ham kayıt değişmez; kullanıcıya kesilmiş dosyayı yeni adla kaydetmesini söyle.
+5. **Ucuz kesim denetimi:** Seslendirme satırlara bölündüyse her satırın saniyedeki harf sayısını hesapla. Ortancadan %35'ten fazla sapan satır büyük olasılıkla yanlış yerden kesilmiş ya da bir kelimesi yutulmuştur; yalnızca bu satırları kullanıcıya dinlet.
 
 **Dikkat:** Kısalma yüzdesi yalnızca konuşma süresinden hesaplanır. Videoda uzun bir sessiz gösterim varsa gerçek süre farklıdır. Sonucu görüntüyle karşılaştırmadan süreye güvenme.
 

@@ -56,6 +56,7 @@ py -3 -I scripts/chapters.py --check liste.txt --duration 612
 - Jake Schincariol, `youtube-agent-skill` 1.0.0. Lisans: MIT, Copyright (c) 2026 Jake Schincariol; izin bildiriminin tam metni paylaşılan depodaki `NOTICE.md` dosyasında. Alınanlar: 11 iş akışı ve yöntem metinleri (Türkçeye ve İngilizceye yakından uyarlandı), kancayı özelliklere ayırıp en zayıf halkaya bakmak, başlık ile küçük resmi tek birim saymak, nişi kanalın kendi ortancasına göre okumak, tek düzeltmeyle biten denetim. Kod alınmadı: araçlar, kelime listeleri ve kanca kalıpları yeniden yazıldı, sayısal puan kaldırıldı. Kopya indirilip okundu; resmî depoyla eşleşmesi doğrulanmadı.
 - YouTube Yardım, "Video Chapters" (support.google.com/youtube/answer/9884579) ve "Edit video settings" (support.google.com/youtube/answer/57404). 13 Kasım 2026'da okundu.
 - Herkese açık on altı video ve hareketli grafik becerisi deposunun incelemesi (17 Kasım 2026). Kod alınmadı; iki aşamalı kesim ve nedenli karar listesi kendi cümlelerimizle yazıldı. Gerçek bir kayıtta henüz sınanmadı.
+- cinematic-skill, exploraX (MIT, https://github.com/Moh4696/cinematic-skill; 18 Kasım 2026'da github.com'dan okundu, kurulmadı, kod alınmadı). Uyarlananlar: saniyedeki harf sayısıyla ucuz kesim denetimi.
 
 ## Dersler
 <!-- Merkezî ajan doğrulanmış dersleri ekler: tarih — proje — ders. -->

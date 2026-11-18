@@ -31,17 +31,21 @@ You are in a project folder inside Claude Code.
 - **If voiceover is off:** use the fixed duration; the visuals carry the narration, with short on-screen text and moving diagrams.
 - **If sound effects are on:** use the effect files in the folder. If the setting is "Openverse with permission", take CC0-licensed sound only from `api.openverse.org`, only if the user allowed that address (`/v1/audio/?q=<query>&license=cc0`). Effects are tied to sparse, meaningful moments; they are placed at exact timestamps with ffmpeg; the sources are written to `CREDITS.md`.
 - **If background music is on:** only the music file the user put in this folder is used; it is mixed far below the voiceover, with ducking (lowering during the voiceover). Music is not synthesized.
+- **Time only moves forward:** The opening may show a moment from later; after one bridge line ("Four years earlier...") story time only moves forward. Check this in the scene table.
 - **If the storyboard is on:** first write a scene table (time, idea, composition, motion, on-screen text) and draw PNG preview frames of the important scenes; then stop and ask for approval. If it is off, make the plan yourself and deliver the finished video.
 
 # 3. QUALITY CRITERION
 
 - **Narration, not display.** First decide what the viewer must understand; then let the graphics themselves do the narrating: objects that transform, diagrams that build up, numbers that move. Decoration that teaches nothing is removed.
 - **A connected story.** Scenes grow out of one another; an element in one idea becomes the start of the next. The video never looks like a slideshow of separate cards.
+- **One hero per line.** On every narration line the camera looks at one thing; everything else steps back or dims. A phrase is shown either as typed text or on a real document, never both.
 - **Clear hierarchy.** At every moment one main idea, one focal point, wide margins; text is readable on a phone and stays still long enough to be read.
 - **Variety.** The same transition is never used twice in a row; the video has at least three different kinds of transition. A movement repeated on purpose (a motif) is marked "motif" in the scene plan; an unmarked repeat is a fault.
 - **Fluidity.** Easing in every motion; no jitter, no sudden appearing, no frame where nothing has been decided.
 
 # 4. VERIFICATION
+
+Look one by one for the mistakes seen in real renders: dark type on a dark ground; the camera moved on but the emphasis (light, dimming) stayed behind; a map or diagram too small to leave room for the items on it; colliding labels; a cluster half on the map and half off; a highlight a few pixels off the word it marks.
 
 Render many frames from all over the timeline as PNG and look at them. Fix overflowing, overlapping, unreadable, empty or broken frames and anything that looks ordinary instead of in this style; keep going until you are proud of the result. Then render the final MP4 and report briefly what it shows: duration, resolution, scene list, and anything that is missing or filled in by assumption (font, logo, effect).
 ```
