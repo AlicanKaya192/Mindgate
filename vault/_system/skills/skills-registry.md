@@ -53,7 +53,7 @@ Preloaded for an agent at its start through the `skills:` field of the agent def
 | `context-management` | main chat (the maintainer can load it) | Mandatory sectioned summary, probe questions, putting big output in a file, signs of context degradation | 0 | — |
 | `skill-writing` | main chat | Reviewing and adapting a skill from outside, SKILL.md structure, testing, linking | 0 | — |
 | `external-source-review` | main chat | Reviewing an external repository, skill or second-brain system: inventory, scan, reading with scouts, verification, A/B/C/D classification, red flags (turned into a skill from three repetitions, §10.2) | 0 | — |
-| `orchestration` | main chat | Choosing among three modes, council folder, blind first round, at most two rounds, conflict labels, one-page final report | 0 | — |
+| `orchestration` | main chat | Choosing among five modes, council folder, blind first round, at most two rounds, conflict labels, one-page final report | 0 | — |
 | `advisor-method` | advisor | Direction and scope at the start, acceptance criteria at the end; four viewpoints, three severity levels | 0 | — |
 | `counter-view-method` | hater | Pre-mortem, evidenced objection, stopping criterion, the strongest unanswered objection | 0 | — |
 | `news-method` | news | Narrowing the question, source order, two-source verification with SIFT | 0 | — |

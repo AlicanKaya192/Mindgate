@@ -81,7 +81,7 @@ Ajan sohbet geçmişini görmez. Metin tek başına yetmeli.
 - Her Agent çağrısında `model` parametresini **açıkça** yaz; ana sohbetin modelini sessizce devralmasın.
 - Zor işte zayıf modelin kalitesini şartname belirler: eksiksiz bir tarif yazmaya kendin zaman ayır.
 - `privacy: private` notları ve `ben/` içeriğini ajan görev metnine koyma.
-- Ajan `SONNET GEREKLİ` ya da `OPUS GEREKLİ` derse aynı işi Agent aracının `model` parametresiyle yükselterek yeniden ver. Tekrarlanan iş Opus gerektirmiyorsa Sonnet. `fable` doğrulanana kadar kullanılmaz.
+- Ajan `SONNET GEREKLİ` ya da `OPUS GEREKLİ` derse aynı işi Agent aracının `model` parametresiyle yükselterek yeniden ver. Tekrarlanan iş Opus gerektirmiyorsa Sonnet. Alt ajanda `fable` yalnızca kullanıcı isterse; Mod 4'te ana sohbet Fable'a geçer (#28).
 
 **Maliyet merdiveni:** Bir işi otomatikleştirmeden ya da ajana vermeden önce sırayla sor:
 0. Betik ya da kural çözer mi? Ayıklama, sayma, tarih ve süre hesabı, biçim dönüştürme → betik (token yok). Hesabı modele bırakma.

@@ -53,7 +53,7 @@ Ajan tanımındaki `skills:` alanıyla o ajana başlarken önceden yüklenir. An
 | `baglam-yonetimi` | ana sohbet (`bakimci` yükleyebilir) | Zorunlu bölümlü özet, yoklama soruları, büyük çıktıyı dosyaya alma, bağlam bozulması belirtileri | 0 | — |
 | `beceri-yazma` | ana sohbet | Dışarıdan gelen beceriyi inceleme ve uyarlama, SKILL.md yapısı, test, bağlama | 0 | — |
 | `dis-kaynak-inceleme` | ana sohbet | Dış depo, beceri ya da ikinci beyin sistemini inceleme: envanter, tarama, `kasif`lerle okuma, doğrulama, A/B/C/D sınıflandırma, kırmızı bayraklar (üç tekrardan beceriye dönüştü, §10.2) | 0 | — |
-| `orkestrasyon` | ana sohbet | Üç mod seçimi, kurul klasörü, kör ilk tur, en çok iki tur, çatışma etiketleri, tek sayfalık son rapor | 0 | — |
+| `orkestrasyon` | ana sohbet | Beş mod seçimi, kurul klasörü, kör ilk tur, en çok iki tur, çatışma etiketleri, tek sayfalık son rapor | 0 | — |
 | `yorum-yontemi` | `yorumcu` | Başta yön ve kapsam, sonda kabul ölçütleri; dört bakış açısı, üç önem derecesi | 0 | — |
 | `karsi-gorus-yontemi` | `hater` | Ön ölüm analizi, kanıtlı itiraz, durdurma ölçütü, cevapsız en güçlü itiraz | 0 | — |
 | `haber-yontemi` | `haber` | Soru daraltma, kaynak sırası, SIFT ile iki kaynaklı doğrulama | 0 | — |

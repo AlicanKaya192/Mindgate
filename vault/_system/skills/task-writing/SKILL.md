@@ -81,7 +81,7 @@ Distribute the work by its **difficulty**, not by its type:
 - In every Agent call write the `model` parameter **explicitly**; it must not silently inherit the main chat's model.
 - In a hard job the specification sets the quality of a weaker model: take the time to write a complete recipe yourself.
 - Do not put `privacy: private` notes and the contents of `me/` in an agent's task text.
-- If an agent says `SONNET NEEDED` or `OPUS NEEDED`, give the same job again with a raised `model` parameter of the Agent tool. If a repeated job does not need Opus, use Sonnet. `fable` is not used until it is verified.
+- If an agent says `SONNET NEEDED` or `OPUS NEEDED`, give the same job again with a raised `model` parameter of the Agent tool. If a repeated job does not need Opus, use Sonnet. `fable` in a subagent only if the user asks; in Mode 4 the main chat switches to Fable (#28).
 
 **Cost ladder:** Before automating a job or giving it to an agent, ask in order:
 0. Does a script or a rule solve it? Extraction, counting, date and duration arithmetic, format conversion → a script (no tokens). Do not leave arithmetic to the model.

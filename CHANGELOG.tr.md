@@ -15,6 +15,7 @@ taşıyabilir. Böyle bir hook, beceri ya da ajan etkinken her araç çağrısı
   `~/.codex`, `~/.gemini`, `~/.agents`) `skills/` ya da `agents/` klasörünün ve bir projenin `.claude/skills/` ya da
   `.claude/agents/` klasörünün altındaki her `.md`. Düzenlemede yeni metindeki girintisiz bir `hooks:` satırı yeter.
   Gövdedeki `hooks:` (ör. kod bloğundaki girintili bir örnek) sorulmaz.
+- **Mod 4 ve 5, her yerde son sürüm:** yalnızca kullanıcı "Mod 4" ya da "Mod 5" deyince açılan iki yeni mod. Kurul Mod 3 kurulu; fark ana sohbetin modelidir: Fable'ın (4) ya da Mythos'un (5) en son sürümü, kullanıcının onayıyla geçilir (erişim yoksa Opus'ta kalınır ve söylenir; Mythos alt ajan olamaz). Modeller artık sürümsüz takma adla verilir (`opus`, `sonnet`, `haiku`, `fable`); kullanıcı sabitlemediyse yeni sürüm kendiliğinden kullanılır. Kural #28, `orkestrasyon`, `gorev-yazma`, global talimatlar ve şema tabloları güncellendi.
 - **`health.py` var olanları gösterir:** yeni *Hooks in skill and agent definitions* denetimi vault'un ve her asistanın
   evindeki beceri ve ajan tanımlarını tarar. `hooks:` taşıyan tanım hatadır, dosya adı ayrıntıda görünür; okunamayan
   dosya uyarıdır.

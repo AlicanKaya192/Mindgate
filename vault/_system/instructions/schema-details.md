@@ -274,6 +274,8 @@ When Claude processes a log:
   | 1 · Solo | Questions, single fixes, notes and upkeep | Central agent; if needed scout, auditor, maintainer | — |
   | 2 · Core council | Medium work | Advisor + Hater, two rounds and a close | Mode line (the user can change it) |
   | 3 · Full council | Large work | Mode 2 + news, writer, language editor, planner, developer, reviewer | Mode line (agent count included); parallel writing with separate worktrees and separate files (#10) |
+  | 4 · Fable first | Only when the user says "Mode 4" | Mode 3 council; the main chat is the latest Fable | The user approves the model switch; without access, Opus stays and it is said |
+  | 5 · Mythos first | Only when the user says "Mode 5" | Mode 3 council; the main chat is the latest Mythos (never a subagent) | Same as Mode 4 |
   | — | Agent teams, external agent | — | Off by default; asked every time |
 - **Measurement, each agent's own log:** Every agent run is written as one line in the "Log" table **on that agent's page** (`knowledge/agents-log/agent-<name>.md`). Row: `| date | mode | model | job | result | chat | project |`. Weekly maintenance summarizes the logs.
 - **Security:** Hooks (`command_guard`, `site_guard`) and CLAUDE.md apply in subagents too (verified with the official docs). Nested agent spawning is off (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1`, `~/.claude/settings.json`).

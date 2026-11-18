@@ -274,6 +274,8 @@ Claude bir kaydı işlerken:
   | 1 · Tek başına | Soru, tek düzeltme, not ve bakım | Merkez; gerekirse kâşif, denetçi, bakımcı | — |
   | 2 · Çekirdek kurul | Orta iş | Yorumcu + Hater, iki tur ve kapanış | Mod satırı (kullanıcı değiştirebilir) |
   | 3 · Tam kurul | Büyük iş | Mod 2 + haber, yazar, dil kurumu, planlayıcı, yazılımcı, inceleyici | Mod satırı (ajan sayısı dahil); paralel yazım ayrı worktree ve ayrı dosyalarla (#10) |
+  | 4 · Fable başta | Yalnızca kullanıcı "Mod 4" deyince | Mod 3 kurulu; ana sohbet Fable'ın en son sürümü | Model geçişini kullanıcı onaylar; erişim yoksa Opus'ta kalınır ve söylenir |
+  | 5 · Mythos başta | Yalnızca kullanıcı "Mod 5" deyince | Mod 3 kurulu; ana sohbet Mythos'un en son sürümü (alt ajan olamaz) | Mod 4 ile aynı |
   | — | Agent teams, dış ajan | — | Varsayılan kapalı; her seferinde sorulur |
 - **Ölçüm, her ajanın kendi günlüğü:** Her ajan çalıştırması **o ajanın sayfasındaki** "Günlük" tablosuna tek satır yazılır (`bilgi/ajanlar/ajan-<ad>.md`). Satır: `| tarih | mod | model | iş | sonuç | sohbet | proje |`. Haftalık bakım günlükleri özetler.
 - **Güvenlik:** Hook'lar (`command_guard`, `site_guard`) ve CLAUDE.md alt ajanlarda da geçerli (resmî dokümanla doğrulandı). İç içe ajan başlatma kapalı (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1`, `~/.claude/settings.json`).

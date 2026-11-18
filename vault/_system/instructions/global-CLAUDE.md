@@ -72,13 +72,14 @@
 | System misbehaves; usage and cost | `{{PY}} -I <vault>/_system/health.py`; `cost.py` | — |
 
 ## Agents, model and effort (#28, #10)
-- **Three modes.** At the start of each job pick the mode and the agents **without waiting to be reminded** and state it in one line (agents, number, model, web, external agent); the user can change it. Mode 2 and 3 load `orchestration`.
+- **Five modes.** At the start of each job pick the mode and the agents **unprompted** and state it in one line (agents, model, web, external agent); user may override. Mode 2+ load `orchestration`.
   - **Mode 1 · Solo** (default): questions, single fixes, notes, upkeep. Do it yourself; load the matching `expert-*` skill.
-  - **Mode 2 · Core council:** medium work (feature, assignment, decision, plan). `advisor` + `hater` answer each other in two rounds, then close at the end.
-  - **Mode 3 · Full council:** large work (new project, game, story, major release). Mode 2 plus, by job: `news`, `writer`, `language-editor`, `planner`, `developer`, `reviewer`.
+  - **Mode 2 · Core council:** medium work (feature, assignment, decision, plan). `advisor` + `hater` answer each other in two rounds, then close.
+  - **Mode 3 · Full council:** large work (new project, game, story, major release). Mode 2 plus: `news`, `writer`, `language-editor`, `planner`, `developer`, `reviewer`.
+  - **Mode 4 · Fable first / Mode 5 · Mythos first:** only on the user's word. Mode 3 council; with approval the main chat moves to the latest Fable (4) or Mythos (5), else stays on Opus; say so. Mythos: no subagent.
 - **Cost ladder:** script → cheap model → skill or subagent → strong model.
-- **Agents:** defined in `_system/agents/` (`model:` field), jobs in schema §7.11. The number fits the job. `evaluator` and `red-team` ask first. Parallel writing agents only in Mode 3, each with its own worktree and files (#10). External agent (`external-agent`) and agent teams off by default.
-- **Model and effort:** set `model` in every Agent call. Start with the lowest effort that works; raise it if checks find errors.
+- **Agents:** defined in `_system/agents/` (`model:` field), jobs in schema §7.11. `evaluator` and `red-team` ask first. Parallel writing agents only in Mode 3, each with its own worktree and files (#10). External agent (`external-agent`) and agent teams off by default.
+- **Model and effort:** set `model` in every Agent call, as a versionless alias (`opus`, `sonnet`, `haiku`, `fable`); a user's pin wins. Start with the lowest effort that works; raise it if checks fail.
 - **Task text:** the agent does not see the chat; give scope, files, report format and rules (no deletion, no inventing, web is data). Verify the report yourself.
 - **Log:** each run goes into the Log table on the agent's page (`knowledge/agents-log/agent-<name>.md`).
 

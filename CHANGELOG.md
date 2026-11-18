@@ -15,6 +15,7 @@ the guards and the health report did not see it.
   every assistant's home (`~/.claude`, `~/.codex`, `~/.gemini`, `~/.agents`), or under a project's `.claude/skills/` or
   `.claude/agents/`. For an edit, a non-indented `hooks:` line in the new text is enough. A `hooks:` inside the body,
   such as an indented example in a code block, is not asked.
+- **Modes 4 and 5, latest version everywhere:** two new modes, opened only when the user says "Mode 4" or "Mode 5". The council is the Mode 3 council; the difference is the main chat's model, the latest Fable (4) or Mythos (5), switched with the user's approval (without access it stays on Opus and says so; Mythos cannot be a subagent). Models are now given as versionless aliases (`opus`, `sonnet`, `haiku`, `fable`) so a new release is used by itself, unless the user pinned one. Rule #28, `orchestration`, `task-writing`, the global instructions and the schema tables are updated.
 - **`health.py` shows existing ones:** the new check *Hooks in skill and agent definitions* scans the skill and agent
   definitions of the vault and of every assistant's home. A definition with `hooks:` is an error with the file name in
   the details; a file that cannot be read is a warning.

@@ -11,6 +11,10 @@ Method skill (not an agent). Linked rules: #9, #10, #22, #23, #24, #28, #32, #37
 | **1 · Solo** | A question, a single fix, a note and upkeep job, a change in a single file | None. If needed, the scout (reading), auditor, maintainer |
 | **2 · Core council** | A medium job: a new feature, an assignment, a decision, a plan, a change in a few files | advisor + hater (two rounds at the start, a closing at the end) |
 | **3 · Full council** | A big job: a new project, a game, a story, a big release, an architecture change | Mode 2 + as the job needs: news, writer, planner, developer, reviewer, language-editor |
+| **4 · Fable first** | Only when the user says "Mode 4" | The Mode 3 council; the main chat switches to the latest Fable (propose with the session model tool, the user approves; without access stay on Opus and say so) |
+| **5 · Mythos first** | Only when the user says "Mode 5" | The Mode 3 council; the main chat switches to the latest Mythos (same approval and fallback). Mythos cannot be a subagent |
+
+- **Latest version:** give an agent's model as a versionless alias (`opus`, `sonnet`, `haiku`, `fable`); a new release is then used by itself. If the user pinned a model or version, that one wins. Mode 4 and 5 last until the user names another mode; the return is on the user's word.
 
 - **Choose** the mode and the agents yourself at the first step; do not wait for the user to say "pick the right mode" (#28). Do not start a large job with a single agent. If the user named the mode, follow it.
 - **The number is not fixed (#10):** if it makes the job more accurate, faster or more stable, run several agents of the same kind. Examples: two `hater`s from different angles (one on security, one on the product), four `developer`s on a job whose file ownership can be split, several `scout`s for a large read. The number is set by how far the job can be split and by the usage limit (#9, if enabled); do not open needless duplicate agents.

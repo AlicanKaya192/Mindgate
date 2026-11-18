@@ -11,6 +11,10 @@ Yöntem becerisi (ajan değil). Bağlı kurallar: #9, #10, #22, #23, #24, #28, #
 | **1 · Tek başına** | Soru, tek düzeltme, not ve bakım işi, tek dosyalık değişiklik | Yok. Gerekirse `kasif` (okuma), `denetci`, `bakimci` |
 | **2 · Çekirdek kurul** | Orta iş: yeni özellik, ödev, karar, plan, birkaç dosyalık değişiklik | `yorumcu` + `hater` (başta iki tur, sonda kapanış) |
 | **3 · Tam kurul** | Büyük iş: yeni proje, oyun, hikâye, büyük sürüm, mimari değişiklik | Mod 2 + işe göre `haber`, `yazar`, `planlayici`, `yazilimci`, `inceleyici`, `dil-kurumu` |
+| **4 · Fable başta** | Yalnızca kullanıcı "Mod 4" deyince | Mod 3 kurulu; ana sohbet Fable'ın en son sürümüne geçer (oturum model aracıyla öner, kullanıcı onaylar; erişim yoksa Opus'ta kal ve söyle) |
+| **5 · Mythos başta** | Yalnızca kullanıcı "Mod 5" deyince | Mod 3 kurulu; ana sohbet Mythos'un en son sürümüne geçer (aynı onay ve geri dönüş). Mythos alt ajan olamaz |
+
+- **Son sürüm:** ajan modeli sürümsüz takma adla verilir (`opus`, `sonnet`, `haiku`, `fable`); yeni sürüm kendiliğinden kullanılır. Kullanıcı bir model ya da sürüm sabitlediyse o geçerlidir. Mod 4 ve 5 kullanıcı başka mod söyleyene kadar sürer; dönüş de onun sözüyledir.
 
 - Modu ve ajanları ilk adımda **kendin seç**; kullanıcının "uygun modu seç" demesini bekleme (#28). Büyük bir işe tek ajanla başlama. Kullanıcı modu söylediyse ona uy.
 - **Sayı sabit değil (#10):** iş daha doğru, daha hızlı ya da daha kararlı olacaksa aynı türden birden çok ajan çalıştır. Örnekler: farklı açılardan iki `hater` (biri güvenlik, biri ürün), dosya sahipliği ayrılabilen işte dört `yazilimci`, büyük okumada birkaç `kasif`. Sayıyı işin bölünebilirliği ve kullanım sınırı (#9, etkinse) belirler; gereksiz kopya ajan açma.
